@@ -3,6 +3,16 @@
 
 - [테스트 서버](http://aiedu.tplinkdns.com/)
 
+- 시스템 구조
+
+```ermaid
+graph TD;
+    nginx-->react;
+    react-->highgooh;
+    react-->triplevalues;
+    react-->skm;
+```
+
 ---
 
 ## **4월 넷째주 일정**
