@@ -20,8 +20,10 @@ jobs:
           npm install
           npm run build
       
-      - name: Docker Down and Up
+      - name: Docker Down
         working-directory: .
-        run: |
-          docker compose down
-          docker compose up -d
+        run: docker compose down
+
+      - name: Docker Up
+        working-directory: .
+        run: docker compose up -d
