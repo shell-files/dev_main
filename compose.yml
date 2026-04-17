@@ -49,8 +49,8 @@ services:
       - main-network
     volumes:
       - ./.mariadb/conf.d:/etc/mysql/conf.d:ro
-      - ./.mariadb/data:/var/lib/mysql:rw
       - ./.mariadb/initdb.d:/docker-entrypoint-initdb.d:ro
+      - data-mariadb:/var/lib/mysql:rw
     environment:
       - MARIADB_HOST=localhost
       - MARIADB_PORT=3306
@@ -62,3 +62,6 @@ services:
 networks:
   main-network: 
     driver: bridge
+
+volumes:
+  data-mariadb:
