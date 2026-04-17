@@ -1,7 +1,7 @@
 services:
   web-main:
-    image: nginx:1.28
     container_name: web-main
+    image: nginx:1.28
     ports:
       - 80:80
     volumes:
@@ -20,6 +20,21 @@ services:
     volumes:
       - ./frontend/dist:/usr/share/nginx/html:ro
       - ./frontend/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  backend:
+    container_name: backend
+    image: uv:1
+    volumes:
+      - ./backend/main.py:/workspace/main.py
+      - ./backend/settings.py:/workspace/settings.py
+      - ./backend/pyproject.toml:/workspace/pyproject.toml
+      - ./backend/uv.lock:/workspace/uv.lock
+      - ./backend/.python-version:/workspace/.python-version
+    environment:
+      - HOST_IP=http://aiedu.tplinkdns.com
+    networks:
+      - my-network
+    command: ["uv", "run", "fastapi", "run"]
 
 networks:
   main-network: 
