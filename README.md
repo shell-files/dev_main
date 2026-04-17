@@ -5,7 +5,7 @@
 
 - 시스템 구조
 
-```ermaid
+```mermaid
 graph TD;
     nginx-->react;
     react-->highgooh;
