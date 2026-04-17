@@ -33,7 +33,8 @@ services:
     environment:
       - HOST_IP=http://aiedu.tplinkdns.com
     networks:
-      - my-network
+      - main-network
+    restart: always 
     command: ["uv", "run", "fastapi", "run"]
 
 networks:
