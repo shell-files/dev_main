@@ -1,4 +1,4 @@
-name: "🚀 Feature Request"
+name: "🚀 Feature & Feature Request"
 description: "새로운 기능을 제안하거나 구현 계획을 공유합니다."
 labels: ["feature"]
 body:
@@ -12,7 +12,7 @@ body:
     id: feature-description
     attributes:
       label: "📖 기능 설명"
-      description: "어떤 기능을 만들고 싶은지, 왜 이 기능이 필요한지 설명해 주세요."
+      description: "어떤 기능을 넣을건지, 어떤 기능을 만들고 싶은지, 왜 이 기능이 필요한지 설명해 주세요."
       placeholder: "예: 사용자가 탄소 배출 데이터를 기간별로 조회할 수 있는 대시보드 기능을 추가합니다."
     validations:
       required: true
