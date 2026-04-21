@@ -1,4 +1,4 @@
-name: "🐛 Bug Report"
+name: "🐛 Bug Report(버그 보고)"
 description: "버그를 보고하고 문제를 해결하기 위한 상세 양식입니다."
 labels: ["bug"]
 body:
@@ -59,7 +59,10 @@ body:
       label: "📊 기대 결과 vs 실제 결과"
       description: "정상 동작 시의 기대값과 현재 발생하는 실제 결과를 비교해 주세요."
       value: |
-        **기대 결과 (Expected):** **실제 결과 (Actual):** validations:
+        **기대 결과 (Expected):**
+        
+        **실제 결과 (Actual):**
+    validations:
       required: true
 
   - type: textarea
