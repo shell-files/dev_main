@@ -14,14 +14,14 @@ jobs:
         with:
           path: .
       
-      # - name: Docker Main Down
-      #   working-directory: ./main
-      #   run: docker compose down
-      #   continue-on-error: true
+      - name: Docker Main Down
+        working-directory: ./main
+        run: docker compose down
+        continue-on-error: true
 
-      # - name: Docker Main Up
-      #   working-directory: ./main
-      #   run: docker compose up -d
+      - name: Docker Main Up
+        working-directory: ./main
+        run: docker compose up -d
 
       - name: Build Frontend
         working-directory: ./app/frontend
