@@ -10,7 +10,7 @@ services:
     #   - 7000:7000
     environment:
       - CORS_ORIGIN=http://aiedu.tplinkdns.com
-      - ROUTE_MAIN_URI=http://backend:8000
+      - ROUTE_MAIN_URI=http://192.168.0.205:8000
       - ROUTE_SKM_URI=http://192.168.0.201:8000
       - ROUTE_HG_URI=http://192.168.0.204:8000
       - ROUTE_TV_URI=http://192.168.0.203:8000
@@ -36,6 +36,8 @@ services:
     restart: always 
     networks:
       - main_with-network
+    ports:
+      - 8000:8000
     # depends_on:
     #   - mariadb
     working_dir: /workspace

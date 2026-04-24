@@ -14,10 +14,7 @@ spring:
             cors-configurations:
               '[/**]':
                 allowedOrigins:
-                  - ${CORS_ORIGIN1}
-                  - ${CORS_ORIGIN2}
-                  - ${CORS_ORIGIN3}
-                  - ${CORS_ORIGIN4}
+                  - ${CORS_ORIGIN}
                 allow-credentials: true
                 allowedHeaders: 
                   - '*'
@@ -29,26 +26,40 @@ spring:
                   - DELETE
                   - OPTIONS
           routes:
-            - id: oauth-service
-              uri: ${ROUTE_OAUTH_URI}
+            - id: main-service
+              uri: ${ROUTE_MAIN_URI}
               predicates:
-                - Path=/oauth/**
+                - Path=/main/**
               filters:
-                - RewritePath=/oauth/?(?<segment>.*), /${segment}
+                - RewritePath=/main/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: skm-service
+              uri: ${ROUTE_SKM_URI}
+              predicates:
+                - Path=/skm/**
+              filters:
+                - RewritePath=/skm/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: hg-service
+              uri: ${ROUTE_HG_URI}
+              predicates:
+                - Path=/hg/**
+              filters:
+                - RewritePath=/hg/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: tv-service
+              uri: ${ROUTE_TV_URI}
+              predicates:
+                - Path=/tv/**
+              filters:
+                - RewritePath=/tv/?(?<segment>.*), /${segment}
                 - ApiFilter
             - id: openapi
-              uri: ${ROUTE_API_URI}
+              uri: ${CORS_ORIGIN}
               predicates:
                 - Path=/v3/api-docs/**
               filters:
-                - RewritePath=/v3/api-docs/?(?<segment>.*), /${segment}/v3/api-docs
-            - id: solo
-              uri: ${ROUTE_SOLO_URI}
-              predicates:
-                - Path=/**
-              filters:
-                # - RewritePath=/solo/?(?<segment>.*), /${segment}
-                - ApiFilter
+                - RewritePath=/v3/api-docs/?(?<segment>.*), /gateway/${segment}/v3/api-docs
 
 management:
   endpoints:
