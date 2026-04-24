@@ -1,0 +1,70 @@
+services:
+  web-main:
+    container_name: web-main
+    image: nginx:1.28
+    ports:
+      - 80:80
+    restart: always
+    networks:
+      - main-network
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./nginx/html:/usr/share/nginx/html:ro
+
+  mariadb:
+    container_name: mariadb
+    image: mariadb:12.1.2
+    restart: always
+    ports:
+      - 3306:3306
+    networks:
+      - main-network
+    volumes:
+      - ./.mariadb/conf.d:/etc/mysql/conf.d:ro
+      - ./.mariadb/initdb.d:/docker-entrypoint-initdb.d:ro
+      - data-mariadb:/var/lib/mysql:rw
+    environment:
+      - MARIADB_HOST=localhost
+      - MARIADB_PORT=3306
+      - MARIADB_ROOT_PASSWORD=1234
+      - MARIADB_DATABASE=edu
+      - TZ=Asia/Seoul
+      - LC_ALL:en_US.UTF-8
+
+  kafka:
+    container_name: kafka
+    image: apache/kafka:4.0.1
+    restart: always
+    networks:
+      - main-network
+    ports:
+      - 9092:9092
+      - 9094:9094
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:9094,CONTROLLER://0.0.0.0:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://192.168.0.205:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  redis:
+    container_name: redis
+    image: redis:8.4.0
+    restart: always
+    ports:
+      - 6379:6379
+    networks:
+      - main-network
+
+networks:
+  main-network: 
+    driver: bridge
+
+volumes:
+  data-mariadb:
