@@ -5,7 +5,7 @@ services:
     container_name: gateway
     restart: always 
     networks:
-      - dev_main_main-network
+      - main_with-network
     ports:
       - 7000:7000
     environment:
@@ -23,7 +23,7 @@ services:
     image: nginx:1.28
     restart: always
     networks:
-      - dev_main_main-network
+      - main_with-network
     ports:
       - 80:80
     volumes:
@@ -35,7 +35,7 @@ services:
     image: uv:1
     restart: always 
     networks:
-      - dev_main_main-network
+      - main_with-network
     # depends_on:
     #   - mariadb
     working_dir: /workspace
@@ -50,7 +50,7 @@ services:
     command: ["uv", "run", "fastapi", "run"]
 
 networks:
-  dev_main_main-network: 
+  main_with-network: 
     external: true
 
 volumes:

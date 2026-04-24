@@ -6,7 +6,7 @@ services:
       - 80:80
     restart: always
     networks:
-      - main-network
+      - with-network
     volumes:
       - ./nginx/conf.d:/etc/nginx/conf.d:ro
       - ./nginx/html:/usr/share/nginx/html:ro
@@ -18,7 +18,7 @@ services:
     ports:
       - 3306:3306
     networks:
-      - main-network
+      - with-network
     volumes:
       - ./.mariadb/conf.d:/etc/mysql/conf.d:ro
       - ./.mariadb/initdb.d:/docker-entrypoint-initdb.d:ro
@@ -36,7 +36,7 @@ services:
     image: apache/kafka:4.0.1
     restart: always
     networks:
-      - main-network
+      - with-network
     ports:
       - 9092:9092
       - 9094:9094
@@ -60,10 +60,10 @@ services:
     ports:
       - 6379:6379
     networks:
-      - main-network
+      - with-network
 
 networks:
-  main-network: 
+  with-network: 
     driver: bridge
 
 volumes:
