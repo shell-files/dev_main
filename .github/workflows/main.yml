@@ -29,11 +29,11 @@ jobs:
           npm install
           npm run build
       
-      # - name: Docker Down
-      #   working-directory: .
-      #   run: docker compose down
-      #   continue-on-error: true
+      - name: Docker Down
+        working-directory: .
+        run: docker compose down
+        continue-on-error: true
 
-      # - name: Docker Up
-      #   working-directory: .
-      #   run: docker compose up -d
+      - name: Docker Up
+        working-directory: .
+        run: docker compose up -d
