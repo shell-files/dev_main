@@ -15,25 +15,25 @@ jobs:
           path: .
       
       - name: Docker Main Down
-        working-directory: .
-        run: docker compose -f main-system.yml down
+        working-directory: ./main
+        run: docker compose down
         continue-on-error: true
 
       - name: Docker Main Up
-        working-directory: .
-        run: docker compose -f main-system.yml up -d
+        working-directory: ./main
+        run: docker compose up -d
 
       - name: Build Frontend
-        working-directory: ./frontend
+        working-directory: ./app/frontend
         run: |
           npm install
           npm run build
       
       - name: Docker App Down
-        working-directory: .
-        run: docker compose -f app-system.yml down
+        working-directory: ./app
+        run: docker compose down
         continue-on-error: true
 
       - name: Docker App Up
-        working-directory: .
-        run: docker compose -f app-system.yml up -d
+        working-directory: ./app
+        run: docker compose up -d
