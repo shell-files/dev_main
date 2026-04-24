@@ -36,8 +36,8 @@ services:
     restart: always 
     networks:
       - dev_main_main-network
-    depends_on:
-      - mariadb
+    # depends_on:
+    #   - mariadb
     working_dir: /workspace
     volumes:
       - ./backend/main.py:/workspace/main.py
