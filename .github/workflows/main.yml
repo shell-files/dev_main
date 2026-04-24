@@ -54,3 +54,7 @@ jobs:
       - name: Docker App Up
         working-directory: ./app
         run: docker compose up -d
+
+      - name: Restart Specific Nginx
+        working-directory: ./main
+        run: docker compose restart web-main
