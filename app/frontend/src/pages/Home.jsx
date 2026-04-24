@@ -5,7 +5,7 @@ const Home = () => {
   const [result, setResult] = useState({"msg": ""})
   const eventSubmit = e => {
     e.preventDefault()
-    api.get("/api")
+    api.get("/gateway/main")
     .then(res => {
       console.log(res)
       setResult(res.data)
