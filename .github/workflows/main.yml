@@ -28,7 +28,11 @@ jobs:
         run: |
           npm install
           npm run build
-      
+
+      - name: Build Gateway
+        working-directory: ./app/gateway
+        run: ./mvnw clean package
+
       - name: Docker App Down
         working-directory: ./app
         run: docker compose down
