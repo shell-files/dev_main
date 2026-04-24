@@ -81,3 +81,5 @@ springdoc:
     operationsSorter: method
 
 logging.level.org.springframework: INFO
+
+api-origin-uri: ${CORS_ORIGIN}
