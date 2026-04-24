@@ -31,7 +31,7 @@ jobs:
 
       - name: Build Gateway
         working-directory: ./app/gateway
-        run: ./mvnw clean package
+        run: .\mvnw clean package
 
       - name: Docker App Down
         working-directory: ./app
