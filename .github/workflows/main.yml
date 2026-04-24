@@ -29,11 +29,11 @@ jobs:
           npm install
           npm run build
       
-      - name: Docker Down
+      - name: Docker App Down
         working-directory: .
-        run: docker compose down
+        run: docker compose -f app-system.yml down
         continue-on-error: true
 
-      - name: Docker Up
+      - name: Docker App Up
         working-directory: .
-        run: docker compose up -d
+        run: docker compose -f app-system.yml up -d
