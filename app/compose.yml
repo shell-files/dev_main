@@ -1,7 +1,7 @@
 services:
 
   gateway:
-    image: maven:3.9.11-sapmachine-21
+    image: maven:3.9.15-eclipse-temurin-21-alpine
     container_name: gateway
     restart: always 
     networks:
