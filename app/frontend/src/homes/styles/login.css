@@ -1,0 +1,298 @@
+/* 기본 초기화 */
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+body {
+    background-color: #fff;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    display: flex;
+    justify-content: center;
+    padding: 20px; /* 모바일 여백 확보 */
+}
+
+a {text-decoration: none; color: #333; display: inline-block;}
+
+/* =================== */
+/* 로그인 */
+
+
+/* 카드 컨테이너 */
+#login .container {
+    margin-top: 100px;
+    position: relative;
+    background-color: #ffffff; 
+    width: 484px;
+    height: 678px;
+    padding: 20px 30px;
+    border-radius: 20px;
+    border: 1px solid #e0e0e0;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+/* 상단 뒤로가기 */
+#login .back-btn {
+    position: absolute;
+    top: 10px;
+    left: 20px;
+    font-size: 20px;
+    width: 20px;
+    pointer-events:fill;
+    cursor: pointer;
+}
+
+/* 로고 박스 */
+#login .logo-placeholder {
+    width: 120px;
+    height: 75px;
+    margin: 30px auto 15px;
+    background-color: #dbdbdb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: #333;
+}
+
+#login h1 {
+    font-size: 46px;
+    margin-bottom: 40px;
+    font-weight: 500;
+}
+
+/* 입력창 스타일 */
+#login .input-group input {
+    width: 100%;
+    padding: 15px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    outline: none;
+    font-size: 14px;
+}
+
+#login .input-group input::placeholder {
+    color: #ccc;
+}
+
+/* 안내 박스 (비밀번호 찾기용) */
+#login .info-box {
+    background-color: #dbdbdb;
+    padding: 20px;
+    font-size: 12px;
+    line-height: 1.6;
+    text-align: left;
+    margin: 20px 0;
+    border-radius: 4px;
+}
+
+/* 하단 링크 영역 */
+#login .links {
+    color: #666;
+    margin: 20px 0 40px;
+}
+
+#login .links a {
+    cursor: pointer;
+    color: #666;
+}
+
+#login .links span {
+    cursor: pointer;
+    color: #666;
+}
+
+
+
+/* 메인 버튼 */
+#login .btn-primary {
+    position: absolute;
+    bottom: 70px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    padding: 15px 0;
+    background-color: #03a94d; 
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+#login .btn-primary:hover {
+    background-color: #028a3f;
+}
+
+
+
+/* =================  */
+/* 회원가입 */
+
+
+#signup_page.signup-container {
+    
+    background-color: white;
+    width: 100%; /* 기본적으로 가로를 다 채움 */
+    max-width: 700px; /* 데스크톱 최대 너비 */
+    padding: 40px 5%; /* 내부 여백을 비율로 설정 */
+    border-radius: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    margin: 20px 0;
+    margin-top: 100px;
+}
+
+#signup_page h1 {
+    color: #00B050;
+    text-align: center;
+    margin-bottom: 40px;
+    font-size: 30px;
+    
+}
+
+#signup_page .section-title {
+    font-size: 18px;
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+#signup_page .helper-text {
+    font-size: 11px;
+    color: #888;
+    margin-bottom: 10px;
+    line-height: 1.4;
+}
+
+/* 입력 그룹 레이아웃 */
+#signup_page .input-group {
+    display: flex;
+    flex-wrap: wrap; /* 내용이 넘치면 다음 줄로 */
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+#signup_page .input-group label {
+    width: 140px; /* 데스크톱 라벨 너비 */
+    font-size: 14px;
+    color: #333;
+}
+
+#signup_page .input-group input[type="text"],
+#signup_page .input-group input[type="email"],
+#signup_page .input-group input[type="password"] {
+    flex: 1;
+    min-width: 200px; /* 모바일에서 너무 작아지지 않게 */
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+}
+
+/* 파일 업로드 영역 반응형 */
+#signup_page .upload-controls {
+    flex: 1;
+    display: flex;
+    gap: 8px;
+    min-width: 250px;
+}
+
+#signup_page .upload-controls input { flex: 1; }
+
+#signup_page .btn-green {
+    background-color: #00B050;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 14px;
+    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+}
+
+#signup_page .divider {
+    border: 0;
+    border-top: 1px solid #eee;
+    margin: 30px 0;
+}
+
+/* 약관 영역 */
+#signup_page .terms-box {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    height: 120px;
+    padding: 15px;
+    overflow-y: auto;
+    font-size: 12px;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+#signup_page .radio-group {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+#signup_page .action-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+#signup_page .btn-large {
+    flex: 1; /* 버튼이 동일한 비율로 커짐 */
+    max-width: 150px;
+    padding: 15px;
+    font-weight: bold;
+}
+
+/* ============================================================
+   📱 모바일 대응 (화면 너비 600px 이하)
+   ============================================================ */
+@media (max-width: 600px) {
+    #signup_page .signup-container {
+        padding: 30px 20px;
+    }
+
+    #signup_page .input-group {
+        flex-direction: column; /* 라벨과 입력을 세로로 배치 */
+        align-items: flex-start;
+    }
+
+    #signup_page .input-group label {
+        width: 100%;
+        margin-bottom: 8px;
+    }
+
+    #signup_page .input-group input[type="text"],
+    #signup_page .input-group input[type="email"],
+    #signup_page .input-group input[type="password"],
+    #signup_page .upload-controls {
+        width: 100%;
+    }
+
+    #signup_page .upload-controls {
+        flex-wrap: wrap; /* 파일 경로창과 버튼들 정렬 */
+    }
+
+    #signup_page .upload-controls input {
+        width: 100%;
+        flex: none;
+    }
+
+    #signup_page .upload-controls .btn-green {
+        flex: 1; /* 모바일에서 버튼들이 가로를 채우도록 함 */
+    }
+
+    #signup_page .radio-group {
+        gap: 20px;
+    }
+}
