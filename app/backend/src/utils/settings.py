@@ -2,6 +2,11 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
   host_ip: str
+  user: str
+  password: str
+  host: str
+  database: str
+  port: int
 
   model_config = SettingsConfigDict(
     env_file=".env",
