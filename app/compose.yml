@@ -51,6 +51,9 @@ services:
       - ./backend/src:/workspace/src
     environment:
       - HOST_IP=http://weareithero.cloud
+      - MAIL_USERNAME=${MAIL_USERNAME}
+      - MAIL_PASSWORD=${MAIL_PASSWORD}
+      - MAIL_FROM=${MAIL_FROM}
     command: ["uv", "run", "fastapi", "run"]
 
 networks:

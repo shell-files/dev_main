@@ -52,6 +52,10 @@ jobs:
         continue-on-error: true
 
       - name: Docker App Up
+        env:
+          MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
+          MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
+          MAIL_FROM: ${{ secrets.MAIL_FROM }}
         working-directory: ./app
         run: docker compose up -d
 
