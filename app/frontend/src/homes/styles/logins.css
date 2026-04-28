@@ -144,6 +144,23 @@
     letter-spacing: -1px;
 }
 
+#login #forgot-section .forgot-icon-wrapper {
+    position: relative;
+    height: 60px;
+    margin: 40px 0;
+    pointer-events: none;
+}
+
+#login #forgot-section .forgot-icon-wrapper img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(calc(-50% - 3px), -50%);
+    width: 220px;
+    height: 220px;
+    object-fit: contain;
+}
+
 #login #forgot-section .input-group {
     align-items: center;
 }
@@ -178,6 +195,8 @@
 #login #forgot-section .links {
     order: 4;
     margin: 18px 0 0;
+    padding-bottom: 20px;
+    text-align: center;
     font-size: 13px;
     color: #666;
 }
@@ -186,7 +205,7 @@
     order: 3;
     width: 150px;
     height: 54px;
-    margin: 0 auto !important;
+    margin: 0 auto 20px !important;
     border-radius: 12px;
     line-height: 54px;
     font-size: 16px;
@@ -403,4 +422,23 @@
     to {
         transform: rotate(360deg);
     }
+}
+
+#login .input-error {
+    border-color: #e35b5b !important;
+    background-color: #fffafa;
+}
+
+#login .error {
+    margin: -4px 0 10px;
+    padding-left: 4px;
+    font-size: 12px;
+    color: #d94a4a;
+    text-align: left;
+}
+
+#login #forgot-section .error {
+    width: 86%;
+    margin-top: -16px;
+    margin-bottom: 8px;
 }

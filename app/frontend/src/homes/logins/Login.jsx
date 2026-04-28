@@ -1,7 +1,7 @@
 // =====================================================================================
 // Login.jsx 페이지 흐름설명 (함수 기준)
 
-// 1. login 흐름 → handleLoginSubmit (handleLogin) → requestLoginApi 호출 → 성공 시 navigateToHome (navigate("/home")) 실행
+// 1. login 흐름 → handleLoginSubmit (handleLogin) → requestLoginApi 호출 → 성공 시 navigateToHome (navigate("/main")) 실행
 // 2. forgot 흐름 → goToForgotView → handlePasswordResetSubmit (handleSendPasswordEmail) → requestPasswordResetApi 호출 → 성공 시 showSuccessView (setView("success")) 실행
 // 3. success 흐름 → goToLoginView → setView("login") 실행
 
@@ -18,8 +18,8 @@
 // 1. handleLoginSubmit (handleLogin) - 설명: 로그인 버튼 클릭 시 실행
 //    - 입력값 검증 (email, password)
 //    - requestLoginApi 호출
-//    - 성공 시 navigate("/home")
-// 1. navigateToHome - 설명: 로그인 성공 시 홈 화면 이동 (navigate("/home"))
+//    - 성공 시 navigate("/main")
+// 1. navigateToHome - 설명: 로그인 성공 시 홈 화면 이동 (navigate("/main"))
 
 // 2. forgot
 // 2. goToForgotView - 설명: login → forgot 화면 전환
@@ -52,8 +52,9 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
-import LoginVisual from "@logins/LoginVisual";
+// import LoginVisual from "@logins/LoginVisual";
 import "@styles/logins.css";
+import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
@@ -70,6 +71,7 @@ const Login = () => {
   // 2. forgot: 비밀번호 찾기 화면
   // 3. success: 이메일 발송 완료 화면
   const [view, setView] = useState("login");
+  const [errors, setErrors] = useState({});
 
   // 1. login_로그인 버튼 로딩 상태
   const [loginLoading, setLoginLoading] = useState(false);
@@ -79,6 +81,31 @@ const Login = () => {
 
   // 페이지 이동 처리 함수
   const navigate = useNavigate();
+
+  // 필수 기입 메세지 처리 함수
+  const validateRequiredField = (name, value) => {
+  let message = "";
+
+  if (!value.trim()) {
+    if (name === "loginEmail") message = "이메일을 입력해 주세요.";
+    if (name === "loginPassword") message = "비밀번호를 입력해 주세요.";
+    if (name === "passwordResetEmail") message = "이메일을 입력해 주세요.";
+  }
+
+  if ((name === "loginEmail" || name === "passwordResetEmail") && value.trim()) {
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(value)) {
+      message = "올바른 이메일 주소를 입력해 주세요.";
+    }
+  }
+
+  setErrors((prev) => ({
+    ...prev,
+    [name]: message,
+  }));
+
+  return message;
+  };
 
   // =========================
   // 1. initLoginPage
@@ -136,19 +163,14 @@ const Login = () => {
   // - 이메일/비밀번호 입력값 검증
   // - requestLoginApi 호출
   // - 성공 시 accessToken 저장
-  // - 성공 시 /home 이동
+  // - 성공 시 /main 이동
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!loginEmail.trim()) {
-      alert("이메일을 입력해 주세요.");
-      return;
-    }
+    const emailError = validateRequiredField("loginEmail", loginEmail);
+    const passwordError = validateRequiredField("loginPassword", loginPassword);
 
-    if (!loginPassword.trim()) {
-      alert("비밀번호를 입력해 주세요.");
-      return;
-    }
+    if (emailError || passwordError) return;
 
     try {
       setLoginLoading(true);
@@ -170,7 +192,7 @@ const Login = () => {
       }
 
       // 1. navigateToHome
-      navigate("/home");
+      navigate("/main");
     } catch (error) {
       alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
     } finally {
@@ -240,10 +262,12 @@ const Login = () => {
   const handleSendPasswordEmail = async (e) => {
     if (e) e.preventDefault();
 
-    if (!passwordResetEmail.trim()) {
-      alert("이메일을 입력해 주세요.");
-      return;
-    }
+  const emailError = validateRequiredField(
+    "passwordResetEmail",
+    passwordResetEmail
+  );
+
+  if (emailError) return;
 
     try {
       setPasswordResetLoading(true);
@@ -298,12 +322,6 @@ const goToPasswordResetViewAgain = () => {
   return (
     <>
     <div className="login-layout">
-
-      {/* 왼쪽 3D / 홍보 영역 */}
-      <LoginVisual />
-      {/* 오른쪽 카드 영역 */}
-      <div className="login-card-area"></div>
-
         {/* ========================= */}
         {/* 1. login: 로그인 화면 */}
         {/* ========================= */}
@@ -321,19 +339,35 @@ const goToPasswordResetViewAgain = () => {
           <h1>Login</h1>
 
           <form className="input-group" onSubmit={handleLogin}>
-            <input
-              type="email"
-              placeholder="이메일을 입력해주세요"
-              value={loginEmail}
-              onChange={(e) => setLoginEmail(e.target.value)}
-            />
+          <input
+            type="email"
+            autoComplete="off"
+            name="loginEmail"
+            className={errors.loginEmail ? "input-error" : ""}
+            placeholder="이메일을 입력해주세요"
+            value={loginEmail}
+            onChange={(e) => {
+              setLoginEmail(e.target.value);
+              setErrors((prev) => ({ ...prev, loginEmail: "" }));
+            }}
+            onBlur={(e) => validateRequiredField("loginEmail", e.target.value)}
+          />
+          {errors.loginEmail && <p className="error">{errors.loginEmail}</p>}
 
-            <input
-              type="password"
-              placeholder="비밀번호를 입력해주세요"
-              value={loginPassword}
-              onChange={(e) => setLoginPassword(e.target.value)}
-            />
+          <input
+            type="password"
+            autoComplete="new-password"
+            name="loginPassword"
+            className={errors.loginPassword ? "input-error" : ""}
+            placeholder="비밀번호를 입력해주세요"
+            value={loginPassword}
+            onChange={(e) => {
+              setLoginPassword(e.target.value);
+              setErrors((prev) => ({ ...prev, loginPassword: "" }));
+            }}
+            onBlur={(e) => validateRequiredField("loginPassword", e.target.value)}
+          />
+          {errors.loginPassword && <p className="error">{errors.loginPassword}</p>}
 
             <div className="links">
               <span onClick={goToSignupPage}>회원 가입</span> |{" "}
@@ -371,25 +405,32 @@ const goToPasswordResetViewAgain = () => {
 
           <h1>비밀번호 찾기</h1>
 
+          <div className="forgot-icon-wrapper">
+            <img 
+              src={emailIcon} 
+              alt="이메일 비밀번호 찾기" 
+            />
+          </div>
+
           <form className="input-group" onSubmit={handleSendPasswordEmail}>
             <input
               type="email"
+              autoComplete="off"
+              name="passwordResetEmail"
+              className={errors.passwordResetEmail ? "input-error" : ""}
               placeholder="이메일을 입력해주세요"
               value={passwordResetEmail}
-              onChange={(e) => setPasswordResetEmail(e.target.value)}
+              onChange={(e) => {
+                setPasswordResetEmail(e.target.value);
+                setErrors((prev) => ({ ...prev, passwordResetEmail: "" }));
+              }}
+              onBlur={(e) => validateRequiredField("passwordResetEmail", e.target.value)}
             />
+            {errors.passwordResetEmail && <p className="error">{errors.passwordResetEmail}</p>}
 
             <div className="info-box">
               <strong>임시 비밀번호 발송 안내</strong>
               입력하신 이메일로 임시 비밀번호가 발송됩니다.
-              <br />
-              메일이 보이지 않는다면 스팸 메일함도 확인해 주세요.
-            </div>
-
-            <div className="links">
-              <span onClick={handleAccountInquiry}>
-                아이디가 기억나지 않나요?
-              </span>
             </div>
 
             <button
@@ -403,6 +444,12 @@ const goToPasswordResetViewAgain = () => {
                 "이메일 전송"
               )}
             </button>
+
+            <div className="links">
+              <span onClick={handleAccountInquiry}>
+                아이디가 기억나지 않나요?
+              </span>
+            </div>
           </form>
         </div>
 
