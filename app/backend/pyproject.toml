@@ -8,4 +8,5 @@ dependencies = [
     "fastapi[standard]>=0.136.0",
     "mariadb>=1.1.14",
     "pydantic-settings>=2.13.1",
+    "websockets>=16.0",
 ]
