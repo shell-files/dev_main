@@ -2,7 +2,7 @@ name: Windows PC Job
 
 on:
   push:
-    branches: [ "main", "dev" ]
+    branches: [ "dev" ]
 
 jobs:
   build:
