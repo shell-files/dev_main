@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import "@styles/login.css";
 
-const Signup = () => {
+const Login = () => {
   const [isForgotView, setIsForgotView] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     document.body.id = "login";
-
     return () => {
       document.body.removeAttribute("id");
     };
@@ -16,8 +17,14 @@ const Signup = () => {
     setIsForgotView((prev) => !prev);
   };
 
+  const handleLogin = () => {
+    // TODO: 나중에 API 연결
+    navigate("/home");
+  };
+
   return (
     <>
+      {/* 로그인 영역 */}
       <div
         className="container"
         id="login-section"
@@ -37,8 +44,17 @@ const Signup = () => {
         </form>
 
         <div className="links">
-          <a href="signup.html">회사 등록</a> /{" "}
-          <span onClick={() => alert("아이디 찾기 커스텀 알럿")}>
+          <span onClick={() => navigate("/signup")}>회원 가입</span> /{" "}
+          <span
+              onClick={() =>
+                alert(
+                  "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
+                  "담당자: 고객지원팀\n" +
+                  "연락처: 010-0000-0000\n" +
+                  "운영시간: 평일 09:00 ~ 18:00"
+                )
+              }
+               >
             이메일 찾기
           </span>{" "}
           /{" "}
@@ -47,16 +63,12 @@ const Signup = () => {
           </span>
         </div>
 
-        <button
-          className="btn-primary"
-          onClick={() => {
-            window.location.href = "main.html";
-          }}
-        >
+        <button className="btn-primary" onClick={handleLogin}>
           로그인
         </button>
       </div>
 
+      {/* 비밀번호 찾기 영역 */}
       <div
         className="container"
         id="forgot-section"
@@ -83,7 +95,12 @@ const Signup = () => {
         </div>
 
         <div className="links">
-          <span onClick={() => alert("아이디 찾기 커스텀 알럿")}>
+          <span onClick={() => alert(
+                  "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
+                  "담당자: 고객지원팀\n" +
+                  "연락처: 010-0000-0000\n" +
+                  "운영시간: 평일 09:00 ~ 18:00"
+                )}>
             아이디가 기억나지 않나요?
           </span>
         </div>
@@ -92,6 +109,6 @@ const Signup = () => {
       </div>
     </>
   );
-}
+};
 
-export default Signup;
+export default Login;
