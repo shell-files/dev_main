@@ -1,4 +1,4 @@
-// ===============================================================
+// =====================================================================================
 // Login.jsx 페이지 흐름설명 (함수 기준)
 
 // 1. login 흐름 → handleLoginSubmit (handleLogin) → requestLoginApi 호출 → 성공 시 navigateToHome (navigate("/home")) 실행
@@ -47,10 +47,12 @@
 
 // 2. requestPasswordResetApi
 // → api.post("/auth/password-reset", { email })
-// ===============================================================
+// =====================================================================================
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
+import LoginVisual from "@logins/LoginVisual";
 import "@styles/logins.css";
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
@@ -295,149 +297,157 @@ const goToPasswordResetViewAgain = () => {
 
   return (
     <>
-      {/* ========================= */}
-      {/* 1. login: 로그인 화면 */}
-      {/* ========================= */}
-      <div
-        className="container"
-        id="login-section"
-        style={{ display: view === "login" ? "block" : "none" }}
-      >
-        <div className="header-nav">
-          <span className="back-btn">←</span>
+    <div className="login-layout">
+
+      {/* 왼쪽 3D / 홍보 영역 */}
+      <LoginVisual />
+      {/* 오른쪽 카드 영역 */}
+      <div className="login-card-area"></div>
+
+        {/* ========================= */}
+        {/* 1. login: 로그인 화면 */}
+        {/* ========================= */}
+        <div
+          className="container"
+          id="login-section"
+          style={{ display: view === "login" ? "block" : "none" }}
+        >
+          <div className="header-nav">
+            <span className="back-btn">←</span>
+          </div>
+
+          <div className="logo-placeholder">로고 추가 예정</div>
+
+          <h1>Login</h1>
+
+          <form className="input-group" onSubmit={handleLogin}>
+            <input
+              type="email"
+              placeholder="이메일을 입력해주세요"
+              value={loginEmail}
+              onChange={(e) => setLoginEmail(e.target.value)}
+            />
+
+            <input
+              type="password"
+              placeholder="비밀번호를 입력해주세요"
+              value={loginPassword}
+              onChange={(e) => setLoginPassword(e.target.value)}
+            />
+
+            <div className="links">
+              <span onClick={goToSignupPage}>회원 가입</span> |{" "}
+              <span onClick={handleAccountInquiry}>이메일 찾기</span> |{" "}
+              <span className="active-link" onClick={goToForgotView}>
+                비밀번호 찾기
+              </span>
+            </div>
+
+            <button
+              className="login-action-button"
+              type="submit"
+              disabled={loginLoading}
+            >
+              {loginLoading ? <span className="button-spinner" /> : "로그인"}
+            </button>
+          </form>
         </div>
 
-        <div className="logo-placeholder">로고 추가 예정</div>
-
-        <h1>Login</h1>
-
-        <form className="input-group" onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="이메일을 입력해주세요"
-            value={loginEmail}
-            onChange={(e) => setLoginEmail(e.target.value)}
-          />
-
-          <input
-            type="password"
-            placeholder="비밀번호를 입력해주세요"
-            value={loginPassword}
-            onChange={(e) => setLoginPassword(e.target.value)}
-          />
-
-          <div className="links">
-            <span onClick={goToSignupPage}>회원 가입</span> |{" "}
-            <span onClick={handleAccountInquiry}>이메일 찾기</span> |{" "}
-            <span className="active-link" onClick={goToForgotView}>
-              비밀번호 찾기
+        {/* ========================= */}
+        {/* 2. forgot: 비밀번호 찾기 화면 */}
+        {/* ========================= */}
+        <div
+          className="container"
+          id="forgot-section"
+          style={{ display: view === "forgot" ? "block" : "none" }}
+        >
+          <div className="header-nav">
+            <span className="back-btn" onClick={goToLoginView}>
+              ←
             </span>
           </div>
 
-          <button
-            className="login-action-button"
-            type="submit"
-            disabled={loginLoading}
+          <div className="logo-placeholder">로고 추가 예정</div>
+
+          <h1>비밀번호 찾기</h1>
+
+          <form className="input-group" onSubmit={handleSendPasswordEmail}>
+            <input
+              type="email"
+              placeholder="이메일을 입력해주세요"
+              value={passwordResetEmail}
+              onChange={(e) => setPasswordResetEmail(e.target.value)}
+            />
+
+            <div className="info-box">
+              <strong>임시 비밀번호 발송 안내</strong>
+              입력하신 이메일로 임시 비밀번호가 발송됩니다.
+              <br />
+              메일이 보이지 않는다면 스팸 메일함도 확인해 주세요.
+            </div>
+
+            <div className="links">
+              <span onClick={handleAccountInquiry}>
+                아이디가 기억나지 않나요?
+              </span>
+            </div>
+
+            <button
+              className="login-action-button"
+              type="submit"
+              disabled={passwordResetLoading}
+            >
+              {passwordResetLoading ? (
+                <span className="button-spinner" />
+              ) : (
+                "이메일 전송"
+              )}
+            </button>
+          </form>
+        </div>
+
+        {/* ========================= */}
+        {/* 3. success: 이메일 발송 완료 화면 */}
+        {/* ========================= */}
+        <div
+          className="container"
+          id="success-section"
+          style={{ display: view === "success" ? "block" : "none" }}
           >
-            {loginLoading ? <span className="button-spinner" /> : "로그인"}
-          </button>
-        </form>
-      </div>
+          <div className="logo-placeholder">로고 추가 예정</div>
 
-      {/* ========================= */}
-      {/* 2. forgot: 비밀번호 찾기 화면 */}
-      {/* ========================= */}
-      <div
-        className="container"
-        id="forgot-section"
-        style={{ display: view === "forgot" ? "block" : "none" }}
-      >
-        <div className="header-nav">
-          <span className="back-btn" onClick={goToLoginView}>
-            ←
-          </span>
-        </div>
+          <h1>이메일 발송 완료</h1>
 
-        <div className="logo-placeholder">로고 추가 예정</div>
-
-        <h1>비밀번호 찾기</h1>
-
-        <form className="input-group" onSubmit={handleSendPasswordEmail}>
-          <input
-            type="email"
-            placeholder="이메일을 입력해주세요"
-            value={passwordResetEmail}
-            onChange={(e) => setPasswordResetEmail(e.target.value)}
-          />
-
-          <div className="info-box">
-            <strong>임시 비밀번호 발송 안내</strong>
-            입력하신 이메일로 임시 비밀번호가 발송됩니다.
-            <br />
-            메일이 보이지 않는다면 스팸 메일함도 확인해 주세요.
+          <div className="success-check-wrap">
+            <div className="success-check-icon">✓</div>
           </div>
 
-          <div className="links">
-            <span onClick={handleAccountInquiry}>
-              아이디가 기억나지 않나요?
-            </span>
+          <div className="success-message-box">
+            <div className="success-message-main">
+              {maskEmail(passwordResetEmail)}
+              <br />
+              임시 비밀번호를 발송했습니다.
+            </div>
+
+            <div className="success-message-sub">
+              메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
+              <br />
+              로그인 확인 후 비밀번호를 변경해 주세요.
+            </div>
           </div>
 
           <button
-            className="login-action-button"
-            type="submit"
-            disabled={passwordResetLoading}
+            className="login-action-button success-button"
+            onClick={goToLoginView}
           >
-            {passwordResetLoading ? (
-              <span className="button-spinner" />
-            ) : (
-              "이메일 전송"
-            )}
+            로그인으로 돌아가기
           </button>
-        </form>
-      </div>
 
-      {/* ========================= */}
-      {/* 3. success: 이메일 발송 완료 화면 */}
-      {/* ========================= */}
-      <div
-        className="container"
-        id="success-section"
-        style={{ display: view === "success" ? "block" : "none" }}
-        >
-        <div className="logo-placeholder">로고 추가 예정</div>
-
-        <h1>이메일 발송 완료</h1>
-
-        <div className="success-check-wrap">
-          <div className="success-check-icon">✓</div>
-        </div>
-
-        <div className="success-message-box">
-          <div className="success-message-main">
-            {maskEmail(passwordResetEmail)}
-            <br />
-            임시 비밀번호를 발송했습니다.
+          <div className="success-help-links">
+            <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
+            <span className="divider">|</span>
+            <span onClick={handleAccountInquiry}>고객센터 문의</span>
           </div>
-
-          <div className="success-message-sub">
-            메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
-            <br />
-            로그인 확인 후 비밀번호를 변경해 주세요.
-          </div>
-        </div>
-
-        <button
-          className="login-action-button success-button"
-          onClick={goToLoginView}
-        >
-          로그인으로 돌아가기
-        </button>
-
-        <div className="success-help-links">
-          <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
-          <span className="divider">|</span>
-          <span onClick={handleAccountInquiry}>고객센터 문의</span>
         </div>
       </div>
     </>
