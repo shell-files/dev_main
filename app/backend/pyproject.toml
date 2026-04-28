@@ -7,5 +7,10 @@ requires-python = ">=3.12"
 dependencies = [
     "fastapi[standard]>=0.136.0",
     "jwcrypto>=1.5.7",
+    "httpx>=0.28.1",
+    "mariadb>=1.1.14",
+    "pathlib>=1.0.1",
     "pydantic-settings>=2.13.1",
+    "redis>=7.4.0",
+    "uuid>=1.30",
 ]

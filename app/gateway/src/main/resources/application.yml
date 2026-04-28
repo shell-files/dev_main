@@ -14,7 +14,8 @@ spring:
             cors-configurations:
               '[/**]':
                 allowedOrigins:
-                  - ${CORS_ORIGIN}
+                  - ${CORS_ORIGIN1}
+                  - ${CORS_ORIGIN2}
                 allow-credentials: true
                 allowedHeaders: 
                   - '*'
@@ -29,37 +30,27 @@ spring:
             - id: main-service
               uri: ${ROUTE_MAIN_URI}
               predicates:
-                - Path=/main/**
+                - Host=main.weareithero.cloud**
               filters:
-                - RewritePath=/main/?(?<segment>.*), /${segment}
                 - ApiFilter
             - id: skm-service
               uri: ${ROUTE_SKM_URI}
               predicates:
-                - Path=/skm/**
+                - Host=skm.weareithero.cloud**
               filters:
-                - RewritePath=/skm/?(?<segment>.*), /${segment}
                 - ApiFilter
             - id: hg-service
               uri: ${ROUTE_HG_URI}
               predicates:
-                - Path=/hg/**
+                - Host=hg.weareithero.cloud**
               filters:
-                - RewritePath=/hg/?(?<segment>.*), /${segment}
                 - ApiFilter
             - id: tv-service
               uri: ${ROUTE_TV_URI}
               predicates:
-                - Path=/tv/**
+                - Host=tv.weareithero.cloud**
               filters:
-                - RewritePath=/tv/?(?<segment>.*), /${segment}
                 - ApiFilter
-            - id: openapi
-              uri: ${CORS_ORIGIN}
-              predicates:
-                - Path=/v3/api-docs/**
-              filters:
-                - RewritePath=/v3/api-docs/?(?<segment>.*), /gateway/${segment}/v3/api-docs
 
 management:
   endpoints:
@@ -77,9 +68,15 @@ management:
 springdoc:
   swagger-ui:
     # use-root-path: true
-    path: /docs
+    path: /gateway-docs
     operationsSorter: method
 
 logging.level.org.springframework: INFO
+
+# logging:
+#   level:
+#     org.springframework.cloud.gateway: DEBUG
+#     org.springframework.http.server.reactive: DEBUG
+#     org.springframework.web.reactive: DEBUG
 
 api-origin-uri: ${CORS_ORIGIN}
