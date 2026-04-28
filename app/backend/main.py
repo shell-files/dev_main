@@ -2,8 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.utils.settings import settings
 
-app = FastAPI(root_path="/gateway/main", servers=[
-    {"url": "/gateway/main", "description": "API 기본 서버"}
+app = FastAPI(servers=[
+    {"url": "/", "description": "API 기본 서버"}
   ])
 
 origins = ["http://localhost", settings.host_ip]
