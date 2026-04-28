@@ -131,42 +131,207 @@
 }
 
 /* =================== */
-/* 2. forgot 화면 */
+/* 2. forgot: 비밀번호 찾기 화면 */
 
 #login #forgot-section .logo-placeholder {
-    margin-top: 30px;
+    margin: 18px auto 22px;
 }
 
 #login #forgot-section h1 {
-    font-size: 42px;
-    margin-bottom: 40px;
+    font-size: 40px;
+    margin: 0 0 34px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+#login #forgot-section .input-group {
+    align-items: center;
+}
+
+#login #forgot-section .input-group input {
+    width: 86%;
+    height: 58px;
+    margin-bottom: 24px;
+}
+
+#login #forgot-section .info-box {
+    width: 86%;
+    margin: 0 auto 28px;
+    padding: 22px 24px;
+    background-color: #f3f7f4;
+    border: 1px solid #d9eadf;
+    border-radius: 14px;
+    text-align: center;
+    line-height: 1.65;
+    font-size: 14px;
+    color: #333;
+    box-sizing: border-box;
+}
+
+#login #forgot-section .info-box strong {
+    display: block;
+    font-size: 16px;
+    color: #222;
+    margin-bottom: 8px;
+}
+
+#login #forgot-section .links {
+    order: 4;
+    margin: 18px 0 0;
+    font-size: 13px;
+    color: #666;
 }
 
 #login #forgot-section .login-action-button {
-    margin-top: 95px;
+    order: 3;
+    width: 150px;
+    height: 54px;
+    margin: 0 auto !important;
+    border-radius: 12px;
+    line-height: 54px;
+    font-size: 16px;
 }
 
 /* =================== */
-/* 3. success 화면 */
+/* 3. success: 이메일 발송 완료 화면 */
 
 #login #success-section {
-    padding-top: 55px;
+    padding: 48px 30px 38px;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box;
+}
+
+#login #success-section[style*="block"] {
+    display: flex !important;
 }
 
 #login #success-section .logo-placeholder {
-    margin: 0 auto 25px;
+    margin: 0 auto 20px;
 }
 
 #login #success-section h1 {
-    font-size: 42px;
-    margin: 0 0 32px;
-    font-weight: 600;
+    font-size: 40px;
+    margin: 0 0 22px;
+    font-weight: 700;
+    letter-spacing: -1px;
+}
+
+#login #success-section .success-check-wrap {
+    margin: 0 auto 24px;
+}
+
+#login #success-section .success-check-icon {
+    width: 68px;
+    height: 68px;
+    border-radius: 50%;
+    background-color: #03a94d;
+    color: #ffffff;
+    font-size: 40px;
+    font-weight: 800;
+    line-height: 68px;
+    text-align: center;
+    animation: success-check-pop 0.45s ease-out;
 }
 
 #login #success-section .success-message-box {
     width: 86%;
+    margin: 0 auto 30px;
+    padding: 22px 24px;
+    background-color: #f3f7f4;
+    border: 1px solid #d9eadf;
+    border-radius: 14px;
+    text-align: center;
+    line-height: 1.65;
+    color: #222;
+    box-sizing: border-box;
+}
+
+#login #success-section .success-message-main {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    line-height: 1.55;
+}
+
+#login #success-section .success-message-sub {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.65;
+}
+
+#login #success-section .success-message-notice {
+    display: none;
+}
+
+#login #success-section .success-button {
+    width: 180px;
+    height: 54px;
+    margin: 0 auto px;
+    padding: 0 ;
+    border-radius: 12px;
+    line-height: 54px;
+    font-size: 16px;
+}
+
+#login #success-section .success-help-links {
+    margin-top: 0;
+    font-size: 13px;
+    color: #666;
+}
+
+#login #success-section .success-help-links span {
+    cursor: pointer;
+}
+
+#login #success-section .success-help-links span:hover {
+    text-decoration: underline;
+}
+
+#login #success-section .success-help-links .divider {
+    margin: 0 10px;
+    cursor: default;
+    color: #bbb;
+}
+
+@keyframes success-check-pop {
+    0% {
+        transform: scale(0.4);
+        opacity: 0;
+    }
+
+    70% {
+        transform: scale(1.12);
+        opacity: 1;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* =================== */
+/* success 체크 애니메이션 */
+
+#login #success-section .success-check-icon {
+    width: 74px;
+    height: 74px;
+    border-radius: 50%;
+    background-color: #03a94d;
+    color: #ffffff;
+    font-size: 44px;
+    font-weight: 800;
+    line-height: 74px;
+    text-align: center;
+    animation: success-check-pop 0.45s ease-out;
+}
+
+/* success 메시지 박스 세부 텍스트 */
+#login #success-section .success-message-box {
+    width: 86%;
     margin: 0 auto;
-    padding: 24px 26px;
+    padding: 20px 26px;
     background-color: #f3f7f4;
     border: 1px solid #d9eadf;
     border-radius: 12px;
@@ -178,14 +343,64 @@
 }
 
 #login #success-section .success-message-main {
-    font-weight: 600;
-    margin-bottom: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-#login #success-section .success-button {
-    width: 150px;
-    height: 62px;
-    line-height: 1.4;
-    padding-top: 9px;
-    margin-top: 220px;
+#login #success-section .success-message-sub {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+#login #success-section .success-message-notice {
+    font-size: 13px;
+    color: #555;
+}
+
+/* 하단 유틸 링크 */
+#login #success-section .success-help-links {
+    margin-top: 18px;
+    font-size: 13px;
+    color: #666;
+}
+
+#login #success-section .success-help-links span {
+    cursor: pointer;
+}
+
+#login #success-section .success-help-links .divider {
+    margin: 0 8px;
+    cursor: default;
+    color: #aaa;
+}
+
+/* =================== */
+/* 버튼 내부 로딩 스피너 정렬 */
+
+#login .login-action-button {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#login .button-spinner {
+    display: inline-block !important;
+    width: 20px !important;
+    height: 20px !important;
+    border: 3px solid rgba(255, 255, 255, 0.45) !important;
+    border-top-color: #ffffff !important;
+    border-radius: 50% !important;
+    animation: login-spin 0.8s linear infinite !important;
+    box-sizing: border-box !important;
+}
+
+@keyframes login-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
 }
