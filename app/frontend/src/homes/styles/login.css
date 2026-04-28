@@ -252,6 +252,20 @@ a {text-decoration: none; color: #333; display: inline-block;}
     padding: 15px;
     font-weight: bold;
 }
+#signup_page .input-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+#signup_page .error {
+  color: red;
+  font-size: 12px;
+  margin-top: 4px;
+}
+#signup_page .success {
+  color: green;
+  font-size: 12px;
+}
 
 /* ============================================================
    📱 모바일 대응 (화면 너비 600px 이하)
