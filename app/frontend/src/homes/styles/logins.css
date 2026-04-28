@@ -1,12 +1,10 @@
 /* =================== */
-/* 로그인 */
+/* 로그인 공통 */
 
-
-/* 카드 컨테이너 */
 #login .container {
     margin-top: 100px;
     position: relative;
-    background-color: #ffffff; 
+    background-color: #ffffff;
     width: 484px;
     height: 678px;
     padding: 20px 30px;
@@ -14,19 +12,18 @@
     border: 1px solid #e0e0e0;
     text-align: center;
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    box-sizing: border-box;
 }
-/* 상단 뒤로가기 */
+
 #login .back-btn {
     position: absolute;
     top: 10px;
     left: 20px;
     font-size: 20px;
     width: 20px;
-    pointer-events:fill;
     cursor: pointer;
 }
 
-/* 로고 박스 */
 #login .logo-placeholder {
     width: 120px;
     height: 75px;
@@ -41,26 +38,47 @@
 
 #login h1 {
     font-size: 46px;
-    margin-bottom: 40px;
+    margin: 0 0 40px;
     font-weight: 500;
+    color: #333;
 }
 
-/* 입력창 스타일 */
+#login .input-group {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
 #login .input-group input {
     width: 100%;
-    padding: 15px;
-    margin-bottom: 10px;
+    height: 58px;
+    padding: 0 15px;
+    margin-bottom: 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
     outline: none;
-    font-size: 14px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
 #login .input-group input::placeholder {
     color: #ccc;
 }
 
-/* 안내 박스 (비밀번호 찾기용) */
+#login .links {
+    color: #666;
+    margin: 20px 0 0;
+    font-size: 16px;
+}
+
+#login .links span,
+#login .links a {
+    cursor: pointer;
+    color: #666;
+    text-decoration: none;
+}
+
 #login .info-box {
     background-color: #dbdbdb;
     padding: 20px;
@@ -69,44 +87,105 @@
     text-align: left;
     margin: 20px 0;
     border-radius: 4px;
+    box-sizing: border-box;
 }
 
-/* 하단 링크 영역 */
-#login .links {
-    color: #666;
-    margin: 20px 0 40px;
-}
+/* =================== */
+/* 로그인 전용 버튼 */
 
-#login .links a {
-    cursor: pointer;
-    color: #666;
-}
-
-#login .links span {
-    cursor: pointer;
-    color: #666;
-}
-
-
-
-/* 메인 버튼 */
-#login .btn-primary {
-    position: absolute;
-    bottom: 70px;
-    left: 50%;
-    transform: translateX(-50%);
+#login .login-action-button {
+    all: unset;
+    display: block;
     width: 120px;
-    padding: 15px 0;
-    background-color: #03a94d; 
-    color: white;
-    border: none;
+    height: 54px;
+    margin: 30px auto 0;
+    background-color: #03a94d;
+    color: #ffffff;
     border-radius: 10px;
     font-size: 16px;
-    font-weight: bold;
+    font-weight: 700;
+    text-align: center;
+    line-height: 54px;
     cursor: pointer;
-    transition: background 0.3s;
+    box-sizing: border-box;
 }
 
-#login .btn-primary:hover {
+#login .login-action-button:hover {
     background-color: #028a3f;
+}
+
+#login .login-action-button:disabled {
+    background-color: #9fd8b8;
+    cursor: not-allowed;
+}
+
+/* =================== */
+/* 1. login 화면 */
+
+#login #login-section .logo-placeholder {
+    margin-top: 35px;
+}
+
+#login #login-section .login-action-button {
+    margin-top: 34px;
+}
+
+/* =================== */
+/* 2. forgot 화면 */
+
+#login #forgot-section .logo-placeholder {
+    margin-top: 30px;
+}
+
+#login #forgot-section h1 {
+    font-size: 42px;
+    margin-bottom: 40px;
+}
+
+#login #forgot-section .login-action-button {
+    margin-top: 95px;
+}
+
+/* =================== */
+/* 3. success 화면 */
+
+#login #success-section {
+    padding-top: 55px;
+}
+
+#login #success-section .logo-placeholder {
+    margin: 0 auto 25px;
+}
+
+#login #success-section h1 {
+    font-size: 42px;
+    margin: 0 0 32px;
+    font-weight: 600;
+}
+
+#login #success-section .success-message-box {
+    width: 86%;
+    margin: 0 auto;
+    padding: 24px 26px;
+    background-color: #f3f7f4;
+    border: 1px solid #d9eadf;
+    border-radius: 12px;
+    text-align: center;
+    line-height: 1.7;
+    font-size: 15px;
+    color: #333;
+    box-sizing: border-box;
+}
+
+#login #success-section .success-message-main {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+#login #success-section .success-button {
+    width: 150px;
+    height: 62px;
+    line-height: 1.4;
+    padding-top: 9px;
+    margin-top: 220px;
 }
