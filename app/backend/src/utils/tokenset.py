@@ -8,7 +8,7 @@ from .settings import settings
 # --------------------------
 # 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)
 # --------------------------
-def encrypt_to_jwe(payload: dict):
+def encryptToJwe(payload: dict):
     """ 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)"""
     payload_str = json.dumps(payload)
     # settings에서 가져온 키를 바탕으로 JWK 객체 생성
@@ -23,7 +23,7 @@ def encrypt_to_jwe(payload: dict):
 # --------------------------
 # 복호화 함수: JWE 토큰을 해독하여 파이썬 딕셔너리로 반환
 # --------------------------
-def decrypt_from_jwe(token: str):
+def decryptFromJwe(token: str):
     """ 복호화 함수: JWE 토큰을 해독하여 파이썬 딕셔너리로 반환"""
     try:
         # key = jwk.JWK(k=settings.secret_key, kty='oct')
@@ -37,7 +37,7 @@ def decrypt_from_jwe(token: str):
 # --------------------------
 # 액세스 토큰과 UUID 생성 함수 (공통 모듈)
 # --------------------------
-def generate_access_with_uuid(user_id: str):
+def generateAccessWithUuid(user_id: str):
     """ 액세스 토큰과 UUID 생성 함수 (공통 모듈)"""
     token_uuid = str(uuid.uuid4())
     payload = {
@@ -47,7 +47,7 @@ def generate_access_with_uuid(user_id: str):
         
     }
     # JWE로 암호화하여 반환
-    access_token = encrypt_to_jwe(payload)
+    access_token = encryptToJwe(payload)
     return access_token, token_uuid
 # --------------------------
 # 로그인 시 호출: JWE 액세스/리프레시 토큰 및 UUID 생성
@@ -55,7 +55,7 @@ def generate_access_with_uuid(user_id: str):
 def create_user_tokens(user_id: str):
     """ 로그인 시 호출: JWE 액세스/리프레시 토큰 및 UUID 생성"""
     # 액세스 토큰 및 UUID 생성 
-    access_token, token_uuid = generate_access_with_uuid(user_id)
+    access_token, token_uuid = generateAccessWithUuid(user_id)
     
     # 리프레시 토큰 생성 (30일)
     refresh_payload = {
@@ -64,7 +64,7 @@ def create_user_tokens(user_id: str):
         "exp": int((datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days)).timestamp())
         
     }
-    refresh_token = encrypt_to_jwe(refresh_payload)
+    refresh_token = encryptToJwe(refresh_payload)
     
     return access_token, refresh_token, token_uuid
 
@@ -74,7 +74,7 @@ def create_user_tokens(user_id: str):
 def refresh_access_token(refresh_token: str):
     """ 토큰 재발급: 리프레시 토큰 검증 후 새로운 UUID와 액세스 토큰 생성"""
     # 1. JWE 복호화 및 유효성 검사
-    payload = decrypt_from_jwe(refresh_token)
+    payload = decryptFromJwe(refresh_token)
     
     if not payload:
         return None # 해독 실패 또는 변조
@@ -82,6 +82,6 @@ def refresh_access_token(refresh_token: str):
     user_id = payload.get("sub")
     
     # 2. 새로운 액세스 토큰과 UUID 생성 
-    new_access_token, new_uuid = generate_access_with_uuid(user_id)
+    new_access_token, new_uuid = generateAccessWithUuid(user_id)
     
     return new_access_token, new_uuid
