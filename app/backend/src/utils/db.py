@@ -28,7 +28,7 @@ def getConn():
 # --------------------------
 # 하나만 불러오기
 # --------------------------
-def findOne(sql, params: None):
+def findOne(sql:str, params=None):
   '''DB에서 단일 행 조회'''
   result = None
   try:
@@ -43,7 +43,7 @@ def findOne(sql, params: None):
 # --------------------------
 # 모두 불러오기
 # --------------------------
-def findAll(sql, params: None):
+def findAll(sql:str, params=None):
   '''DB에서 여러 행 조회'''
   result = []
   try:
@@ -58,7 +58,7 @@ def findAll(sql, params: None):
 # --------------------------
 # DB에 저장하기
 # --------------------------
-def save(sql, params: None):
+def save(sql:str, params=None):
   '''DB에 단일 값 저장'''
   result = False
   try:
@@ -74,7 +74,7 @@ def save(sql, params: None):
 # --------------------------
 # 여러 값 저장하기
 # --------------------------
-def saveMany(sql: str, params: None):
+def saveMany(sql:str, params=None):
   """DB에 여러 값 한번에 저장"""
   result = False
   try:
@@ -100,7 +100,7 @@ result = saveMany(sql, data_values)
 # --------------------------
 # 직전에 넣은 키값 불러오기
 # --------------------------
-def add_key(sql, params: None):
+def add_key(sql:str, params=None):
   """DB에 직전에 생성한 키값 불러오기"""
   result = [False, 0]
   try:
@@ -121,7 +121,7 @@ def add_key(sql, params: None):
 # --------------------------
 # 데이터 존재 여부 확인
 # --------------------------
-def exists(sql, params: None):
+def exists(sql:str, params=None):
     '''DB에서 데이터 존재 여부 체크'''
     result = False
     try:
@@ -146,7 +146,7 @@ if is_joined:
 # --------------------------
 # 페이지네이션 목록
 # --------------------------
-def getPageList(sql, parmas=None):
+def getPageList(sql:str, parmas=None):
     '''DB에서 페이지네이션 목록 조회'''
     result = {"total": 0, "list": []}
     try:
@@ -164,6 +164,3 @@ def getPageList(sql, parmas=None):
         print(f"MariaDB Error : {e}")
     return result
 # limit = 보여줄 개수, offset = 건너뛸 개수
-
-## 공통화 할 수 있는 부분 체크, 함수화 할 수 있는지 체크해서 수정하기
-
