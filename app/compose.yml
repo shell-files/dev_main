@@ -1,0 +1,59 @@
+services:
+
+  gateway:
+    image: maven:3.9.15-eclipse-temurin-21-alpine
+    container_name: gateway
+    restart: always 
+    networks:
+      - main_with-network
+    # ports:
+    #   - 7000:7000
+    environment:
+      - CORS_ORIGIN=http://aiedu.tplinkdns.com
+      - ROUTE_MAIN_URI=http://192.168.0.205:8000
+      - ROUTE_SKM_URI=http://192.168.0.201:8000
+      - ROUTE_HG_URI=http://192.168.0.204:8000
+      - ROUTE_TV_URI=http://192.168.0.203:8000
+    volumes:
+      - ./gateway/target:/usr/local/work/app
+    command: ["java","-jar","/usr/local/work/app/gateway-0.0.1-SNAPSHOT.jar"]
+
+  frontend:
+    container_name: frontend
+    image: nginx:1.28
+    restart: always
+    networks:
+      - main_with-network
+    # ports:
+    #   - 80:80
+    volumes:
+      - ./frontend/dist:/usr/share/nginx/html:ro
+      - ./frontend/default.conf:/etc/nginx/conf.d/default.conf:ro
+
+  backend:
+    container_name: backend
+    image: uv:1
+    restart: always 
+    networks:
+      - main_with-network
+    ports:
+      - 8000:8000
+    # depends_on:
+    #   - mariadb
+    working_dir: /workspace
+    volumes:
+      - ./backend/main.py:/workspace/main.py
+      - ./backend/settings.py:/workspace/settings.py
+      - ./backend/pyproject.toml:/workspace/pyproject.toml
+      - ./backend/uv.lock:/workspace/uv.lock
+      - ./backend/.python-version:/workspace/.python-version
+    environment:
+      - HOST_IP=http://aiedu.tplinkdns.com
+    command: ["uv", "run", "fastapi", "run"]
+
+networks:
+  main_with-network: 
+    external: true
+
+volumes:
+  data-mariadb:

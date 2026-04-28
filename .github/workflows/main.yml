@@ -2,7 +2,7 @@ name: Windows PC Job
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "main", "dev" ]
 
 jobs:
   build:
@@ -13,18 +13,48 @@ jobs:
         uses: actions/checkout@v4
         with:
           path: .
+      
+      # - name: Docker Main Down
+      #   working-directory: ./main
+      #   run: docker compose down
+      #   continue-on-error: true
+
+      # - name: Docker Main Up
+      #   working-directory: ./main
+      #   run: docker compose up -d
 
       - name: Build Frontend
-        working-directory: ./frontend
+        working-directory: ./app/frontend
         run: |
           npm install
           npm run build
-      
-      - name: Docker Down
-        working-directory: .
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build Gateway
+        env: 
+          CORS_ORIGIN: ${{ secrets.CORS_ORIGIN }}
+          ROUTE_MAIN_URI: ${{ secrets.ROUTE_MAIN_URI }}
+          ROUTE_SKM_URI: ${{ secrets.ROUTE_SKM_URI }}
+          ROUTE_HG_URI: ${{ secrets.ROUTE_HG_URI }}
+          ROUTE_TV_URI: ${{ secrets.ROUTE_TV_URI }}
+        working-directory: ./app/gateway
+        run: .\mvnw clean package
+
+      - name: Docker App Down
+        working-directory: ./app
         run: docker compose down
         continue-on-error: true
 
-      - name: Docker Up
-        working-directory: .
+      - name: Docker App Up
+        working-directory: ./app
         run: docker compose up -d
+
+      - name: Restart Specific Nginx
+        working-directory: ./main
+        run: docker compose restart web-main

@@ -7,10 +7,12 @@
 
 ```mermaid
 graph TD;
-    nginx-->react;
-    react-->highgooh;
-    react-->triplevalues;
-    react-->skm;
+    nginx-->frontend;
+    nginx-->gateway;
+    gateway-->main
+    gateway-->hg;
+    gateway-->tv;
+    gateway-->skm;
 ```
 
 ---

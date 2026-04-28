@@ -1,0 +1,85 @@
+server.port: 7000
+
+spring:
+  application.name: gateway
+  config:
+    import: optional:file:.env[.properties]
+  cloud:
+    gateway:
+      server:
+        webflux:
+          default-filters:
+            - DedupeResponseHeader=Access-Control-Allow-Origin Access-Control-Allow-Methods Access-Control-Allow-Headers Access-Control-Allow-Credentials RETAIN_FIRST 
+          globalcors:
+            cors-configurations:
+              '[/**]':
+                allowedOrigins:
+                  - ${CORS_ORIGIN}
+                allow-credentials: true
+                allowedHeaders: 
+                  - '*'
+                allowedMethods:
+                  - PUT
+                  - GET
+                  - POST
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+          routes:
+            - id: main-service
+              uri: ${ROUTE_MAIN_URI}
+              predicates:
+                - Path=/main/**
+              filters:
+                - RewritePath=/main/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: skm-service
+              uri: ${ROUTE_SKM_URI}
+              predicates:
+                - Path=/skm/**
+              filters:
+                - RewritePath=/skm/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: hg-service
+              uri: ${ROUTE_HG_URI}
+              predicates:
+                - Path=/hg/**
+              filters:
+                - RewritePath=/hg/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: tv-service
+              uri: ${ROUTE_TV_URI}
+              predicates:
+                - Path=/tv/**
+              filters:
+                - RewritePath=/tv/?(?<segment>.*), /${segment}
+                - ApiFilter
+            - id: openapi
+              uri: ${CORS_ORIGIN}
+              predicates:
+                - Path=/v3/api-docs/**
+              filters:
+                - RewritePath=/v3/api-docs/?(?<segment>.*), /gateway/${segment}/v3/api-docs
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    tags:
+      application: gateway
+  tracing:
+    enabled: false
+    sampling:
+      probability: 1.0
+
+springdoc:
+  swagger-ui:
+    # use-root-path: true
+    path: /docs
+    operationsSorter: method
+
+logging.level.org.springframework: INFO
+
+api-origin-uri: ${CORS_ORIGIN}
