@@ -86,21 +86,11 @@ def saveMany(sql:str, params=None):
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
-# 사용 예시
-"""
-sql = "INSERT INTO students (name, score) VALUES (?, ?)"
-data_values = [
-    ('최수아', 99),
-    ('이현서', 00),
-    ('최윤우', 98)
-]
-result = saveMany(sql, data_values)
-"""
 
 # --------------------------
 # 직전에 넣은 키값 불러오기
 # --------------------------
-def add_key(sql:str, params=None):
+def addKey(sql:str, params=None):
   """DB에 직전에 생성한 키값 불러오기"""
   result = [False, 0]
   try:
@@ -135,13 +125,6 @@ def exists(sql:str, params=None):
     except mariadb.Error as e:
         print(f"MariaDB Error : {e}")
     return result
-
-# 사용 예시
-'''
-is_joined = exists("SELECT COUNT(*) FROM users WHERE email = ?", ("test@test.com",))
-if is_joined:
-    print("이미 가입된 이메일입니다.")
-'''
 
 # --------------------------
 # 페이지네이션 목록
