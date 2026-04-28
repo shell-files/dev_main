@@ -167,19 +167,3 @@ def getPageList(sql, parmas=None):
 
 ## 공통화 할 수 있는 부분 체크, 함수화 할 수 있는지 체크해서 수정하기
 
-# 테스트용 코드, 삭제 예정
-
-from fastapi import FastAPI
-app = FastAPI()
-
-@app.get("/test")
-def test():
-    return {
-            "findAll 결과": findAll("SELECT * FROM USER WHERE email = ?", ("test5@gmail.com",))
-            # "findOne 결과": findOne("SELECT * FROM USER WHERE email = ?", ("test6@gmail.com",)),
-            # "exists 결과": exists("SELECT COUNT(*) FROM USER WHERE email = ?", ("test7@gmail.com",))
-# "add_key 결과": add_key("INSERT INTO USER (email, password, name) VALUES (?,?,?)", ("test8@gmail.com", "1234","최수아"))
-# "getPageList 결과": getPageList("SELECT * FROM USER", (3, 0))
-# "saveMany 결과": saveMany("INSERT INTO USER (email, password, name) VALUES (?,?,?)", [("test6@gmail.com", "1234","최수아"), ("test7@gmail.com", "1234","최수아")])
-# "save 결과": save("INSERT INTO categories (category_id, category_name) VALUES (?, ?)", (4, "TV"))
-            }
