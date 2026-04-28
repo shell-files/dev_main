@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 및 비밀번호 찾기</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body id="login">
+
+    <div class="container" id="login-section">
+        <div class="header-nav">
+            <span class="back-btn">←</span>
+        </div>
+        <div class="logo-placeholder">로고 추가 예정</div>
+        <h1>Login</h1>
+        
+        <form class="input-group">
+            <input type="email" placeholder="이메일을 입력해주세요">
+            <input type="password" placeholder="비밀번호를 입력해주세요">
+        </form>
+
+        <div class="links">
+            <a href="signup.html">회사 등록</a> / <span onclick="alert('아이디 찾기 커스텀 알럿')">이메일 찾기</span> / <span class="active-link" onclick="toggleView()">비밀번호 찾기</span>
+        </div>
+
+        <button class="btn-primary"onclick="location.href='main.html'">로그인</button>
+    </div>
+
+    <div class="container" id="forgot-section" style="display: none;">
+        <div class="header-nav">
+            <span class="back-btn" onclick="toggleView()">←</span>
+        </div>
+        <div class="logo-placeholder">로고 추가 예정</div>
+        <h1>비밀번호 찾기</h1>
+        
+        <form class="input-group">
+            <input type="email" placeholder="이메일을 입력해주세요">
+        </form>
+
+        <div class="info-box">
+            *계정 이메일 입력 후 이메일 전송 클릭 시<br>
+            임시 비밀번호를 해당 이메일에 발송
+        </div>
+
+        <div class="links">
+            <span onclick="alert('아이디 찾기 커스텀 알럿')">아이디가 기억나지 않나요?</span>
+        </div>
+
+        <button class="btn-primary">이메일 전송</button>
+    </div>
+
+    <script>
+        // 화면 전환 테스트용 간단한 함수
+        const toggleView=()=>{
+            const login = document.getElementById('login-section');
+            const forgot = document.getElementById('forgot-section');
+            if (login.style.display === 'none') {
+                login.style.display = 'block';
+                forgot.style.display = 'none';
+            } else {
+                login.style.display = 'none';
+                forgot.style.display = 'block';
+            }
+        }
+    </script>
+</body>
+</html>
