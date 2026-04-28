@@ -1,6 +1,6 @@
 import { useState,useRef } from 'react'
 import { useNavigate } from 'react-router'
-import '@styles/login.css'
+import '@styles/SignUp.css'
 import { api } from '@utils/network'
 
 const Signup = ()=>{
@@ -14,6 +14,7 @@ const Signup = ()=>{
     const [emailValid, setEmailValid] = useState(null);
     const [businessValid, setBusinessValid] = useState(null);
     const [errors, setErrors] = useState({});
+    const [signupLoading, setSignupLoading] = useState(false);
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -28,14 +29,26 @@ const Signup = ()=>{
         industryId:'',
         subCategory:''
     })
-    
+    const requiredFields = {
+        email: "이메일은 필수입니다.",
+        password: "비밀번호는 필수입니다.",
+        ceoName: "대표자명은 필수입니다.",
+        businessNumber: "사업자번호는 필수입니다.",
+        companyName: "법인명은 필수입니다.",
+        openingDate: "개업일은 필수입니다.",
+        corporateNumber: "법인 등록번호는 필수입니다.",
+        headOffice: "본점 소재지는 필수입니다.",
+        issueDate: "발행일은 필수입니다.",
+        issuer: "발행처는 필수입니다.",
+        industryId: "업태는 필수입니다.",
+        subCategory: "종목은 필수입니다."
+    };
+    const isLoading = isUploading || signupLoading;
     const validateField = (name, value) => {
         let message = "";
         //필수값 체크
         if (!value) {
-            if (name === "email") message = "이메일은 필수입니다.";
-            if (name === "password") message = "비밀번호는 필수입니다.";
-            if (name === "businessNumber") message = "사업자번호는 필수입니다.";
+            message = requiredFields[name] || "필수 항목입니다.";
         }
         //이메일 형식 체크
         if (name === "email" && value) {
@@ -102,18 +115,24 @@ const Signup = ()=>{
                     "Content-Type": "multipart/form-data"
                 }
             });
-            const result = res.json();
+            const result = res.data;
             if (result.success) {
                 setFormData(prev => ({
                     ...prev,
                     businessNumber: result.data.businessNumber || '',
                     companyName: result.data.companyName || '',
                     ceoName: result.data.ceoName || '',
-                    openingDate: result.data.openingDate || ''
+                    openingDate: result.data.openingDate || '',
+                    corporateNumber: result.data.corporateNumber || '',
+                    headOffice: result.data.headOffice || '',
+                    issueDate: result.data.issueDate || '',
+                    issuer: result.data.issuer || '',
+                    industryId: result.data.industryId || '',
+                    subCategory: result.data.subCategory || ''
                 }));
                 setIsOcrDone(true);
                 // alert("OCR 완료! 자동 입력됨");
-                console.log(formData);
+                console.log(result.data);
             } else {
                 // alert("OCR 실패");
                 console.error("OCR 실패");
@@ -127,7 +146,7 @@ const Signup = ()=>{
     };
     const checkEmail = async () => {
         if (!formData.email || emailValid !== null) return;
-
+// -------------------------------------------------이메일 중복 체크 API -------------------------------------------------------
         try {
             const res = await api.get('/api/user', {
                 params: { email: formData.email }
@@ -151,7 +170,7 @@ const Signup = ()=>{
             console.error(err);
         }
     };
-    const handleSubmit = (e) => {
+    const handleSubmit = async(e) => {
         e.preventDefault();
 
         const newErrors = {};
@@ -168,14 +187,26 @@ const Signup = ()=>{
             setErrors(newErrors);
             return;
         }
+        try {
+            setSignupLoading(true);
 
-        const finalData = {
-            ...formData,
-            fileName,
-            agreed: isAgreed
-        };
+            // 회원가입 API (추가 예정)
+            const res = await api.post("/api/signup", {
+                ...formData,
+                fileName,
+                agreed: isAgreed
+            });
+            if (res.data.status !== "success") {
+                throw new Error("회원가입 실패");
+            }
 
-        console.log(finalData);
+            navigate("/main");
+
+        } catch (err) {
+            alert("회원가입 실패");
+        } finally {
+            setSignupLoading(false);
+        }
     };
     return(
 
@@ -188,7 +219,7 @@ const Signup = ()=>{
                         <label>이메일</label>
                             <div className="input-wrap">
                                 <input type="email" name="email" value={formData.email} onChange={handleChange} 
-                                onBlur={(e)=>{validateField("email", e.target.value);checkEmail()}} placeholder="이메일을 입력해주세요"/>
+                                    onBlur={(e) => {validateField("email", e.target.value);checkEmail();}} placeholder="이메일을 입력해주세요"/>
                                 {!errors.email && emailValid === true && (
                                     <p className="success">사용 가능한 이메일입니다.</p>
                                 )}
@@ -218,7 +249,8 @@ const Signup = ()=>{
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
                             <input type="text" readOnly value={fileName} placeholder="선택된 파일 없음" />
                             <button type="button" className="btn-green" onClick={handleFileBtnClick}>파일 선택</button>
-                            <button type="button" className="btn-green" onClick={handleUpload}>{isUploading ? '업로드 중...' : '등록'}</button>
+                            <button type="button" className="btn-green"onClick={handleUpload} disabled={isUploading}>
+                                {isUploading ? <span className="button-spinner" /> : "등록"}</button>
                         </div>
                     </div>
                         {errors.file && <p className="error">{errors.file}</p>}
@@ -242,31 +274,40 @@ const Signup = ()=>{
                         </div>
                     </div>
                     <div className="input-group"><label>법인명(단체명)</label>
-                        <input type="text" name='companyName' value={formData.companyName} onChange={handleChange} placeholder='법인명(단체명)을 입력해주세요'/>
+                        <input type="text" name='companyName' value={formData.companyName}
+                        onBlur={(e) => validateField("companyName", e.target.value)} onChange={handleChange} placeholder='법인명(단체명)을 입력해주세요'/>
                     </div>
                      <div className="input-group"><label>대표자명</label>
-                        <input type="text" name="ceoName" value={formData.ceoName} onChange={handleChange} placeholder="대표자명을 입력해주세요"/>
+                        <input type="text" name="ceoName" value={formData.ceoName} 
+                        onBlur={(e) => validateField("ceoName", e.target.value)} onChange={handleChange} placeholder="대표자명을 입력해주세요"/>
                     </div>
                     <div className="input-group"><label>개업 연월일</label>
-                        <input type="text" name='openingDate' value={formData.openingDate} onChange={handleChange} placeholder="개업 연월일을 입력해주세요"/>
+                        <input type="text" name='openingDate' value={formData.openingDate} 
+                        onBlur={(e) => validateField("openingDate", e.target.value)} onChange={handleChange} placeholder="개업 연월일을 입력해주세요"/>
                     </div>
                     <div className="input-group"><label>법인 등록번호</label>
-                        <input type="text" name='corporateNumber' value={formData.corporateNumber} onChange={handleChange} placeholder="법인 등록번호를 입력해주세요"/>
+                        <input type="text" name='corporateNumber' value={formData.corporateNumber} 
+                        onBlur={(e) => validateField("corporateNumber", e.target.value)} onChange={handleChange} placeholder="법인 등록번호를 입력해주세요"/>
                         </div>
                     <div className="input-group"><label>본점 소재지</label>
-                        <input type="text" name='headOffice' value={formData.headOffice} onChange={handleChange} placeholder='본점 소재지를 입력해주세요'/>
+                        <input type="text" name='headOffice' value={formData.headOffice}
+                        onBlur={(e) => validateField("headOffice", e.target.value)} onChange={handleChange} placeholder='본점 소재지를 입력해주세요'/>
                         </div>
                     <div className="input-group"><label>발행일</label>
-                        <input type="text" name='issueDate' value={formData.issueDate} onChange={handleChange} placeholder='발행일을 입력해주세요'/>
+                        <input type="text" name='issueDate' value={formData.issueDate} 
+                        onBlur={(e) => validateField("issueDate", e.target.value)} onChange={handleChange} placeholder='발행일을 입력해주세요'/>
                         </div>
                     <div className="input-group"><label>발행처</label>
-                        <input type="text" name='issuer' value={formData.issuer} onChange={handleChange} placeholder='발행처를 입력해주세요'/>
+                        <input type="text" name='issuer' value={formData.issuer}
+                        onBlur={(e) => validateField("issuer", e.target.value)} onChange={handleChange} placeholder='발행처를 입력해주세요'/>
                     </div>
                     <div className="input-group"><label>사업의 종류(업태)</label>
-                        <input type="text" name='industryId' value={formData.industryId} onChange={handleChange} placeholder='업태를 입력해주세요'/>
+                        <input type="text" name='industryId' value={formData.industryId}
+                        onBlur={(e) => validateField("industryId", e.target.value)} onChange={handleChange} placeholder='업태를 입력해주세요'/>
                     </div>
                     <div className="input-group"><label>사업의 종류(종목)</label>
-                        <input type="text" name='subCategory' value={formData.subCategory} onChange={handleChange} placeholder='종목을 입력해주세요'/>
+                        <input type="text" name='subCategory' value={formData.subCategory}
+                        onBlur={(e) => validateField("subCategory", e.target.value)} onChange={handleChange} placeholder='종목을 입력해주세요'/>
                     </div>
                 </section>
 
@@ -292,12 +333,15 @@ const Signup = ()=>{
                             동의안함
                         </label>
                     </div>
+                    {errors.agree && <p className="error">{errors.agree}</p>}
                 </section>
 
                 <hr className="divider"/>
 
                 <div className="action-buttons">
-                    <button type="submit" className="btn-green btn-large">가입</button>
+                    <button type="submit" className="btn-green btn-large signup-action-button" disabled={isLoading}>
+                        {signupLoading ? <span className="button-spinner" /> : "가입"}
+                    </button>
                     <button type="button" className="btn-green btn-large" onClick={handleCancel}>취소</button>
                 </div>
             </form>

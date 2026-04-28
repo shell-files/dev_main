@@ -4,6 +4,7 @@ import NotFound from '@errors/NotFound.jsx'
 import Gate from '@gates/Gate.jsx'
 import Login from '@logins/Login.jsx'
 import Signup from '@logins/SignUp.jsx'
+import Main from '@mains/Main.jsx'
 
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     {path: "/", element: <Gate />},
     {path: "/login", element: <Login />},
     {path: "/signup", element: <Signup />},
+    {path: "/main", element: <Main />},
     {path: "*", element: <NotFound />},
   ]
   return (
