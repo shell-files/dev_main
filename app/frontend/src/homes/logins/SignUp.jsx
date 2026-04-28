@@ -1,6 +1,7 @@
 import { useState,useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/login.css'
+import { api } from '@utils/network'
 
 const Signup = ()=>{
     const navigate = useNavigate();
@@ -30,11 +31,18 @@ const Signup = ()=>{
     
     const validateField = (name, value) => {
         let message = "";
-
+        //필수값 체크
         if (!value) {
             if (name === "email") message = "이메일은 필수입니다.";
             if (name === "password") message = "비밀번호는 필수입니다.";
             if (name === "businessNumber") message = "사업자번호는 필수입니다.";
+        }
+        //이메일 형식 체크
+        if (name === "email" && value) {
+            const regex = /\S+@\S+\.\S+/;
+            if (!regex.test(value)) {
+                message = "이메일 형식이 올바르지 않습니다.";
+            }
         }
 
         setErrors(prev => ({
@@ -51,7 +59,6 @@ const Signup = ()=>{
             [name]: value
         }));
 
-        // 🔥 추가 (핵심)
         if (name === "email") setEmailValid(null);
         if (name === "businessNumber") setBusinessValid(null);
 
@@ -90,11 +97,12 @@ const Signup = ()=>{
             const formDataToSend = new FormData();
             formDataToSend.append("file", file);
 
-            const res = await fetch("/api/ocr", {
-                method: "POST",
-                body: formDataToSend
+            const res = await api.post("/api/ocr", formDataToSend, {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                }
             });
-            const result = await res.json();
+            const result = res.json();
             if (result.success) {
                 setFormData(prev => ({
                     ...prev,
@@ -104,9 +112,11 @@ const Signup = ()=>{
                     openingDate: result.data.openingDate || ''
                 }));
                 setIsOcrDone(true);
-                alert("OCR 완료! 자동 입력됨");
+                // alert("OCR 완료! 자동 입력됨");
+                console.log(formData);
             } else {
-                alert("OCR 실패");
+                // alert("OCR 실패");
+                console.error("OCR 실패");
             }
         } catch (err) {
             console.error(err);
@@ -116,13 +126,14 @@ const Signup = ()=>{
         }
     };
     const checkEmail = async () => {
-        if (!formData.email) return;
+        if (!formData.email || emailValid !== null) return;
 
         try {
-            const res = await fetch(`/api/user?email=${formData.email}`);
-            const result = await res.json();
+            const res = await api.get('/api/user', {
+                params: { email: formData.email }
+            });
 
-            setEmailValid(result.available); // true / false
+            setEmailValid(res.data.available);
         } catch (err) {
             console.error(err);
         }
@@ -131,10 +142,11 @@ const Signup = ()=>{
         if (!formData.businessNumber) return;
 
         try {
-            const res = await fetch(`/api/user?businessNumber=${formData.businessNumber}`);
-            const result = await res.json();
+            const res = await api.get('/api/user', {
+                params: { businessNumber: formData.businessNumber }
+            });
 
-            setBusinessValid(result.available);
+            setBusinessValid(res.data.available);
         } catch (err) {
             console.error(err);
         }
@@ -209,6 +221,8 @@ const Signup = ()=>{
                             <button type="button" className="btn-green" onClick={handleUpload}>{isUploading ? '업로드 중...' : '등록'}</button>
                         </div>
                     </div>
+                        {errors.file && <p className="error">{errors.file}</p>}
+                        {errors.ocr && <p className="error">{errors.ocr}</p>}
 
                     <p className="helper-text">*입력된 정보를 확인 후 수정이 필요할 시 수정된 후 가입 버튼을 눌러주세요</p>
                     <div className="input-group">
@@ -219,11 +233,9 @@ const Signup = ()=>{
                             {!errors.businessNumber && businessValid === true && (
                                 <p className="success">사용 가능</p>
                             )}
-
                             {!errors.businessNumber && businessValid === false && (
                                 <p className="error">이미 등록됨</p>
                             )}
-
                             {errors.businessNumber && (
                                 <p className="error">{errors.businessNumber}</p>
                             )}
