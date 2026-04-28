@@ -12,7 +12,6 @@ def encrypt_to_jwe(payload: dict):
     """ 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)"""
     payload_str = json.dumps(payload)
     # settings에서 가져온 키를 바탕으로 JWK 객체 생성
-    # key = jwk.JWK(k=settings.secret_key, kty='oct')
     key = jwk.JWK(k=settings.secret_key, kty='oct')
     
     # A256KW(키 암호화) + A256GCM(데이터 암호화) 조합
