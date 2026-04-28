@@ -3,6 +3,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
   host_ip: str
   # --------------------------
+  # tokenset.py
+  # --------------------------
+  secret_key: str
+  access_token_expire_minutes: int
+  refresh_token_expire_days: int
+  # --------------------------
   # rediscl.py
   # --------------------------
   redis_host: str = "redis"
