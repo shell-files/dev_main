@@ -10,5 +10,6 @@ dependencies = [
     "mariadb>=1.1.14",
     "pathlib>=1.0.1",
     "pydantic-settings>=2.13.1",
+    "redis>=7.4.0",
     "uuid>=1.30",
 ]

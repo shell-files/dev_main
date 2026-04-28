@@ -3,6 +3,12 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
   host_ip: str
   # --------------------------
+  # rediscl.py
+  # --------------------------
+  redis_host: str = "redis"
+  redis_port: int = 6379
+  redis_db: int = 0
+  # --------------------------
   # file.py
   # --------------------------
   mariadb_user: str
