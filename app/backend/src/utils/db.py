@@ -2,21 +2,7 @@ import mariadb
 from settings import settings
 
 # ------------------
-# 연결방식1
-# ------------------
-# 이 방식을 mariadb가 못 읽어서 연결방식2 체택함
-# def getConn():
-#   try:
-#     conn = mariadb.connect(settings.maria_db_url)
-#     if conn == None:
-#         return None
-#     return conn
-#   except mariadb.Error as e:
-#     print(f"접속 오류 : {e}")
-#     return None
-  
-# ------------------
-# 연결방식2
+# DB 연결
 # ------------------
 
 # env 관리
@@ -29,15 +15,7 @@ conn_params = {
 }
 
 def getConn():
-#   '''DB 연결'''
-#   try:
-#     with mariadb.connect(**conn_params) as conn:
-#       if conn == None:
-#         return None
-#       return conn
-#   except mariadb.Error as e:
-#     print(f"접속 오류 : {e}")
-#     return None
+  '''DB 연결'''
   try:
     conn = mariadb.connect(**conn_params)
     if conn == None:
@@ -47,29 +25,17 @@ def getConn():
     print(f"접속 오류 : {e}")
     return None
 
-
-# --------------------------
-# 연결방식3 SQLAlchemy -> ORM 방식 안 쓰기로 해서 기각함
-# --------------------------
-# from sqlalchemy import create_password_url, create_engine
-# from sqlalchemy.orm import sessionmaker, declarative_base
-
 # --------------------------
 # 하나만 불러오기
 # --------------------------
-def findOne(sql):
+def findOne(sql, params: None):
   '''DB에서 단일 행 조회'''
   result = None
   try:
-    conn = getConn()
-    if conn:
-      cur = conn.cursor()
-      cur.execute(sql)
-      row = cur.fetchone()
-      columns = [desc[0] for desc in cur.description]
-      cur.close()
-      conn.close()
-      result = dict(zip(columns, row)) if row else None
+    with getConn() as conn:
+        with conn.cursor(dictionary=True) as cur:
+            cur.execute(sql, params)
+            result = cur.fetchone()
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
@@ -77,19 +43,14 @@ def findOne(sql):
 # --------------------------
 # 모두 불러오기
 # --------------------------
-def findAll(sql):
+def findAll(sql, params: None):
   '''DB에서 여러 행 조회'''
   result = []
   try:
-    conn = getConn()
-    if conn:
-      cur = conn.cursor()
-      cur.execute(sql)
-      rows = cur.fetchall()
-      columns = [desc[0] for desc in cur.description]
-      cur.close()
-      conn.close()
-      result = [dict(zip(columns, row)) for row in rows]
+     with getConn() as conn:
+        with conn.cursor(dictionary=True) as cur:
+            cur.execute(sql, params)
+            result = cur.fetchall()
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
@@ -97,18 +58,15 @@ def findAll(sql):
 # --------------------------
 # DB에 저장하기
 # --------------------------
-def save(sql):
+def save(sql, params: None):
   '''DB에 단일 값 저장'''
   result = False
   try:
-    conn = getConn()
-    if conn:
-      cur = conn.cursor()
-      cur.execute(sql)
-      conn.commit()
-      cur.close()
-      conn.close()
-      result = True
+     with getConn() as conn:
+        with conn.cursor(dictionary=True) as cur:
+            cur.execute(sql, params)
+            conn.commit()
+            result = True
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
@@ -116,19 +74,15 @@ def save(sql):
 # --------------------------
 # 여러 값 저장하기
 # --------------------------
-def saveMany(sql2: str, values):
+def saveMany(sql: str, params: None):
   """DB에 여러 값 한번에 저장"""
   result = False
   try:
-    conn = getConn()
-    if conn:
-      cur = conn.cursor()
-    #   cur.execute(sql1)
-      cur.executemany(sql2, values)
-      conn.commit()
-      cur.close()
-      conn.close()
-      result = True
+     with getConn() as conn:
+        with conn.cursor(dictionary=True) as cur:
+            cur.executemany(sql, params)
+            conn.commit()
+            result = True
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
@@ -146,25 +100,20 @@ result = saveMany(sql, data_values)
 # --------------------------
 # 직전에 넣은 키값 불러오기
 # --------------------------
-def add_key(sql):
+def add_key(sql, params: None):
   """DB에 직전에 생성한 키값 불러오기"""
   result = [False, 0]
   try:
-    conn = getConn()
-    if conn:
-      cur = conn.cursor(dictionary=True)
-      cur.execute(sql)
-      sql2 = "SELECT LAST_INSERT_ID() as no"
-      cur.execute(sql2)
-      row = cur.fetchone()
-      columns = [desc[0] for desc in cur.description]
-      data = dict(zip(columns, row)) if row else None      
-      conn.commit()
-      cur.close()
-      conn.close()
-      result[0] = True
-      if data:
-        result[1] = data["no"]
+    with getConn() as conn:
+        with conn.cursor(dictionary=True) as cur:
+            cur.execute(sql, params)
+            sql2 = "SELECT LAST_INSERT_ID() as id"
+            cur.execute(sql2)
+            data = cur.fetchone()  
+            conn.commit()
+            result[0] = True
+            if data:
+                result[1] = data["id"]
   except mariadb.Error as e:
     print(f"MariaDB Error : {e}")
   return result
@@ -172,19 +121,17 @@ def add_key(sql):
 # --------------------------
 # 데이터 존재 여부 확인
 # --------------------------
-def exists(sql, params):
+def exists(sql, params: None):
     '''DB에서 데이터 존재 여부 체크'''
     result = False
     try:
-        conn = getConn()
-        if conn:
-            cur = conn.cursor()
-            cur.execute(sql, params)
-            # 결과가 0보다 크면 존재하는 것
-            count = cur.fetchone()[0]
-            result = True if count > 0 else False
-            cur.close()
-            conn.close()
+         with getConn() as conn:
+            with conn.cursor(dictionary=True) as cur:
+                cur.execute(sql, params)
+                # 결과가 0보다 크면 존재하는 것
+                row = cur.fetchone()
+                count = list(row.values())[0] if row else 0
+                result = True if count > 0 else False
     except mariadb.Error as e:
         print(f"MariaDB Error : {e}")
     return result
@@ -199,24 +146,20 @@ if is_joined:
 # --------------------------
 # 페이지네이션 목록
 # --------------------------
-def getPageList(sql, limit, offset):
+def getPageList(sql, parmas=None):
     '''DB에서 페이지네이션 목록 조회'''
     result = {"total": 0, "list": []}
     try:
-        conn = getConn()
-        if conn:
-            cur = conn.cursor(dictionary=True)
-            # 1. 전체 개수 파악 (페이지 번호 계산용)
-            count_sql = f"SELECT COUNT(*) as cnt FROM ({sql}) as temp"
-            cur.execute(count_sql)
-            result["total"] = cur.fetchone()["cnt"]
-            
-            # 2. 실제 페이지 데이터 조회
-            paging_sql = sql + " LIMIT %s OFFSET %s"
-            cur.execute(paging_sql, (limit, offset))
-            result["list"] = cur.fetchall()
-            cur.close()
-            conn.close()
+        with getConn() as conn:
+            with conn.cursor(dictionary=True) as cur:
+                # 1. 전체 개수 파악 (페이지 번호 계산용)
+                count_sql = f"SELECT COUNT(*) as cnt FROM ({sql}) as temp"
+                cur.execute(count_sql)
+                result["total"] = cur.fetchone()["cnt"]
+                # 2. 실제 페이지 데이터 조회
+                paging_sql = sql + " LIMIT ? OFFSET ?"
+                cur.execute(paging_sql, parmas)
+                result["list"] = cur.fetchall()
     except mariadb.Error as e:
         print(f"MariaDB Error : {e}")
     return result
@@ -231,11 +174,12 @@ app = FastAPI()
 
 @app.get("/test")
 def test():
-    sql = "SELECT COUNT(*) FROM USER WHERE email = ?"
-    # data = findAll(sql)
-    # data = exists(sql, ("test@gmail.com",))
     return {
-            # "findAll 결과": data, 
-            # "findOne 결과": findOne(sql), 
-            "exists 결과": exists(sql, ("test@gmail.com",))
+            "findAll 결과": findAll("SELECT * FROM USER WHERE email = ?", ("test5@gmail.com",))
+            # "findOne 결과": findOne("SELECT * FROM USER WHERE email = ?", ("test6@gmail.com",)),
+            # "exists 결과": exists("SELECT COUNT(*) FROM USER WHERE email = ?", ("test7@gmail.com",))
+# "add_key 결과": add_key("INSERT INTO USER (email, password, name) VALUES (?,?,?)", ("test8@gmail.com", "1234","최수아"))
+# "getPageList 결과": getPageList("SELECT * FROM USER", (3, 0))
+# "saveMany 결과": saveMany("INSERT INTO USER (email, password, name) VALUES (?,?,?)", [("test6@gmail.com", "1234","최수아"), ("test7@gmail.com", "1234","최수아")])
+# "save 결과": save("INSERT INTO categories (category_id, category_name) VALUES (?, ?)", (4, "TV"))
             }
