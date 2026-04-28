@@ -4,10 +4,10 @@ import shutil
 from pathlib import Path
 import httpx
 import json
-from settings import settings
-from fastapi import FastAPI, UploadFile, File
+from src.utils.settings import settings
+# from fastapi import FastAPI, UploadFile, File
 
-app = FastAPI()
+# app = FastAPI()
 
 
 # 파일 저장 디렉토리 설정
@@ -19,11 +19,11 @@ UPLOAD_DIR = Path("licenseFiles")
 def getConn():
   try:
     conn = mariadb.connect(
-      user=settings.user,
-      password=settings.password,
-      host=settings.host,
-      database=settings.database,
-      port=settings.port
+      user=settings.mariadb_user,
+      password=settings.mariadb_password,
+      host=settings.mariadb_host,
+      database=settings.mariadb_database,
+      port=settings.mariadb_port
     )
     if conn == None:
       return None
@@ -52,7 +52,7 @@ def save(sql:str, params=None):
 # --------------------------
 # 파일명 분리, 암호화 로직
 # --------------------------
-def licenceFile(file):
+def licenseFile(file):
     UPLOAD_DIR.mkdir(exist_ok=True)
     origin = file.filename
     ext = origin.split(".")[-1].lower()
@@ -76,7 +76,7 @@ def licenceFile(file):
 # 공공데이터포털 API 호출 로직 (사업자 등록증 진위여부 확인)
 # --------------------------
 async def checkBusinessStatus(businessNumber: str):
-    serviceKey = "6616ee42a1040decaf862903d09b9f1a2e0140f93e6d568a89820979368f9545" 
+    serviceKey = settings.service_key
     url = f"https://api.odcloud.kr/api/nts-businessman/v1/status?serviceKey={serviceKey}"
     payload = {
        "b_no": [businessNumber]
@@ -120,34 +120,22 @@ async def checkBusinessStatus(businessNumber: str):
 
 # ------------------------------fastapi 테스트용 엔드포인트 ------------------------------
 
-# --------------------------
-# 파일명 저장 테스트
-# --------------------------
-@app.post("/upload_license")
-async def upload_license():
-    fileId = licenceFile()
-    
-    if fileId > 0:
-        return {"status": "success", "file_id": fileId}
-    else:
-        return {"status": "fail", "msg": "파일 저장 중 오류 발생"}
-
-# --------------------------
-# 사업자등록증 진위여부 테스트
-# --------------------------
-@app.post("/license_check")
-async def license_check(business_number: str):
-    business_status = await checkBusinessStatus(business_number)
-    return business_status
+# # --------------------------
+# # 사업자등록증 진위여부 테스트
+# # --------------------------
+# @app.post("/license_check")
+# async def license_check(business_number: str):
+#     business_status = await checkBusinessStatus(business_number)
+#     return business_status
 
 
-# --------------------------
-# 사진 업로드 테스트
-# --------------------------
-@app.post("/test_upload")
-async def test_upload(file: UploadFile = File(...)):
-    file_id = licenceFile(file)
-    return {
-        "file_id": file_id
-    }
+# # --------------------------
+# # 사진 업로드 테스트
+# # --------------------------
+# @app.post("/test_upload")
+# async def test_upload(file: UploadFile = File(...)):
+#     file_id = licenseFile(file)
+#     return {
+#         "file_id": file_id
+#     }
 
