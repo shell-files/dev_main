@@ -240,122 +240,126 @@ const Signup = () => {
 
     // --- [렌더링 구역] ---
     return (
-        <div id="signup_page" className="signup-container">
-            {/* 상단 제목: 더미 모드일 때 빨간 글씨로 표시 */}
-            <h1>회원가입 {USE_DUMMY && <span style={{fontSize:'12px', color:'red'}}>(더미 모드)</span>}</h1>
-            
-            <form onSubmit={handleSubmit} autoComplete="off">
-                
-                {/* 1. 가입 정보 섹션 (이메일, 비밀번호) */}
-                <section className="form-section">
-                    <h2 className="section-title">가입 정보</h2>
+        <div id="signup_page">
+            <div className='signup-wrapper'>
+                <div className="signup-container">
+                    {/* 상단 제목: 더미 모드일 때 빨간 글씨로 표시 */}
+                    <h1>회원가입 {USE_DUMMY && <span style={{fontSize:'12px', color:'red'}}>(더미 모드)</span>}</h1>
                     
-                    {/* 이메일 입력 */}
-                    <div className="input-group">
-                        <label>이메일</label>
-                        <div className="input-wrap">
-                            <input type="email" name="email" value={formData.email} onChange={handleChange} 
-                                onBlur={(e) => { validateField("email", e.target.value); checkEmail(); }} 
-                                placeholder="이메일을 입력해주세요" autoComplete="new-password" />
-                            {!errors.email && emailValid === true && <p className="success">사용 가능한 이메일입니다.</p>}
-                            {!errors.email && emailValid === false && <p className="error">이미 사용중입니다.</p>}
-                            {errors.email && <p className="error">{errors.email}</p>}
-                        </div>
-                    </div>
-
-                    {/* 비밀번호 입력 */}
-                    <div className="input-group">
-                        <label>비밀번호</label>
-                        <div className="input-wrap">
-                            <input type="password" name="password" value={formData.password} onChange={handleChange}
-                                onBlur={(e) => validateField("password", e.target.value)} 
-                                placeholder="비밀번호를 입력해주세요" autoComplete="new-password" />
-                            {errors.password && <p className="error">{errors.password}</p>}
-                        </div>
-                    </div>
-                </section>
-
-                <hr className="divider" />
-
-                {/* 2. 사업자 정보 섹션 (파일 업로드 및 OCR 결과) */}
-                <section className="form-section">
-                    <h2 className="section-title">사업자 정보</h2>
-                    <p className="helper-text">*사업자등록증을 업로드한 후 등록버튼을 눌러주세요</p>
-                    
-                    {/* 파일 선택 및 OCR 등록 버튼 */}
-                    <div className="input-group file-upload">
-                        <label>사업자 등록증</label>
-                        <div className="upload-controls">
-                            <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
-                            <input type="text" readOnly value={fileName} placeholder="선택된 파일 없음" />
-                            <button type="button" className="btn-green" onClick={handleFileBtnClick}>파일 선택</button>
-                            <button type="button" className="btn-green" onClick={handleUpload} disabled={isUploading}>
-                                {isUploading ? <span className="button-spinner" /> : "등록"}
-                            </button>
-                        </div>
-                    </div>
-                    {errors.file && <p className="error">{errors.file}</p>}
-                    {errors.ocr && <p className="error">{errors.ocr}</p>}
-
-                    {/* 사업자 등록번호 (중복 검사 포함) */}
-                    <div className="input-group" style={{marginTop: '20px'}}>
-                        <label>사업자 등록번호</label>
-                        <div className="input-wrap">
-                            <input type="text" name="businessNumber" value={formData.businessNumber} onChange={handleChange}
-                                onBlur={(e) => { validateField("businessNumber", e.target.value); checkBusiness(); }} 
-                                placeholder="사업자 등록번호를 입력해주세요" autoComplete="one-time-code" />
-                            {!errors.businessNumber && businessValid === true && <p className="success">사용 가능</p>}
-                            {!errors.businessNumber && businessValid === false && <p className="error">이미 등록됨</p>}
-                            {errors.businessNumber && <p className="error">{errors.businessNumber}</p>}
-                        </div>
-                    </div>
-
-                    {/* 나머지 OCR 연동 필드들 (반복문 처리) */}
-                    {bizFields.map((field) => (
-                        <div className="input-group" key={field.name}>
-                            <label>{field.label}</label>
-                            <div className="input-wrap">
-                                <input type="text" name={field.name} value={formData[field.name]} onChange={handleChange}
-                                    onBlur={(e) => validateField(field.name, e.target.value)} 
-                                    placeholder={`${field.label}을(를) 입력해주세요`} autoComplete="one-time-code" />
-                                {errors[field.name] && <p className="error">{errors[field.name]}</p>}
+                    <form onSubmit={handleSubmit} autoComplete="off">
+                        
+                        {/* 1. 가입 정보 섹션 (이메일, 비밀번호) */}
+                        <section className="form-section">
+                            <h2 className="section-title">가입 정보</h2>
+                            
+                            {/* 이메일 입력 */}
+                            <div className="input-group">
+                                <label>이메일</label>
+                                <div className="input-wrap">
+                                    <input type="email" name="email" value={formData.email} onChange={handleChange} 
+                                        onBlur={(e) => { validateField("email", e.target.value); checkEmail(); }} 
+                                        placeholder="이메일을 입력해주세요" autoComplete="new-password" />
+                                    {!errors.email && emailValid === true && <p className="success">사용 가능한 이메일입니다.</p>}
+                                    {!errors.email && emailValid === false && <p className="error">이미 사용중입니다.</p>}
+                                    {errors.email && <p className="error">{errors.email}</p>}
+                                </div>
                             </div>
+
+                            {/* 비밀번호 입력 */}
+                            <div className="input-group">
+                                <label>비밀번호</label>
+                                <div className="input-wrap">
+                                    <input type="password" name="password" value={formData.password} onChange={handleChange}
+                                        onBlur={(e) => validateField("password", e.target.value)} 
+                                        placeholder="비밀번호를 입력해주세요" autoComplete="new-password" />
+                                    {errors.password && <p className="error">{errors.password}</p>}
+                                </div>
+                            </div>
+                        </section>
+
+                        <hr className="divider" />
+
+                        {/* 2. 사업자 정보 섹션 (파일 업로드 및 OCR 결과) */}
+                        <section className="form-section">
+                            <h2 className="section-title">사업자 정보</h2>
+                            <p className="helper-text">*사업자등록증을 업로드한 후 등록버튼을 눌러주세요</p>
+                            
+                            {/* 파일 선택 및 OCR 등록 버튼 */}
+                            <div className="input-group file-upload">
+                                <label>사업자 등록증</label>
+                                <div className="upload-controls">
+                                    <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
+                                    <input type="text" readOnly value={fileName} placeholder="선택된 파일 없음" />
+                                    <button type="button" className="btn-green" onClick={handleFileBtnClick}>파일 선택</button>
+                                    <button type="button" className="btn-green" onClick={handleUpload} disabled={isUploading}>
+                                        {isUploading ? <span className="button-spinner" /> : "등록"}
+                                    </button>
+                                </div>
+                            </div>
+                            {errors.file && <p className="error">{errors.file}</p>}
+                            {errors.ocr && <p className="error">{errors.ocr}</p>}
+
+                            {/* 사업자 등록번호 (중복 검사 포함) */}
+                            <div className="input-group" style={{marginTop: '20px'}}>
+                                <label>사업자 등록번호</label>
+                                <div className="input-wrap">
+                                    <input type="text" name="businessNumber" value={formData.businessNumber} onChange={handleChange}
+                                        onBlur={(e) => { validateField("businessNumber", e.target.value); checkBusiness(); }} 
+                                        placeholder="사업자 등록번호를 입력해주세요" autoComplete="one-time-code" />
+                                    {!errors.businessNumber && businessValid === true && <p className="success">사용 가능</p>}
+                                    {!errors.businessNumber && businessValid === false && <p className="error">이미 등록됨</p>}
+                                    {errors.businessNumber && <p className="error">{errors.businessNumber}</p>}
+                                </div>
+                            </div>
+
+                            {/* 나머지 OCR 연동 필드들 (반복문 처리) */}
+                            {bizFields.map((field) => (
+                                <div className="input-group" key={field.name}>
+                                    <label>{field.label}</label>
+                                    <div className="input-wrap">
+                                        <input type="text" name={field.name} value={formData[field.name]} onChange={handleChange}
+                                            onBlur={(e) => validateField(field.name, e.target.value)} 
+                                            placeholder={`${field.label}을(를) 입력해주세요`} autoComplete="one-time-code" />
+                                        {errors[field.name] && <p className="error">{errors[field.name]}</p>}
+                                    </div>
+                                </div>
+                            ))}
+                        </section>
+
+                        <hr className="divider" />
+
+                        {/* 3. 약관 동의 섹션 */}
+                        <section className="form-section">
+                            <h2 className="section-title">약관</h2>
+                            <div className="terms-box">
+                                <h4>[제1장 일반사항]</h4>
+                                <p>본 서비스는 [WITH]이 제공하는 사업자 관리 및 OCR 인식 서비스를 포함합니다.</p>
+                                <h4>[제2장 개인정보 및 사업자정보 수집]</h4>
+                                <p>1. 회사는 서비스 제공을 위해 이메일, 비밀번호, 사업자등록증 내 정보를 수집합니다.</p>
+                                <p>2. OCR 기능을 통해 추출된 정보는 자동 입력 편의를 위해 사용됩니다.</p>
+                                <h4>[제3장 정보의 보유 및 이용기간]</h4>
+                                <p>회원의 개인정보는 원칙적으로 회원 탈퇴 시 지체 없이 파기합니다.</p>
+                            </div>
+                            {/* 동의 라디오 버튼 */}
+                            <div className="radio-group">
+                                <label><input type="radio" name="agree" checked={isAgreed === true} onChange={() => setIsAgreed(true)} /> 동의함</label>
+                                <label><input type="radio" name="agree" checked={isAgreed === false} onChange={() => setIsAgreed(false)} /> 동의안함</label>
+                            </div>
+                            {errors.agree && <p className="error">{errors.agree}</p>}
+                        </section>
+
+                        <hr className="divider" />
+
+                        {/* 4. 하단 액션 버튼 (가입, 취소) */}
+                        <div className="action-buttons">
+                            <button type="submit" className="btn-green btn-large" disabled={isLoading}>
+                                {signupLoading ? <span className="button-spinner" /> : "가입"}
+                            </button>
+                            <button type="button" className="btn-green btn-large" onClick={handleCancel}>취소</button>
                         </div>
-                    ))}
-                </section>
-
-                <hr className="divider" />
-
-                {/* 3. 약관 동의 섹션 */}
-                <section className="form-section">
-                    <h2 className="section-title">약관</h2>
-                    <div className="terms-box">
-                        <h4>[제1장 일반사항]</h4>
-                        <p>본 서비스는 [WITH]이 제공하는 사업자 관리 및 OCR 인식 서비스를 포함합니다.</p>
-                        <h4>[제2장 개인정보 및 사업자정보 수집]</h4>
-                        <p>1. 회사는 서비스 제공을 위해 이메일, 비밀번호, 사업자등록증 내 정보를 수집합니다.</p>
-                        <p>2. OCR 기능을 통해 추출된 정보는 자동 입력 편의를 위해 사용됩니다.</p>
-                        <h4>[제3장 정보의 보유 및 이용기간]</h4>
-                        <p>회원의 개인정보는 원칙적으로 회원 탈퇴 시 지체 없이 파기합니다.</p>
-                    </div>
-                    {/* 동의 라디오 버튼 */}
-                    <div className="radio-group">
-                        <label><input type="radio" name="agree" checked={isAgreed === true} onChange={() => setIsAgreed(true)} /> 동의함</label>
-                        <label><input type="radio" name="agree" checked={isAgreed === false} onChange={() => setIsAgreed(false)} /> 동의안함</label>
-                    </div>
-                    {errors.agree && <p className="error">{errors.agree}</p>}
-                </section>
-
-                <hr className="divider" />
-
-                {/* 4. 하단 액션 버튼 (가입, 취소) */}
-                <div className="action-buttons">
-                    <button type="submit" className="btn-green btn-large" disabled={isLoading}>
-                        {signupLoading ? <span className="button-spinner" /> : "가입"}
-                    </button>
-                    <button type="button" className="btn-green btn-large" onClick={handleCancel}>취소</button>
+                    </form>
                 </div>
-            </form>
+            </div>
         </div>
     );
 };
