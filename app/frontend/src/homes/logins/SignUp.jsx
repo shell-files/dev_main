@@ -162,24 +162,26 @@ const Signup = () => {
 
     // --- [로직: 중복 검사] ---
     const checkEmail = async () => {
-        if (!formData.email || emailValid !== null) return;
+        if (!formData.email) return false;
         try {
-            // ✅ 수정: 엔드포인트 세분화 및 status 확인
             const res = await api.get('/api/user/check-email', { params: { email: formData.email } });
-            setEmailValid(res.data.status); // status 자체가 boolean이므로 바로 세팅
-        } catch (err) { 
-            console.error("이메일 중복 검사 실패", err); 
+            setEmailValid(res.data.status);
+            return res.data.status;
+        } catch (err) {
+            console.error("이메일 중복 검사 실패", err);
+            return false;
         }
     };
 
     const checkBusiness = async () => {
-        if (!formData.businessNumber || businessValid !== null) return;
+        if (!formData.businessNumber) return false;
         try {
-            // ✅ 수정: 엔드포인트 세분화 및 status 확인
             const res = await api.get('/api/user/check-business', { params: { businessNumber: formData.businessNumber } });
             setBusinessValid(res.data.status);
-        } catch (err) { 
-            console.error("사업자번호 중복 검사 실패", err); 
+            return res.data.status;
+        } catch (err) {
+            console.error("사업자번호 중복 검사 실패", err);
+            return false;
         }
     };
 
