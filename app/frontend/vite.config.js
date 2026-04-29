@@ -9,7 +9,7 @@ export default defineConfig({
   server: {
     host: '0.0.0.0',
     port: 80,
-    allowedHosts: ['localhost','aiedu.tplinkdns.com'],
+    allowedHosts: ['localhost','weareithero.cloud'],
   },
   resolve: {
     alias: {
