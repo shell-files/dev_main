@@ -5,6 +5,7 @@ from pathlib import Path
 import httpx
 import json
 from src.utils.settings import settings
+from src.utils.db import save
 # from fastapi import FastAPI, UploadFile, File
 
 # app = FastAPI()
@@ -12,42 +13,6 @@ from src.utils.settings import settings
 
 # 파일 저장 디렉토리 설정
 UPLOAD_DIR = Path("licenseFiles")
-
-# --------------------------
-# mariadb 연결 로직 (임시)
-# --------------------------
-def getConn():
-  try:
-    conn = mariadb.connect(
-      user=settings.mariadb_user,
-      password=settings.mariadb_password,
-      host=settings.mariadb_host,
-      database=settings.mariadb_database,
-      port=settings.mariadb_port
-    )
-    if conn == None:
-      return None
-    return conn
-  except mariadb.Error as e:
-    print(f"접속 오류 : {e}")
-    return None
-
-# --------------------------
-# DB에 저장하기
-# --------------------------
-def save(sql:str, params=None):
-  '''DB에 단일 값 저장'''
-  result = False
-  try:
-     with getConn() as conn:
-        with conn.cursor(dictionary=True) as cur:
-            cur.execute(sql, params)
-            conn.commit()
-            result = True
-  except mariadb.Error as e:
-    print(f"MariaDB Error : {e}")
-  return result
-
 
 # --------------------------
 # 파일명 분리, 암호화 로직
