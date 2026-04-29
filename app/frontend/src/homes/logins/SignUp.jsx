@@ -1,20 +1,33 @@
-import { useState,useRef } from 'react'
+import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
 
-const Signup = ()=>{
+/**
+ * [환경 설정]
+ * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
+ * 백엔드 서버가 준비되지 않았거나 403 에러 등의 이슈가 있을 때 프론트엔드 흐름 테스트용으로 사용합니다.
+ */
+const USE_DUMMY = false;
+
+const Signup = () => {
     const navigate = useNavigate();
-    const fileInputRef = useRef(null); //파일 인풋에 접근하기 위한 변수
-    const [fileName, setFileName] = useState(''); //선택된 파일 이름 저장용
-    const [file, setFile] = useState(null);
-    const [isOcrDone, setIsOcrDone] = useState(false); 
-    const [isUploading, setIsUploading] = useState(false);
-    const [isAgreed, setIsAgreed] = useState(false);
-    const [emailValid, setEmailValid] = useState(null);
-    const [businessValid, setBusinessValid] = useState(null);
-    const [errors, setErrors] = useState({});
-    const [signupLoading, setSignupLoading] = useState(false);
+    const fileInputRef = useRef(null); // 파일 선택창(input type="file")에 직접 접근하기 위한 Ref
+
+    // --- [상태 관리: 파일 및 인증] ---
+    const [fileName, setFileName] = useState(''); // 선택된 파일의 이름 표시용
+    const [file, setFile] = useState(null);       // 실제 서버로 전송할 파일 객체
+    const [isOcrDone, setIsOcrDone] = useState(false);   // 사업자 등록증 OCR 인증 완료 여부
+    const [isUploading, setIsUploading] = useState(false); // OCR 업로드 중 로딩 상태
+    const [isAgreed, setIsAgreed] = useState(false);     // 약관 동의 여부
+
+    // --- [상태 관리: 중복 검사 및 에러] ---
+    const [emailValid, setEmailValid] = useState(null);    // 이메일 중복 검사 결과 (true: 가능, false: 중복)
+    const [businessValid, setBusinessValid] = useState(null); // 사업자번호 중복 검사 결과
+    const [errors, setErrors] = useState({});               // 필드별 에러 메시지 저장 객체
+    const [signupLoading, setSignupLoading] = useState(false); // 최종 가입 버튼 클릭 시 로딩 상태
+
+    // --- [상태 관리: 입력 폼 데이터] ---
     const [formData, setFormData] = useState({
         email: '',
         password: '',
@@ -26,9 +39,11 @@ const Signup = ()=>{
         headOffice: '',
         issueDate: '',
         issuer: '',
-        industryId:'',
-        subCategory:''
-    })
+        industryId: '',
+        subCategory: ''
+    });
+
+    // 필드별 필수 입력 경고 메시지 정의
     const requiredFields = {
         email: "이메일은 필수입니다.",
         password: "비밀번호는 필수입니다.",
@@ -43,310 +58,306 @@ const Signup = ()=>{
         industryId: "업태는 필수입니다.",
         subCategory: "종목은 필수입니다."
     };
+
+    // 현재 페이지가 통신 중(로딩 중)인지 확인하는 변수
     const isLoading = isUploading || signupLoading;
+
+    // --- [로직: 유효성 검사] ---
+    /**
+     * 특정 필드에 포커스가 나갔을 때(onBlur) 값의 유무와 형식을 체크합니다.
+     */
     const validateField = (name, value) => {
         let message = "";
-        //필수값 체크
+        // 1. 빈 값 체크
         if (!value) {
             message = requiredFields[name] || "필수 항목입니다.";
         }
-        //이메일 형식 체크
+        // 2. 이메일 형식 체크
         if (name === "email" && value) {
             const regex = /\S+@\S+\.\S+/;
             if (!regex.test(value)) {
                 message = "이메일 형식이 올바르지 않습니다.";
             }
         }
-
-        setErrors(prev => ({
-            ...prev,
-            [name]: message
-        }));
+        setErrors(prev => ({ ...prev, [name]: message }));
     };
 
+    // --- [로직: 입력 값 변경 핸들링] ---
     const handleChange = (e) => {
         const { name, value } = e.target;
-
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
-
+        setFormData(prev => ({ ...prev, [name]: value }));
+        
+        // 이메일이나 사업자번호가 수정되면 중복 검사 결과를 초기화
         if (name === "email") setEmailValid(null);
         if (name === "businessNumber") setBusinessValid(null);
+        
+        // 타이핑 시 해당 필드의 에러 메시지 제거
+        setErrors(prev => ({ ...prev, [name]: "" }));
+    };
 
-        // 에러 초기화
-        setErrors(prev => ({
-            ...prev,
-            [name]: ""
-        }));
-    };
-    const handleFileBtnClick = () => {
-    fileInputRef.current.click();
-    };
+    // --- [로직: 파일 업로드 및 OCR] ---
+    // 가짜 '파일 선택' 버튼 클릭 시 실제 숨겨진 input을 클릭하게 함
+    const handleFileBtnClick = () => fileInputRef.current.click();
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-            if (selectedFile) {
+        if (selectedFile) {
             setFile(selectedFile);
             setFileName(selectedFile.name);
-            setIsOcrDone(false); 
-            // 여기서 파일을 서버로 보내거는 로직 추가
-            }   
-    }
-    const handleCancel = () => {
-        if (window.confirm("가입을 취소하시겠습니까? 입력한 정보가 사라집니다.")) {
-            navigate(-1); 
+            setIsOcrDone(false); // 파일을 새로 고르면 다시 인증받도록 초기화
         }
     };
 
+    /**
+     * [등록] 버튼 클릭 시 동작: 서버에 이미지 파일을 보내 텍스트를 추출(OCR)합니다.
+     */
     const handleUpload = async () => {
         if (!file) {
             alert("파일을 먼저 선택해주세요.");
             return;
         }
         setIsUploading(true);
+
+        // 더미 모드일 경우 가공의 데이터를 폼에 즉시 채워줌
+        if (USE_DUMMY) {
+            setTimeout(() => {
+                setFormData(prev => ({
+                    ...prev,
+                    businessNumber: '123-45-67890',
+                    companyName: '(주)아이티히어로 더미',
+                    ceoName: '대표자명',
+                    openingDate: '2020-01-01',
+                    corporateNumber: '110111-0000000',
+                    headOffice: '서울특별시 강남구...',
+                    issueDate: '2024-04-29',
+                    issuer: '강남세무서',
+                    industryId: '서비스업',
+                    subCategory: '소프트웨어 개발'
+                }));
+                setIsOcrDone(true);
+                setIsUploading(false);
+                alert("더미 데이터로 OCR 인증이 완료되었습니다.");
+            }, 1000);
+            return;
+        }
+
+        // 실제 모드: FormData에 파일을 담아 API 전송
         try {
             const formDataToSend = new FormData();
             formDataToSend.append("file", file);
-
             const res = await api.post("/api/ocr", formDataToSend, {
-                headers: {
-                    "Content-Type": "multipart/form-data"
-                }
+                headers: { "Content-Type": "multipart/form-data" }
             });
-            const result = res.data;
-            if (result.success) {
-                setFormData(prev => ({
-                    ...prev,
-                    businessNumber: result.data.businessNumber || '',
-                    companyName: result.data.companyName || '',
-                    ceoName: result.data.ceoName || '',
-                    openingDate: result.data.openingDate || '',
-                    corporateNumber: result.data.corporateNumber || '',
-                    headOffice: result.data.headOffice || '',
-                    issueDate: result.data.issueDate || '',
-                    issuer: result.data.issuer || '',
-                    industryId: result.data.industryId || '',
-                    subCategory: result.data.subCategory || ''
-                }));
+            if (res.data.success) {
+                setFormData(prev => ({ ...prev, ...res.data.data }));
                 setIsOcrDone(true);
-                // alert("OCR 완료! 자동 입력됨");
-                console.log(result.data);
-            } else {
-                // alert("OCR 실패");
-                console.error("OCR 실패");
             }
         } catch (err) {
-            console.error(err);
-            alert("서버 오류");
+            alert("서버 오류가 발생했습니다.");
         } finally {
             setIsUploading(false);
         }
     };
+
+    // --- [로직: 중복 검사] ---
     const checkEmail = async () => {
         if (!formData.email || emailValid !== null) return;
-// -------------------------------------------------이메일 중복 체크 API -------------------------------------------------------
+        if (USE_DUMMY) { setEmailValid(true); return; }
         try {
-            const res = await api.get('/api/user', {
-                params: { email: formData.email }
-            });
-
+            const res = await api.get('/api/user', { params: { email: formData.email } });
             setEmailValid(res.data.available);
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     };
+
     const checkBusiness = async () => {
         if (!formData.businessNumber) return;
-
+        if (USE_DUMMY) { setBusinessValid(true); return; }
         try {
-            const res = await api.get('/api/user', {
-                params: { businessNumber: formData.businessNumber }
-            });
-
+            const res = await api.get('/api/user', { params: { businessNumber: formData.businessNumber } });
             setBusinessValid(res.data.available);
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     };
-    const handleSubmit = async(e) => {
-        e.preventDefault();
 
+    // --- [로직: 최종 제출] ---
+    const handleSubmit = async (e) => {
+        e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
         const newErrors = {};
-
+        
+        // [최종 검사] 제출 직전 모든 필수 값 확인
         if (!formData.email) newErrors.email = "이메일은 필수입니다.";
         if (!formData.password) newErrors.password = "비밀번호는 필수입니다.";
         if (!formData.businessNumber) newErrors.businessNumber = "사업자번호는 필수입니다.";
-
         if (!file) newErrors.file = "파일 업로드 필수";
-        if (!isOcrDone) newErrors.ocr = "사업자 인증 필요";
+        if (!isOcrDone) newErrors.ocr = "사업자 인증 필요 (등록 버튼을 눌러주세요)";
         if (!isAgreed) newErrors.agree = "약관 동의 필요";
 
+        // 하나라도 에러가 있으면 진행 중단
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
+
+        setSignupLoading(true);
+
+        if (USE_DUMMY) {
+            setTimeout(() => {
+                setSignupLoading(false);
+                alert("더미 모드로 가입되었습니다!");
+                navigate("/main");
+            }, 1500);
+            return;
+        }
+
         try {
-            setSignupLoading(true);
-
-            // 회원가입 API (추가 예정)
-            const res = await api.post("/api/signup", {
-                ...formData,
-                fileName,
-                agreed: isAgreed
-            });
-            if (res.data.status !== "success") {
-                throw new Error("회원가입 실패");
-            }
-
-            navigate("/main");
-
+            const res = await api.post("/api/signup", { ...formData, fileName, agreed: isAgreed });
+            if (res.data.status === "success") navigate("/main");
+            else alert("가입 실패: " + res.data.message);
         } catch (err) {
-            alert("회원가입 실패");
+            alert("서버 오류");
         } finally {
             setSignupLoading(false);
         }
     };
-    return(
 
+    const handleCancel = () => {
+        if (window.confirm("가입을 취소하시겠습니까? 입력한 정보가 사라집니다.")) {
+            navigate(-1);
+        }
+    };
+
+    // 반복되는 사업자 정보 입력 칸을 효율적으로 렌더링하기 위한 배열
+    const bizFields = [
+        { label: "법인명(단체명)", name: "companyName" },
+        { label: "대표자명", name: "ceoName" },
+        { label: "개업 연월일", name: "openingDate" },
+        { label: "법인 등록번호", name: "corporateNumber" },
+        { label: "본점 소재지", name: "headOffice" },
+        { label: "발행일", name: "issueDate" },
+        { label: "발행처", name: "issuer" },
+        { label: "사업의 종류(업태)", name: "industryId" },
+        { label: "사업의 종류(종목)", name: "subCategory" }
+    ];
+
+    // --- [렌더링 구역] ---
+    return (
         <div id="signup_page" className="signup-container">
-            <h1>회원가입</h1>
-            <form onSubmit={handleSubmit}>
+            {/* 상단 제목: 더미 모드일 때 빨간 글씨로 표시 */}
+            <h1>회원가입 {USE_DUMMY && <span style={{fontSize:'12px', color:'red'}}>(더미 모드)</span>}</h1>
+            
+            <form onSubmit={handleSubmit} autoComplete="off">
+                
+                {/* 1. 가입 정보 섹션 (이메일, 비밀번호) */}
                 <section className="form-section">
                     <h2 className="section-title">가입 정보</h2>
+                    
+                    {/* 이메일 입력 */}
                     <div className="input-group">
                         <label>이메일</label>
-                            <div className="input-wrap">
-                                <input type="email" name="email" value={formData.email} onChange={handleChange} 
-                                    onBlur={(e) => {validateField("email", e.target.value);checkEmail();}} placeholder="이메일을 입력해주세요"/>
-                                {!errors.email && emailValid === true && (
-                                    <p className="success">사용 가능한 이메일입니다.</p>
-                                )}
-                                {!errors.email && emailValid === false && (
-                                    <p className="error">이미 사용중입니다.</p>
-                                )}
-                                {errors.email && <p className="error">{errors.email}</p>}
-                            </div>
+                        <div className="input-wrap">
+                            <input type="email" name="email" value={formData.email} onChange={handleChange} 
+                                onBlur={(e) => { validateField("email", e.target.value); checkEmail(); }} 
+                                placeholder="이메일을 입력해주세요" autoComplete="new-password" />
+                            {!errors.email && emailValid === true && <p className="success">사용 가능한 이메일입니다.</p>}
+                            {!errors.email && emailValid === false && <p className="error">이미 사용중입니다.</p>}
+                            {errors.email && <p className="error">{errors.email}</p>}
                         </div>
+                    </div>
+
+                    {/* 비밀번호 입력 */}
                     <div className="input-group">
-                    <label>비밀번호</label>
+                        <label>비밀번호</label>
                         <div className="input-wrap">
                             <input type="password" name="password" value={formData.password} onChange={handleChange}
-                            onBlur={(e)=>validateField("password",e.target.value)} placeholder="비밀번호를 입력해주세요"/>
+                                onBlur={(e) => validateField("password", e.target.value)} 
+                                placeholder="비밀번호를 입력해주세요" autoComplete="new-password" />
                             {errors.password && <p className="error">{errors.password}</p>}
                         </div>
                     </div>
-                   
                 </section>
+
                 <hr className="divider" />
+
+                {/* 2. 사업자 정보 섹션 (파일 업로드 및 OCR 결과) */}
                 <section className="form-section">
                     <h2 className="section-title">사업자 정보</h2>
                     <p className="helper-text">*사업자등록증을 업로드한 후 등록버튼을 눌러주세요</p>
+                    
+                    {/* 파일 선택 및 OCR 등록 버튼 */}
                     <div className="input-group file-upload">
                         <label>사업자 등록증</label>
                         <div className="upload-controls">
                             <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: 'none' }} />
                             <input type="text" readOnly value={fileName} placeholder="선택된 파일 없음" />
                             <button type="button" className="btn-green" onClick={handleFileBtnClick}>파일 선택</button>
-                            <button type="button" className="btn-green"onClick={handleUpload} disabled={isUploading}>
-                                {isUploading ? <span className="button-spinner" /> : "등록"}</button>
+                            <button type="button" className="btn-green" onClick={handleUpload} disabled={isUploading}>
+                                {isUploading ? <span className="button-spinner" /> : "등록"}
+                            </button>
                         </div>
                     </div>
-                        {errors.file && <p className="error">{errors.file}</p>}
-                        {errors.ocr && <p className="error">{errors.ocr}</p>}
+                    {errors.file && <p className="error">{errors.file}</p>}
+                    {errors.ocr && <p className="error">{errors.ocr}</p>}
 
-                    <p className="helper-text">*입력된 정보를 확인 후 수정이 필요할 시 수정된 후 가입 버튼을 눌러주세요</p>
-                    <div className="input-group">
+                    {/* 사업자 등록번호 (중복 검사 포함) */}
+                    <div className="input-group" style={{marginTop: '20px'}}>
                         <label>사업자 등록번호</label>
                         <div className="input-wrap">
                             <input type="text" name="businessNumber" value={formData.businessNumber} onChange={handleChange}
-                            onBlur={(e)=>{validateField("businessNumber",e.target.value);checkBusiness()}} placeholder="사업자 등록번호를 입력해주세요"/>
-                            {!errors.businessNumber && businessValid === true && (
-                                <p className="success">사용 가능</p>
-                            )}
-                            {!errors.businessNumber && businessValid === false && (
-                                <p className="error">이미 등록됨</p>
-                            )}
-                            {errors.businessNumber && (
-                                <p className="error">{errors.businessNumber}</p>
-                            )}
+                                onBlur={(e) => { validateField("businessNumber", e.target.value); checkBusiness(); }} 
+                                placeholder="사업자 등록번호를 입력해주세요" autoComplete="one-time-code" />
+                            {!errors.businessNumber && businessValid === true && <p className="success">사용 가능</p>}
+                            {!errors.businessNumber && businessValid === false && <p className="error">이미 등록됨</p>}
+                            {errors.businessNumber && <p className="error">{errors.businessNumber}</p>}
                         </div>
                     </div>
-                    <div className="input-group"><label>법인명(단체명)</label>
-                        <input type="text" name='companyName' value={formData.companyName}
-                        onBlur={(e) => validateField("companyName", e.target.value)} onChange={handleChange} placeholder='법인명(단체명)을 입력해주세요'/>
-                    </div>
-                     <div className="input-group"><label>대표자명</label>
-                        <input type="text" name="ceoName" value={formData.ceoName} 
-                        onBlur={(e) => validateField("ceoName", e.target.value)} onChange={handleChange} placeholder="대표자명을 입력해주세요"/>
-                    </div>
-                    <div className="input-group"><label>개업 연월일</label>
-                        <input type="text" name='openingDate' value={formData.openingDate} 
-                        onBlur={(e) => validateField("openingDate", e.target.value)} onChange={handleChange} placeholder="개업 연월일을 입력해주세요"/>
-                    </div>
-                    <div className="input-group"><label>법인 등록번호</label>
-                        <input type="text" name='corporateNumber' value={formData.corporateNumber} 
-                        onBlur={(e) => validateField("corporateNumber", e.target.value)} onChange={handleChange} placeholder="법인 등록번호를 입력해주세요"/>
+
+                    {/* 나머지 OCR 연동 필드들 (반복문 처리) */}
+                    {bizFields.map((field) => (
+                        <div className="input-group" key={field.name}>
+                            <label>{field.label}</label>
+                            <div className="input-wrap">
+                                <input type="text" name={field.name} value={formData[field.name]} onChange={handleChange}
+                                    onBlur={(e) => validateField(field.name, e.target.value)} 
+                                    placeholder={`${field.label}을(를) 입력해주세요`} autoComplete="one-time-code" />
+                                {errors[field.name] && <p className="error">{errors[field.name]}</p>}
+                            </div>
                         </div>
-                    <div className="input-group"><label>본점 소재지</label>
-                        <input type="text" name='headOffice' value={formData.headOffice}
-                        onBlur={(e) => validateField("headOffice", e.target.value)} onChange={handleChange} placeholder='본점 소재지를 입력해주세요'/>
-                        </div>
-                    <div className="input-group"><label>발행일</label>
-                        <input type="text" name='issueDate' value={formData.issueDate} 
-                        onBlur={(e) => validateField("issueDate", e.target.value)} onChange={handleChange} placeholder='발행일을 입력해주세요'/>
-                        </div>
-                    <div className="input-group"><label>발행처</label>
-                        <input type="text" name='issuer' value={formData.issuer}
-                        onBlur={(e) => validateField("issuer", e.target.value)} onChange={handleChange} placeholder='발행처를 입력해주세요'/>
-                    </div>
-                    <div className="input-group"><label>사업의 종류(업태)</label>
-                        <input type="text" name='industryId' value={formData.industryId}
-                        onBlur={(e) => validateField("industryId", e.target.value)} onChange={handleChange} placeholder='업태를 입력해주세요'/>
-                    </div>
-                    <div className="input-group"><label>사업의 종류(종목)</label>
-                        <input type="text" name='subCategory' value={formData.subCategory}
-                        onBlur={(e) => validateField("subCategory", e.target.value)} onChange={handleChange} placeholder='종목을 입력해주세요'/>
-                    </div>
+                    ))}
                 </section>
 
-                <hr className="divider"/>
+                <hr className="divider" />
 
+                {/* 3. 약관 동의 섹션 */}
                 <section className="form-section">
                     <h2 className="section-title">약관</h2>
                     <div className="terms-box">
-                        <p>제1조 (목적)</p>
-                        <p>본 약관은 [서비스명] (이하 "회사")이 제공하는 인터넷 관련 서비스의 이용 조건 및 절차, 회사와 회원 간의 권리, 의무 및 책임 사항을 규정함을 목적으로 합니다.</p>
-                        <p>제2조 (이용계약의 성립)</p>
-                        <p>1. 이용계약은 회원이 본 약관에 동의하고 가입 신청을 한 후, 회사가 이를 승낙함으로써 성립합니다.</p>
+                        <h4>[제1장 일반사항]</h4>
+                        <p>본 서비스는 [WITH]이 제공하는 사업자 관리 및 OCR 인식 서비스를 포함합니다.</p>
+                        <h4>[제2장 개인정보 및 사업자정보 수집]</h4>
+                        <p>1. 회사는 서비스 제공을 위해 이메일, 비밀번호, 사업자등록증 내 정보를 수집합니다.</p>
+                        <p>2. OCR 기능을 통해 추출된 정보는 자동 입력 편의를 위해 사용됩니다.</p>
+                        <h4>[제3장 정보의 보유 및 이용기간]</h4>
+                        <p>회원의 개인정보는 원칙적으로 회원 탈퇴 시 지체 없이 파기합니다.</p>
                     </div>
-                    <p className="terms-notice">민감정보 수집이용, 개인정보의 수집 및 이용, 온라인 신청 서비스 정책, 고유식별정보 수집 및 이용 항목에 대해 모두 동의합니다.</p>
-                    
+                    {/* 동의 라디오 버튼 */}
                     <div className="radio-group">
-                        <label>
-                            <input type="radio" name="agree" checked={isAgreed === true} onChange={() => setIsAgreed(true)} /> 
-                            동의함
-                        </label>
-                        <label>
-                            <input type="radio" name="agree" checked={isAgreed === false} onChange={() => setIsAgreed(false)} /> 
-                            동의안함
-                        </label>
+                        <label><input type="radio" name="agree" checked={isAgreed === true} onChange={() => setIsAgreed(true)} /> 동의함</label>
+                        <label><input type="radio" name="agree" checked={isAgreed === false} onChange={() => setIsAgreed(false)} /> 동의안함</label>
                     </div>
                     {errors.agree && <p className="error">{errors.agree}</p>}
                 </section>
 
-                <hr className="divider"/>
+                <hr className="divider" />
 
+                {/* 4. 하단 액션 버튼 (가입, 취소) */}
                 <div className="action-buttons">
-                    <button type="submit" className="btn-green btn-large signup-action-button" disabled={isLoading}>
+                    <button type="submit" className="btn-green btn-large" disabled={isLoading}>
                         {signupLoading ? <span className="button-spinner" /> : "가입"}
                     </button>
                     <button type="button" className="btn-green btn-large" onClick={handleCancel}>취소</button>
                 </div>
             </form>
         </div>
-    )
-}
+    );
+};
 
-export default Signup
+export default Signup;
