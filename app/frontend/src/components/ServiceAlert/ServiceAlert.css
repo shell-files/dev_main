@@ -1,0 +1,46 @@
+/* 팝업 창 전체 스타일 */
+.custom-swal-popup {
+  border-radius: 24px !important;
+  padding: 2.5rem 1.5rem !important;
+  font-family: 'Pretendard', sans-serif !important;
+}
+
+/* 아이콘 컨테이너 (기본 테두리 제거) */
+.custom-swal-icon-container {
+  border: none !important;
+  margin-bottom: 10px !important;
+}
+
+/* 실제 아이콘 이미지 크기 */
+.custom-swal-icon-img {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+}
+
+/* 제목 스타일 */
+.custom-swal-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #333;
+  display: block;
+  margin-top: 10px;
+}
+
+/* 본문 텍스트 스타일 */
+.custom-swal-text {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #888;
+  margin-top: 15px;
+}
+
+/* 확인 버튼 커스텀 */
+.custom-swal-confirm-btn {
+  width: 120px !important;
+  padding: 12px 0 !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 12px !important;
+  margin-top: 10px !important;
+}

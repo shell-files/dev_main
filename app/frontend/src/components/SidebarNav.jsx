@@ -18,11 +18,11 @@ const sidebarnav= () => {
         </nav>
 
         <nav className="nav-group">
-            <div className="nav-item" onclick="location.href='404.html'">404</div>
-            <div className="nav-item" onclick="location.href='log.html'">로그 확인</div>
+            <div className="nav-item" onClick={() => navigate('/404')}>404</div>
+            <div className="nav-item" onClick={() => navigate('/log')}>로그 확인</div>
             <div className="nav-item">ESG 담당자 페이지</div>
-            <div className="nav-item sub-item" onclick="location.href='manager.html'">└ 관리페이지</div>
-            <div className="nav-item sub-item" onclick="location.href='invite.html'">└ 초대페이지</div>
+            <div className="nav-item sub-item" onClick={() => navigate('/manager')}>└ 관리페이지</div>
+            <div className="nav-item sub-item" onClick={() => navigate('/invite')}>└ 초대페이지</div>
         </nav>
 
         <div className="sidebar-footer">
