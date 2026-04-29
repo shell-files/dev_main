@@ -2,7 +2,7 @@ from fastapi import APIRouter
 from src.models.model import loginModel
 from src.models.auth import loginProcess
 
-router = APIRouter(prefix="/auth", tags=["auth"])
+router = APIRouter()
 
 @router.get("", 
         summary="비밀번호 찾기", 
