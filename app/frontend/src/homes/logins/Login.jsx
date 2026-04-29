@@ -204,6 +204,9 @@ const Login = () => {
   const goToSignupPage = () => {
     navigate("/signup");
   };
+  const goToGatePage = () => {
+    navigate("/");
+  };
 
   // =========================
   // 2. forgot: 비밀번호 찾기 화면 상태/함수
@@ -331,7 +334,7 @@ const goToPasswordResetViewAgain = () => {
           style={{ display: view === "login" ? "block" : "none" }}
         >
           <div className="header-nav">
-            <span className="back-btn">←</span>
+            <span className="back-btn" onClick={goToGatePage}>←</span>
           </div>
 
           <div className="logo-placeholder">로고 추가 예정</div>

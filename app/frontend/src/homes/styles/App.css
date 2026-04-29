@@ -1,0 +1,16 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    color: #333;
+}
+
+body {
+    background-color: #fff;
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    height: 100%
+}
+html {
+    height: 100%;
+}
+a {text-decoration: none; color: #333; display: inline-block;}
