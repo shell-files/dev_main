@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timedelta
 from jwcrypto import jwk, jwe  # jwcrypto 라이브러리 사용 가정
 import json
-from .settings import settings
+from src.utils.settings import settings
 
 # --------------------------
 # 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)
