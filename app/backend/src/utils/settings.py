@@ -28,7 +28,8 @@ class Settings(BaseSettings):
   # --------------------------
   # rediscl.py
   # --------------------------
-  redis_host: str = "redis"
+  # redis_host: str = "redis"
+  redis_host: str = "192.168.0.205"
   redis_port: int = 6379
   redis_db: int = 0
   # --------------------------
