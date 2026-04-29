@@ -56,6 +56,14 @@ jobs:
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
+          MARIA_DB_DATABASE: ${{ secrets.MARIA_DB_DATABASE }}
+          MARIA_DB_USER: ${{ secrets.MARIA_DB_USER }}
+          MARIA_DB_PASSWORD: ${{ secrets.MARIA_DB_PASSWORD }}
+          MARIA_DB_HOST: ${{ secrets.MARIA_DB_HOST }}
+          MARIA_DB_PORT: ${{ secrets.MARIA_DB_PORT }}
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          REFRESH_TOKEN_EXPIRE_DAYS: ${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }}
         working-directory: ./app
         run: docker compose up -d
 
