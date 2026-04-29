@@ -55,6 +55,8 @@ import { api } from "@utils/network";
 // import LoginVisual from "@logins/LoginVisual";
 import "@styles/logins.css";
 import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
+import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
+
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
@@ -194,7 +196,14 @@ const Login = () => {
       // 1. navigateToHome
       navigate("/main");
     } catch (error) {
-      alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+      // ----------- 커스텀 알럿 추가 ----------
+      showDefaultAlert(
+        "로그인 실패",
+        "이메일 또는 비밀번호가 일치하지 않습니다.\n"+
+        "다시 시도해주세요.",
+        "error"
+      )
+      // alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
     } finally {
       setLoginLoading(false);
     }
@@ -284,7 +293,14 @@ const Login = () => {
       // 2. showSuccessView
       setView("success");
     } catch (error) {
-      alert("이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      // ----------- 커스텀 알럿 추가 ----------
+      showDefaultAlert(
+        "이메일 발송 실패",
+        "이메일 발송에 실패했습니다.\n"+
+        "잠시 후 다시 시도해 주세요.",
+        "error"
+      )
+      // alert("이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPasswordResetLoading(false);
     }
@@ -308,19 +324,42 @@ const goToPasswordResetViewAgain = () => {
 };
 
   // =========================
-  // 4. 공통: 계정 문의 안내 함수
+  // 4. 공통: 이메일 문의 안내 함수
   // =========================
 
   // 0. handleAccountInquiry
-  // 설명: 이메일 찾기 / 아이디 문의 클릭 시 안내
+  // 설명: 이메일 찾기/문의 클릭 시 안내
   const handleAccountInquiry = () => {
-    alert(
-      "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
-        "담당자: 고객지원팀\n" +
-        "연락처: 010-0000-0000\n" +
-        "운영시간: 평일 09:00 ~ 18:00"
+    // ----------- 커스텀 알럿 추가 ----------
+    showDefaultAlert(
+      "이메일 정보를 잊으셨나요?", 
+      "보안 정책상 계정 조회는\n" +
+      "<span class='text-point'>소속 기업별 ESG 시스템 관리자</span>를 통해 진행됩니다.\n" +
+      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의하여 주시기 바랍니다.", 
+      "info"
     );
+    // alert(
+    //   "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
+    //     "담당자: 고객지원팀\n" +
+    //     "연락처: 010-0000-0000\n" +
+    //     "운영시간: 평일 09:00 ~ 18:00"
+    // );
   };
+
+  // =========================
+  // 5. 고객센터 문의 안내 함수
+  // =========================
+  const handleSupportInquiry = () => {
+    showDefaultAlert(
+      "도움이 필요하신가요?", 
+      "<span class='text-point'>platformanagers@gmail.com</span>\n\n"+
+      "플랫폼 운영 및 기술 관련 문의사항은\n" +
+      "위의 고객센터 메일로 접수해 주시기 바랍니다.\n\n" +
+      "계정 분실 및 권한 승인 관련 문의사항은\n" + 
+      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의 바랍니다.",
+      "info"
+    );
+  }
 
   return (
     <>
@@ -450,7 +489,7 @@ const goToPasswordResetViewAgain = () => {
 
             <div className="links">
               <span onClick={handleAccountInquiry}>
-                아이디가 기억나지 않나요?
+                이메일 정보를 잊으셨나요?
               </span>
             </div>
           </form>
@@ -496,7 +535,7 @@ const goToPasswordResetViewAgain = () => {
           <div className="success-help-links">
             <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
             <span className="divider">|</span>
-            <span onClick={handleAccountInquiry}>고객센터 문의</span>
+            <span onClick={handleSupportInquiry}>고객센터 문의</span>
           </div>
         </div>
       </div>
