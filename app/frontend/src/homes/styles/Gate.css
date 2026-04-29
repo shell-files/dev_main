@@ -27,7 +27,9 @@
   background-color: var(--white);
   overflow: hidden; 
   height: 100vh;
-  display: flex; justify-content: center; align-items: center;
+  display: flex;
+  justify-content: center; 
+  /* align-items: center; */
   position: relative;
 }
 
@@ -53,22 +55,26 @@
 .container {
   /* width: 1400px; */
   max-width: 100%;
-  padding: 0 40px;
+  padding: 0 0;
   z-index: 10;
 }
 
 .header {
   text-align: center;
-  margin-bottom: 25px;
+  /* margin-bottom: 25px; */
   border-bottom: 1px solid var(--primary-green-opacity);
   /* border-bottom: 1px solid rgba(0, 0, 0, 0.1); */
-  padding: 0 0 30px 0;
+  padding: 30px 0;
   position: relative;
   background: var(--header-bg-opacity);
 }
 
 .logo { height: 40px; }
 
+.content_whole_wrap {
+  height: calc(100% - 101px);
+  align-content: center;
+}
 /* 좌측 메인 배너와 우측 카드 배치(가로) */
 .content-wrapper {
   display: flex;
@@ -79,6 +85,7 @@
   z-index: 2;
   margin: 0 auto;
 }
+
 
 /* ―――――――――― [ 좌측 메인 배너 ] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― */
 .main-banner {
@@ -214,3 +221,57 @@
 .service-card:hover .badge { background: var(--primary-green); }
 .service-card:hover .default-icon { opacity: 0; }
 .service-card:hover .hover-icon { opacity: 1; }
+
+
+/* ―――――――――― [ 반응형 미디어 쿼리 ] ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― */
+
+/* 1. 화면 너비가 1420px 이하일 때 (데스크탑/노트북 대응) */
+@media screen and (max-width: 1420px) {
+  .content-wrapper {
+    width: 95%; /* 고정 너비 대신 퍼센트 사용 */
+    height: auto; /* 높이 고정 해제 */
+    flex-direction: column; /* 좌우 배치를 상하 배치로 변경 */
+    gap: 40px;
+    padding-top : 50px;
+    padding-bottom : 50px;
+  }
+
+  .main-banner {
+    flex: none;
+    width: 100%;
+    height: 450px; /* 배너 높이 조절 */
+  }
+
+  .service-grid {
+    flex: none;
+    width: 100%;
+  }
+
+  .content_whole_wrap {
+    height: auto; /* 고정된 계산값 해제 */
+    overflow-y: auto;
+  }
+
+  .gate-body {
+    height: auto; /* 전체 페이지 스크롤 허용 */
+    overflow-y: auto;
+  }
+}
+
+/* 2. 화면 너비가 768px 이하일 때 (모바일 대응) */
+@media screen and (max-width: 768px) {
+  .banner-text h1 { font-size: 32px; }
+  .banner-text h2 { font-size: 18px; }
+  .banner-text p { font-size: 14px; }
+
+  .service-grid {
+    grid-template-columns: 1fr; /* 카드를 한 줄에 하나씩 배치 */
+  }
+
+  .service-card {
+    border-radius: 20px !important; /* 모바일에서는 독특한 곡률보다 가독성 위주 */
+    padding: 40px 20px;
+  }
+
+  .bg-elements { display: none; } /* 모바일에서는 복잡한 배경 제거 (성능) */
+}

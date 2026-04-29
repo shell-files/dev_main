@@ -39,7 +39,7 @@ const Alarm = () => {
                 </span>
             </div>
 
-            <div className="noti-list" style={{ padding: '16px', maxHeight: '400px', overflowY: 'auto' }}>
+            <div className="noti-list" style={{ padding: '16px', overflowY: 'auto' }}>
                 {notifications.length === 0 ? (
                     <div style={{ textAlign: 'center', color: '#999', padding: '20px 0' }}>새로운 알림이 없습니다.</div>
                 ) : (

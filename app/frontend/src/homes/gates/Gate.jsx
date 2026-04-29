@@ -65,7 +65,7 @@ const Gate = () => {
 				<header className="header">
 					<img src={logo} alt="We are IT Hero Logo" className="logo" />
 				</header>
-
+				<div className='content_whole_wrap'>
 				<main className="content-wrapper">
 					{/* ―――――――――― [ 좌측 메인 배너 ] ――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――― */}
 						<section className="main-banner">
@@ -153,6 +153,7 @@ const Gate = () => {
 							</div>
 						</section>
 				</main>
+				</div>
 			</div>
 		</div>
 	)
