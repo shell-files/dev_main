@@ -1,12 +1,12 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
 from src.utils.rediscl import setRedis
-from src.models.model import responseModel
+from src.models.model import responseModel,emailModel
 
 
 def loginProcess(loginModel):
     """ 
-    1. DB에서 사용자 검증.
+    1. DB에서 사용자 검증 및 사용자 정보 추출
     2. access token 생성
     3. refresh token DB 저장
     4. accessToken redis 저장
@@ -53,4 +53,3 @@ def loginProcess(loginModel):
     except Exception as e:
         print(e)
      
-

@@ -19,3 +19,5 @@ class loginModel(BaseModel):
   email: EmailStr = Field(..., description="로그인에서 사용되는 이메일 모델")
   password: str = Field(..., description="로그인에서 사용하는 pwd 모델")
 
+class emailModel(BaseModel):
+   email: EmailStr = Field(..., description="비밀번호 찾기에 사용되는 이메일 모델")
