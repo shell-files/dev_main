@@ -16,6 +16,7 @@ def loginProcess(loginModel):
         loginSql="""
             SELECT 
                 u.id, 
+                u.name,
                 u.email, 
                 ur.role_id,
                 r.role,
