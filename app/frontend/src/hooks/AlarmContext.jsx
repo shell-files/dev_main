@@ -7,9 +7,11 @@ export const AlarmProvider = ({ children }) => {
     
     // 테스트용 초기 알림 데이터
     const [notifications, setNotifications] = useState([
-        { id: 1, text: '김하영 님이 ESG 데이터 파일(CSV)을 업로드했습니다.' },
-        { id: 2, text: '장태원 님이 요청하신 백엔드 API 배포가 완료되었습니다.' },
-        { id: 3, text: '비밀번호 변경 권장 알림입니다.' }
+        { id: 1, type: 'USER', text: '신규 팀원 초대 요청이 승인되었습니다.', time: '10분 전' },
+        { id: 2, type: 'CHECK', text: 'ESG 데이터 1분기 실적 승인이 반려되었습니다.', time: '1시간 전' },
+        { id: 3, type: 'CHART', text: '0.0V SR 보고서 생성이 완료되었습니다.', time: '2시간 전' },
+        { id: 4, type: 'LEAF', text: '0.0V 탄소관리 보고서 생성이 완료되었습니다.', time: '1일 전' },
+        { id: 5, type: 'CUBE', text: '0.0V 공급망 3D 에셋 변환이 완료되었습니다.', time: '2일 전' }
     ]);
 
     const toggleAlarm = () => setIsAlarmOpen(!isAlarmOpen);
