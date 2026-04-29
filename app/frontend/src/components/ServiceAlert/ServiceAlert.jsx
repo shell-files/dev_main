@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2'
-import '@components/ServiceAlert.css'
+import '@components/ServiceAlert/ServiceAlert.css'
 
 // ―――――――――― [ Gate페이지 서비스 소개 (showServiceIntro) ] ―――――――――――――――――――――――――――――――――――――――――――――――
   /**

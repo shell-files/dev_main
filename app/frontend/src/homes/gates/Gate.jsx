@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { showServiceIntro } from '@components/ServiceAlert.jsx'
+import { showServiceIntro } from '@components/ServiceAlert/ServiceAlert.jsx'
 import '@styles/Gate.css'
 
 // ―――――――――― [ Images import ] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
