@@ -1,27 +1,13 @@
-/* 기본 초기화 */
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-    color: #333;
-}
-
-body {
-    background-color: #fff;
-    font-family: 'Pretendard', -apple-system, sans-serif;
+/* =================== */
+/* 로그인 */
+#signup_page {
     display: flex;
     justify-content: center;
     padding: 20px; /* 모바일 여백 확보 */
 }
 
-a {text-decoration: none; color: #333; display: inline-block;}
-
-/* =================== */
-/* 로그인 */
-
-
 /* 카드 컨테이너 */
-#login .container {
+#signup_page .container {
     margin-top: 100px;
     position: relative;
     background-color: #ffffff; 
@@ -34,7 +20,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
     box-shadow: 0 4px 10px rgba(0,0,0,0.05);
 }
 /* 상단 뒤로가기 */
-#login .back-btn {
+#signup_page .back-btn {
     position: absolute;
     top: 10px;
     left: 20px;
@@ -45,7 +31,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 }
 
 /* 로고 박스 */
-#login .logo-placeholder {
+#signup_page .logo-placeholder {
     width: 120px;
     height: 75px;
     margin: 30px auto 15px;
@@ -57,14 +43,14 @@ a {text-decoration: none; color: #333; display: inline-block;}
     color: #333;
 }
 
-#login h1 {
+#signup_page h1 {
     font-size: 46px;
     margin-bottom: 40px;
     font-weight: 500;
 }
 
 /* 입력창 스타일 */
-#login .input-group input {
+#signup_page .input-group input {
     width: 100%;
     padding: 15px;
     margin-bottom: 10px;
@@ -74,12 +60,12 @@ a {text-decoration: none; color: #333; display: inline-block;}
     font-size: 14px;
 }
 
-#login .input-group input::placeholder {
+#signup_page .input-group input::placeholder {
     color: #ccc;
 }
 
 /* 안내 박스 (비밀번호 찾기용) */
-#login .info-box {
+#signup_page .info-box {
     background-color: #dbdbdb;
     padding: 20px;
     font-size: 12px;
@@ -90,17 +76,17 @@ a {text-decoration: none; color: #333; display: inline-block;}
 }
 
 /* 하단 링크 영역 */
-#login .links {
+#signup_page .links {
     color: #666;
     margin: 20px 0 40px;
 }
 
-#login .links a {
+#signup_page .links a {
     cursor: pointer;
     color: #666;
 }
 
-#login .links span {
+#signup_page .links span {
     cursor: pointer;
     color: #666;
 }
@@ -108,7 +94,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 
 
 /* 메인 버튼 */
-#login .btn-primary {
+#signup_page .btn-primary {
     position: absolute;
     bottom: 70px;
     left: 50%;
@@ -125,7 +111,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
     transition: background 0.3s;
 }
 
-#login .btn-primary:hover {
+#signup_page .btn-primary:hover {
     background-color: #028a3f;
 }
 
@@ -135,7 +121,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 /* 회원가입 */
 
 
-#signup_page.signup-container {
+#signup_page .signup-container {
     
     background-color: white;
     width: 100%; /* 기본적으로 가로를 다 채움 */
