@@ -1,20 +1,35 @@
-const Headernav= () => {
+import React from 'react';
+import { useNavigate } from 'react-router';
+import { useAlarm } from '@hooks/AlarmContext.jsx'; 
 
-    return(
+const Headernav = () => {
+    const navigate = useNavigate();
+    
+    const { toggleAlarm } = useAlarm();
+
+    return (
         <>
-                <header class="header">
-            <div class="user-link" onclick="location.href='my_page.html'">
-                이채훈 <span>(SKM)</span>
-            </div>
-            <div class="header-action" onclick="location.href='index.html'">로그아웃</div>
-            <div class="header-action" onclick="toggleNoti()">
-                알림
-                <div class="noti-dot"></div>
-            </div>
-        </header>
+            {/* class 대신 className 사용 */}
+            <header className="header">
+                
+                {/* location.href 대신 navigate 사용 */}
+                <div className="user-link" onClick={() => navigate('/my_page')} style={{ cursor: "pointer" }}>
+                    이채훈 <span>(SKM)</span>
+                </div>
+                
+                <div className="header-action" onClick={() => navigate('/')} style={{ cursor: "pointer" }}>
+                    로그아웃
+                </div>
+                
+                {/* 💡 onClick에 방금 가져온 toggleAlarm을 연결합니다! */}
+                <div className="header-action" onClick={toggleAlarm} style={{ cursor: "pointer" }}>
+                    알림
+                    <div className="noti-dot"></div>
+                </div>
+                
+            </header>
         </>
-    )
-
+    );
 }
 
-export default Headernav
+export default Headernav;

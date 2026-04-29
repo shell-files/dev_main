@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router";
+import { AlarmProvider } from '@hooks/AlarmContext.jsx';
 import '@styles/App.css'
 import NotFound from '@errors/NotFound.jsx'
 import Gate from '@gates/Gate.jsx'
@@ -9,6 +10,7 @@ import Main from '@mains/Main.jsx'
 import Dashboard from '@mains/Dashboard.jsx'
 import Headernav from "@components/HeaderNav.jsx"
 import Sidebarnav from "@components/SidebarNav.jsx"
+import Alarm from "@components/Alarm.jsx"
 import "@styles/mains.css";
 
 
@@ -28,7 +30,7 @@ function App() {
   const location = useLocation();
   useEffect(()=>{
     setIsNav(location.pathname.includes("/main"))
-  }, [])
+  }, [location.pathname])
   return (
     <>
       { !isNav && 
@@ -37,12 +39,14 @@ function App() {
         </Routes>
       }
       { isNav &&
+      <AlarmProvider>
         <div id="main_page">
           <div className="main-layout">
             <Headernav />
             <div className="content_box">
               <Sidebarnav />
               <div className="main_right_box" style={{ padding: "20px" }}>
+                <Alarm />
                 <Routes>
                   {paths2?.map((v, i) => <Route key={i} path={v.path} element={v.element} />)}
                 </Routes>
@@ -50,6 +54,7 @@ function App() {
             </div>
           </div>
         </div>
+      </AlarmProvider>
       }
     </>
 
