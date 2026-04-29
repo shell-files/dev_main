@@ -20,7 +20,9 @@ class Settings(BaseSettings):
   mail_ssl_tls: bool = False
   # tokenset.py
   # --------------------------
-  secret_key: str
+  # secret_key: str
+  private_key: str = "secrets/authpr.pem"
+  public_key: str = "secrets/authpb.pem"
   access_token_expire_minutes: int
   refresh_token_expire_days: int
   # --------------------------
