@@ -17,14 +17,16 @@ def loginProcess(loginModel):
             SELECT 
                 u.id, 
                 u.email, 
-                r.role_id, 
+                ur.role_id,
+                r.role,
                 c.id AS company_id, 
                 c.company_name
             FROM `USER` AS u
-            INNER JOIN `USER_ROLE` AS r ON u.id = r.user_id
-            INNER JOIN `COMPANY` AS c ON r.company_id = c.id
-            WHERE u.email = ? 
-            AND u.password = ? 
+            INNER JOIN `USER_ROLE` AS ur ON u.id = ur.user_id
+            INNER JOIN `COMPANY` AS c ON ur.company_id = c.id
+            INNER JOIN `ROLE` AS r ON r.id = ur.role_id
+            WHERE u.email = 'test@gmail.com' 
+            AND u.password = '1234' 
             AND u.delete_yn = 0;
             """
         
