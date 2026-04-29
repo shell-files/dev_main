@@ -2,7 +2,6 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
-
 /**
  * [환경 설정]
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
