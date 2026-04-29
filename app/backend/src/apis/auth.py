@@ -14,9 +14,7 @@ def findPwd():
         summary="로그인 api",
         description="email/pwd 받아서 uuid 반환")
 def login(loginModel: loginModel):
-    result = loginProcess(loginModel)
-    
-    return result
+    return loginProcess(loginModel)
 
 @router.delete("",
         summary="회원 탈퇴 api",
