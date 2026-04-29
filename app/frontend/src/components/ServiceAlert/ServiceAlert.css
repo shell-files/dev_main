@@ -96,3 +96,12 @@
 .swal2-icon.swal2-info .swal2-icon-content {
   color: #03a94d !important;
 }
+
+/* warning 아이콘 */
+.swal2-icon.swal2-warning {
+  border-color: #03a94d !important;
+}
+
+.swal2-icon.swal2-warning .swal2-icon-content {
+  color: #03a94d !important;
+}

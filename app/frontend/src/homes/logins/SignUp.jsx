@@ -2,6 +2,8 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
+import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
+
 /**
  * [환경 설정]
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
@@ -112,7 +114,14 @@ const Signup = () => {
      */
     const handleUpload = async () => {
         if (!file) {
-            alert("파일을 먼저 선택해주세요.");
+            // ----------- 커스텀 알럿 추가 ----------
+            showDefaultAlert(
+                "파일이 첨부되지 않았습니다",
+                "기업 회원가입을 위해 <span class='text-point'>사업자등록증</span> 첨부가 필요합니다.\n"+
+                "파일 선택 후 다시 등록 버튼을 눌러주세요.",
+                "warning"
+            )
+            // alert("파일을 먼저 선택해주세요.");
             return;
         }
         setIsUploading(true);
@@ -135,7 +144,14 @@ const Signup = () => {
                 }));
                 setIsOcrDone(true);
                 setIsUploading(false);
-                alert("더미 데이터로 OCR 인증이 완료되었습니다.");
+                // ----------- 커스텀 알럿 추가 ----------
+                showDefaultAlert(
+                    "인증 완료",
+                    "사업자등록증 OCR 인증에 성공하였습니다.\n"+
+                    "추출된 기업 정보가 실제와 일치하는지 확인해 주세요.",
+                    "success"
+                )
+                //alert("더미 데이터로 OCR 인증이 완료되었습니다.");
             }, 1000);
             return;
         }
@@ -152,7 +168,14 @@ const Signup = () => {
                 setIsOcrDone(true);
             }
         } catch (err) {
-            alert("서버 오류가 발생했습니다.");
+            // ----------- 커스텀 알럿 추가 ----------
+            showDefaultAlert(
+                "인증 실패",
+                "사업자등록증 OCR 인증에 실패하였습니다.\n"+
+                "잠시 후 다시 시도해주세요.",
+                "error"
+            )
+            // alert("서버 오류가 발생했습니다.");
         } finally {
             setIsUploading(false);
         }
