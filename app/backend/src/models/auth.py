@@ -1,6 +1,6 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
-from src.utils.rediscl import setRedis
+from src.utils.rediscl import setRedis, delRedis
 from src.models.model import responseModel,emailModel
 
 
@@ -56,3 +56,27 @@ def loginProcess(loginModel):
     except Exception as e:
         print(e)
      
+def logoutProcess(logoutModel):
+    """
+    1. db에서 refresh token delete_yn 1으로 변경
+    2. redis에서 uuid 삭제
+    """
+    uuidKey = logoutModel.uuid
+  
+    try:
+        # 1. db에서 refresh token delete_yn 1으로 변경
+        logoutSql="""
+                UPDATE TOKEN
+                    SET `delete_yn` = 1
+                    WHERE uuid = ? AND `delete_yn` = 0;
+                """
+        logoutParams = (uuidKey,)
+        save(logoutSql, logoutParams)
+
+        # 2. redis에서 uuid 삭제
+        delRedis(uuidKey)
+        
+        return responseModel(True, "로그아웃 완료")        
+    except Exception as e:
+        return responseModel(False, f"오류 발생 : {e}")
+    
