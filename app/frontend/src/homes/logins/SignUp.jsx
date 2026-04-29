@@ -147,12 +147,14 @@ const Signup = () => {
             const res = await api.post("/api/ocr", formDataToSend, {
                 headers: { "Content-Type": "multipart/form-data" }
             });
-            if (res.data.success) {
+            if (res.data.status === true) {
                 setFormData(prev => ({ ...prev, ...res.data.data }));
                 setIsOcrDone(true);
+            }else{
+                alert("OCR 처리에 실패했습니다. 다시 시도해주세요.");
             }
         } catch (err) {
-            alert("서버 오류가 발생했습니다.");
+            alert(`서버 오류가 발생했습니다.`);
         } finally {
             setIsUploading(false);
         }
@@ -161,36 +163,47 @@ const Signup = () => {
     // --- [로직: 중복 검사] ---
     const checkEmail = async () => {
         if (!formData.email || emailValid !== null) return;
-        if (USE_DUMMY) { setEmailValid(true); return; }
         try {
-            const res = await api.get('/api/user', { params: { email: formData.email } });
-            setEmailValid(res.data.available);
-        } catch (err) { console.error(err); }
+            // ✅ 수정: 엔드포인트 세분화 및 status 확인
+            const res = await api.get('/api/user/check-email', { params: { email: formData.email } });
+            setEmailValid(res.data.status); // status 자체가 boolean이므로 바로 세팅
+        } catch (err) { 
+            console.error("이메일 중복 검사 실패", err); 
+        }
     };
 
     const checkBusiness = async () => {
-        if (!formData.businessNumber) return;
-        if (USE_DUMMY) { setBusinessValid(true); return; }
+        if (!formData.businessNumber || businessValid !== null) return;
         try {
-            const res = await api.get('/api/user', { params: { businessNumber: formData.businessNumber } });
-            setBusinessValid(res.data.available);
-        } catch (err) { console.error(err); }
+            // ✅ 수정: 엔드포인트 세분화 및 status 확인
+            const res = await api.get('/api/user/check-business', { params: { businessNumber: formData.businessNumber } });
+            setBusinessValid(res.data.status);
+        } catch (err) { 
+            console.error("사업자번호 중복 검사 실패", err); 
+        }
     };
 
     // --- [로직: 최종 제출] ---
     const handleSubmit = async (e) => {
         e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
         const newErrors = {};
-        
-        // [최종 검사] 제출 직전 모든 필수 값 확인
-        if (!formData.email) newErrors.email = "이메일은 필수입니다.";
-        if (!formData.password) newErrors.password = "비밀번호는 필수입니다.";
-        if (!formData.businessNumber) newErrors.businessNumber = "사업자번호는 필수입니다.";
+        // 모든 필수 필드 자동 검사
+        Object.keys(requiredFields).forEach(key => {
+            if (!formData[key]) {
+                newErrors[key] = requiredFields[key];
+            }
+        });
+        // 추가 조건들
         if (!file) newErrors.file = "파일 업로드 필수";
         if (!isOcrDone) newErrors.ocr = "사업자 인증 필요 (등록 버튼을 눌러주세요)";
         if (!isAgreed) newErrors.agree = "약관 동의 필요";
-
-        // 하나라도 에러가 있으면 진행 중단
+        if (emailValid === false) {
+            newErrors.email = "이미 사용중인 이메일입니다.";
+        }
+        if (businessValid === false) {
+            newErrors.businessNumber = "이미 등록된 사업자번호입니다.";
+        }
+        // 에러 있으면 중단
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -209,10 +222,17 @@ const Signup = () => {
 
         try {
             const res = await api.post("/api/signup", { ...formData, fileName, agreed: isAgreed });
-            if (res.data.status === "success") navigate("/main");
-            else alert("가입 실패: " + res.data.message);
+            
+            // ✅ 수정: status === true 체크
+            if (res.data.status === true) {
+                alert("회원가입이 완료되었습니다!");
+                navigate("/main");
+            } else {
+                // ✅ 수정: 서버 응답 메시지 활용
+                alert("회원가입 요청을 처리할 수 없습니다. 입력 정보를 확인해주세요.");
+            }
         } catch (err) {
-            alert("서버 오류");
+            alert(`서버 오류가 발생했습니다.`);
         } finally {
             setSignupLoading(false);
         }
