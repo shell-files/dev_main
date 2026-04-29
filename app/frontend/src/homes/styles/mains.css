@@ -19,20 +19,47 @@
             border-right: 1px solid #e0e0e0;
             display: flex;
             flex-direction: column;
-            padding: 20px;
+            padding: 20px 30px;
             z-index: 10;
             height: 100%;
         }
 
-        #main_page .sidebar .logo-placeholder {
+        #main_page .sidebar .sidebar-header {
             margin-bottom: 30px;
-            height: 50px;
-            background: #eee;
+            padding: 20px 10px;
+            text-align: center;
+        }
+
+        #main_page .sidebar .sidebar-title {
+            font-size: 38px;
+            font-weight: 900;
+            color: #03a94d;
+            letter-spacing: 1px;
+            line-height: 1.1;
+        }
+
+        #main_page .sidebar .sidebar-subtitle {
+            font-size: 13px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        #main_page .logo-placeholder {
+            width: 120px;
+            height: 40px;
+            background: #f0faf4;
+            color: #03a94d;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            border-radius: 8px;
+            font-weight: 800;
+            border-radius: 6px;
+            font-size: 15px;
+            border: 1px solid #e6f6ed;
+            letter-spacing: 2px;
         }
 
         #main_page .nav-group {

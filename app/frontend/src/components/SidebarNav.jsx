@@ -7,8 +7,10 @@ const sidebarnav= () => {
     return(
         <>
         <aside className="sidebar">
-        <div className="logo-placeholder">로고</div>
-        
+        <div className="sidebar-header">
+            <div className="sidebar-title">W.I.T.H</div>
+            <div className="sidebar-subtitle">we are IT hero!</div>
+        </div>
         <nav className="nav-group">
             <div className="nav-title">프로젝트 목록</div>
             <div className="nav-item" >데이터입력</div>

@@ -9,20 +9,24 @@ const Headernav = () => {
 
     return (
         <>
-            <header className="header">
-                
-                <div className="user-link" onClick={() => navigate('/my_page')} style={{ cursor: "pointer" }}>
-                    이채훈 <span>(SKM)</span>
+            <header className="header" style={{ justifyContent: 'space-between', padding: '0 24px' }}>
+                <div className="logo-placeholder" onClick={() => navigate('/')} style={{ cursor: 'pointer', margin: 0 }}>
+                    로고
                 </div>
-                
-                <div className="header-action" onClick={() => navigate('/')} style={{ cursor: "pointer" }}>
-                    로그아웃
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
+                    <div className="user-link" onClick={() => navigate('/my_page')} style={{ cursor: "pointer" }}>
+                        이채훈 <span>(SKM)</span>
+                    </div>
+                    
+                    <div className="header-action" onClick={() => navigate('/')} style={{ cursor: "pointer" }}>
+                        로그아웃
+                    </div>
+                    <div className="header-action" onClick={toggleAlarm} style={{ cursor: "pointer" }}>
+                        알림
+                        <div className="noti-dot"></div>
+                    </div>
                 </div>
-                <div className="header-action" onClick={toggleAlarm} style={{ cursor: "pointer" }}>
-                    알림
-                    <div className="noti-dot"></div>
-                </div>
-                
             </header>
         </>
     );

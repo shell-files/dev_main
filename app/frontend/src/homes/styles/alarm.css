@@ -1,0 +1,232 @@
+#alarm-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease-in-out;
+    z-index: 999;
+}
+
+#alarm-container {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 400px;
+    background-color: #ffffff;
+    box-shadow: -10px 0 30px rgba(0,0,0,0.05);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    border-top-left-radius: 24px;
+}
+
+#alarm-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 20px 16px;
+}
+
+#alarm-header h2 {
+    margin: 0;
+    font-size: 22px;
+    color: #1a1a1a;
+    fontWeight: 600;
+}
+
+#alarm-header .alarm-title-box {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#alarm-header .alarm-setting-icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+#alarm-header .alarm-close-btn {
+    cursor: pointer;
+    font-size: 24px;
+    color: #666;
+    line-height: 1;
+}
+
+#alarm-filter-tabs {
+    display: flex;
+    gap: 8px;
+    padding: 0 20px 20px;
+}
+
+.alarm-filter-btn {
+    flex: 1;
+    height: 40px;
+    border-radius: 12px;
+    border: 1px solid #eee;
+    background-color: #fff;
+    color: #666;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.alarm-filter-btn.active {
+    border: 1px solid #03A94D;
+    background-color: #f0faf4;
+    color: #03A94D;
+}
+
+.alarm-filter-btn img {
+    width: 20px;
+    height: 20px;
+    opacity: 0.7;
+}
+
+#alarm-action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f5f5f5;
+}
+
+.alarm-badge-new {
+    padding: 4px 12px;
+    background-color: #f0faf4;
+    border-radius: 20px;
+    color: #03A94D;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+}
+
+.alarm-read-all-btn {
+    background: none;
+    border: none;
+    color: #888;
+    font-size: 13px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.alarm-read-all-btn:hover {
+    color: #03A94D;
+}
+
+#alarm-list {
+    flex: 1;
+    padding: 0 20px;
+    overflow-y: auto;
+}
+
+.alarm-item {
+    display: flex;
+    padding: 24px 0;
+    border-bottom: 1px solid #fcfcfc;
+    gap: 16px;
+    position: relative;
+}
+
+.alarm-icon-box {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.alarm-icon-box img {
+    width: 32px;
+    height: 32px;
+}
+
+.alarm-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.alarm-content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.alarm-content-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.alarm-unread-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #03A94D;
+}
+
+.alarm-text {
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.alarm-time {
+    font-size: 13px;
+    color: #aaa;
+    margin-top: 4px;
+}
+
+.alarm-delete-btn {
+    align-self: flex-start;
+    margin-top: 4px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 1px solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.alarm-delete-btn span {
+    color: #999;
+    font-size: 14px;
+}
+
+#alarm-footer {
+    padding: 20px;
+    border-top: 1px solid #f8f8f8;
+}
+
+.alarm-view-all-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    background-color: #f0faf4;
+    color: #03A94D;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.alarm-view-all-btn:hover {
+    background-color: #03A94D;
+    color: #fff;
+}
