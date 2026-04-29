@@ -58,15 +58,13 @@ def loginProcess(loginModel):
      
 def logoutProcess(logoutModel):
     """
-    1. redis에서 uuid 삭제
-    2. db에서 refresh token delete_yn 1으로 변경
+    1. db에서 refresh token delete_yn 1으로 변경
+    2. redis에서 uuid 삭제
     """
+    uuidKey = logoutModel.uuid
+  
     try:
-        uuidKey = logoutModel.uuid
-        # 1. redis에서 uuid 삭제
-        delRedis(uuidKey)
-
-        # 2. db에서 refresh token delete_yn 1으로 변경
+        # 1. db에서 refresh token delete_yn 1으로 변경
         logoutSql="""
                 UPDATE TOKEN
                     SET `delete_yn` = 1
@@ -74,6 +72,10 @@ def logoutProcess(logoutModel):
                 """
         logoutParams = (uuidKey,)
         save(logoutSql, logoutParams)
+
+        # 2. redis에서 uuid 삭제
+        delRedis(uuidKey)
+        
         return responseModel(True, "로그아웃 완료")        
     except Exception as e:
         return responseModel(False, f"오류 발생 : {e}")
