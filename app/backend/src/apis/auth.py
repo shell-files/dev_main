@@ -1,6 +1,6 @@
 from fastapi import APIRouter
-from src.models.model import loginModel
-from src.models.auth import loginProcess
+from src.models.model import loginModel, logoutModel
+from src.models.auth import loginProcess, logoutProcess
 
 router = APIRouter()
 
@@ -17,10 +17,10 @@ def login(loginModel: loginModel):
     return loginProcess(loginModel)
 
 @router.delete("",
-        summary="회원 탈퇴 api",
-        description="deleteYn 0 : 회원 상태 / 1 : 탈퇴 ")
-def userDel():
-    pass
+        summary="로그아웃 api",
+        description="deleteYn 0 : 로그인 상태 / 1 : 로그아웃")
+def userDel(logoutModel: logoutModel):
+    return logoutProcess(logoutModel)
 
 
 
