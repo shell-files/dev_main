@@ -2,14 +2,14 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
-import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
+import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
 
 /**
  * [환경 설정]
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
  * 백엔드 서버가 준비되지 않았거나 403 에러 등의 이슈가 있을 때 프론트엔드 흐름 테스트용으로 사용합니다.
  */
-const USE_DUMMY = false;
+const USE_DUMMY = true;
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -224,7 +224,13 @@ const Signup = () => {
         if (USE_DUMMY) {
             setTimeout(() => {
                 setSignupLoading(false);
-                alert("더미 모드로 가입되었습니다!");
+                showDefaultAlert(
+                    "회원가입 완료",
+                    "회원가입을 진심으로 환영합니다!\n"+ 
+                    "스마트한 ESG 경영 관리를 시작해 보세요.",
+                    "success"
+                )
+                // alert("더미 모드로 가입되었습니다!");
                 navigate("/main");
             }, 1500);
             return;
@@ -241,10 +247,19 @@ const Signup = () => {
         }
     };
 
-    const handleCancel = () => {
-        if (window.confirm("가입을 취소하시겠습니까? 입력한 정보가 사라집니다.")) {
-            navigate(-1);
+    const handleCancel = async () => {
+        const isConfirmed = await showConfirmAlert(
+            "가입 취소",
+            "가입을 취소하시겠습니까?\n" +
+            "지금까지 입력한 정보가 모두 사라집니다.",
+            "warning"
+        )
+        if (isConfirmed) {
+            navigate("/login")
         }
+        // if (window.confirm("가입을 취소하시겠습니까? 입력한 정보가 사라집니다.")) {
+        //     navigate(-1);
+        // }
     };
 
     // 반복되는 사업자 정보 입력 칸을 효율적으로 렌더링하기 위한 배열

@@ -357,7 +357,7 @@ const goToPasswordResetViewAgain = () => {
       "위의 고객센터 메일로 접수해 주시기 바랍니다.\n\n" +
       "계정 분실 및 권한 승인 관련 문의사항은\n" + 
       "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의 바랍니다.",
-      "info"
+      "question"
     );
   }
 

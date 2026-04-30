@@ -64,12 +64,23 @@
 
 /* 확인 버튼 커스텀 */
 .custom-swal-confirm-btn {
-  width: 100px !important;
+  width: 120px !important;
   height: 45px !important;
   font-size: 1rem !important;
   font-weight: 600 !important;
   border-radius: 10px !important;
   margin-top: 10px !important;
+}
+
+/* 취소 버튼 커스텀 */
+.custom-swal-cancel-btn {
+  width: 120px !important;
+  height: 45px !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  margin-top: 10px !important;
+  margin-left: 12px !important;
 }
 
 /* ―――――――――― [ SweetAlert2 기본 아이콘 색상 ] ―――――――――――――――――――――――――――――――――――――――――――――――――――― */
@@ -103,5 +114,14 @@
 }
 
 .swal2-icon.swal2-warning .swal2-icon-content {
+  color: #03a94d !important;
+}
+
+/*question 아이콘 */
+.swal2-icon.swal2-question {
+  border-color: #03a94d !important;
+}
+
+.swal2-icon.swal2-question .swal2-icon-content {
   color: #03a94d !important;
 }
