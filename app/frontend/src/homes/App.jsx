@@ -12,6 +12,7 @@ import Headernav from "@components/HeaderNav.jsx"
 import Sidebarnav from "@components/SidebarNav.jsx"
 import Alarm from "@components/Alarm.jsx"
 import "@styles/mains.css";
+import CompanySelect from "@logins/CompanySelect.jsx"
 
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
       { path: "/", element: <Gate /> },
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
+      { path: "/company", element: <CompanySelect /> },
       { path: "*", element: <NotFound /> },
   ]
   const paths2 = [

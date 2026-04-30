@@ -165,6 +165,41 @@ const Alarm = () => {
                         전체 알림 보기
                     </button>
                 </div>
+            <div className="noti-list" style={{ padding: '16px', overflowY: 'auto' }}>
+                {notifications.length === 0 ? (
+                    <div style={{ textAlign: 'center', color: '#999', padding: '20px 0' }}>새로운 알림이 없습니다.</div>
+                ) : (
+                    notifications.map((noti) => (
+                        <div className="noti-card" key={noti.id} style={{
+                            padding: '12px',
+                            marginBottom: '10px',
+                            backgroundColor: '#f0f4ff', // 연한 블루 톤 배경
+                            borderLeft: '4px solid #4a90e2', // 왼쪽 블루 포인트 라인
+                            borderRadius: '4px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'flex-start',
+                            fontSize: '14px',
+                            color: '#444'
+                        }}>
+                            <span style={{ paddingRight: '10px' }}>{noti.text}</span>
+                            <button 
+                                className="noti-close-btn" 
+                                onClick={() => removeNoti(noti.id)} 
+                                style={{
+                                    background: 'none',
+                                    border: 'none',
+                                    cursor: 'pointer',
+                                    color: '#999',
+                                    fontSize: '16px',
+                                    padding: 0
+                                }}
+                            >
+                                ×
+                            </button>
+                        </div>
+                    ))
+                )}
             </div>
         </>
     );

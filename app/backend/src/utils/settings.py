@@ -20,15 +20,17 @@ class Settings(BaseSettings):
   mail_ssl_tls: bool = False
   # tokenset.py
   # --------------------------
-  secret_key: str
+  # secret_key: str
+  private_key: str = "secrets/authpr.pem"
+  public_key: str = "secrets/authpb.pem"
   access_token_expire_minutes: int
   refresh_token_expire_days: int
   # --------------------------
   # rediscl.py
   # --------------------------
-  redis_host: str = "redis"
-  redis_port: int = 6379
-  redis_db: int = 0
+  redis_host: str
+  redis_port: int
+  redis_db: int
   # --------------------------
   # file.py
   # --------------------------
