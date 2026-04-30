@@ -7,6 +7,7 @@ import Gate from '@gates/Gate.jsx'
 import Login from '@logins/Login.jsx'
 import Signup from '@logins/SignUp.jsx'
 import Main from '@mains/Main.jsx'
+import Onboarding from '@mains/Onboarding.jsx'
 import Dashboard from '@mains/Dashboard.jsx'
 import Headernav from "@components/HeaderNav.jsx"
 import Sidebarnav from "@components/SidebarNav.jsx"
@@ -26,6 +27,7 @@ function App() {
   const paths2 = [
     { path: "/main", element: <Main /> },
     { path: "/main/dashboard", element: <Dashboard />},
+    { path: "/main/onboarding", element: <Onboarding />},
     { path: "main/*", element: <NotFound /> },
   ]
   const [ isNav, setIsNav ] = useState(true);
@@ -47,7 +49,7 @@ function App() {
             <Headernav />
             <div className="content_box">
               <Sidebarnav />
-              <div className="main_right_box" style={{ padding: "20px" }}>
+              <div className="main_right_box">
                 <Alarm />
                 <Routes>
                   {paths2?.map((v, i) => <Route key={i} path={v.path} element={v.element} />)}

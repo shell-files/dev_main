@@ -1,16 +1,20 @@
         /* 메인 레이아웃 전용 스타일 확장 */
 
         #main_page {
-            height: 100%;
+                height: 100%;
+                overflow: hidden;
         }
         #main_page .main-layout {
             width: 100%;
             height: 100%;
+            overflow: hidden;
         }
 
         #main_page .content_box {
             height: calc(100% - 70px);
             display: flex;
+            overflow: hidden;
+            min-height: 0;
         }
         /* 좌측 사이드바 */
         #main_page .sidebar {
@@ -109,11 +113,14 @@
         }
 
         /* 우측 메인 영역 */
-        #main_page .main-container {
+        #main_page .main_right_box {
             flex: 1;
             display: flex;
             flex-direction: column;
             position: relative;
+            min-width: 0;
+            min-height: 0;
+            overflow: hidden;
         }
 
         /* 상단 헤더 */

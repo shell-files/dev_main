@@ -1,0 +1,285 @@
+/* ===================================================================================== */
+/* onboarding.css */
+/* 적용 범위: #onboarding_page 내부만 */
+/* body, :root, 전역 .input-group, .btn 등 충돌 가능성이 큰 선택자 사용 금지 */
+/* ===================================================================================== */
+
+#onboarding_page {
+  --onboarding-green: #03a94d;
+  --onboarding-bg-light: #f4f7f6;
+  --onboarding-border: #e0e0e0;
+  --onboarding-text-main: #333;
+  --onboarding-text-sub: #888;
+
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  background-color: var(--onboarding-bg-light);
+  color: var(--onboarding-text-main);
+  font-family: "Pretendard", sans-serif;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+#onboarding_page * {
+  box-sizing: border-box;
+}
+
+#onboarding_page .onboarding-content-body {
+  flex: 1;
+  padding: 40px;
+  overflow-y: auto;
+}
+
+#onboarding_page .onboarding-top-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+#onboarding_page .onboarding-search-input {
+  width: 250px;
+  padding: 10px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+  background-color: #fff;
+}
+
+#onboarding_page .onboarding-search-input:focus {
+  border-color: var(--onboarding-green);
+}
+
+#onboarding_page .onboarding-tab-group {
+  display: flex;
+  gap: 10px;
+}
+
+#onboarding_page .onboarding-tab {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: #f1f3f5;
+  cursor: pointer;
+  font-size: 13px;
+  border: none;
+  color: #333;
+}
+
+#onboarding_page .onboarding-tab.active {
+  background: var(--onboarding-green);
+  color: #fff;
+}
+
+#onboarding_page .onboarding-data-section {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--onboarding-border);
+  margin-bottom: 25px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+#onboarding_page .onboarding-data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#onboarding_page .onboarding-data-table th {
+  padding: 12px 25px;
+  text-align: left;
+  font-size: 12px;
+  color: #999;
+  border-bottom: 1px solid #eee;
+  background: #fff;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-data-table td {
+  padding: 18px 25px;
+  border-bottom: 1px solid #f9f9f9;
+  vertical-align: middle;
+  font-size: 14px;
+}
+
+#onboarding_page .onboarding-row-id {
+  color: #999;
+  font-size: 12px;
+}
+
+#onboarding_page .onboarding-issue-group {
+  background: #eef2ff;
+  color: #4338ca;
+  padding: 4px 10px;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-indicator-name {
+  font-weight: 500;
+  color: #222;
+}
+
+#onboarding_page .onboarding-input-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#onboarding_page .onboarding-input-field {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  width: 120px;
+  font-size: 14px;
+  outline: none;
+}
+
+#onboarding_page .onboarding-input-field:focus {
+  border-color: var(--onboarding-green);
+}
+
+#onboarding_page .onboarding-unit {
+  font-size: 13px;
+  color: #999;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-status-badge {
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+#onboarding_page .status-working {
+  background: #fff4e5;
+  color: #ef6c00;
+}
+
+#onboarding_page .status-complete {
+  background: #e6f7ef;
+  color: var(--onboarding-green);
+}
+
+#onboarding_page .status-reject {
+  background: #fdecea;
+  color: #e53935;
+}
+
+#onboarding_page .status-none {
+  background: #f1f3f5;
+  color: #999;
+}
+
+#onboarding_page .onboarding-file-btn {
+  background: none;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-file-btn.file-attached {
+  background: #f0fdf4;
+  border-color: var(--onboarding-green);
+  color: var(--onboarding-green);
+}
+
+#onboarding_page .onboarding-admin-actions {
+  display: flex;
+  gap: 6px;
+}
+
+#onboarding_page .onboarding-btn-approve {
+  background: #e6f7ef;
+  color: var(--onboarding-green);
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-btn-reject {
+  background: #fdecea;
+  color: #e53935;
+  border: none;
+  padding: 4px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+#onboarding_page .onboarding-pagination {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+#onboarding_page .onboarding-page-btn {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+#onboarding_page .onboarding-page-btn.active {
+  background: var(--onboarding-green);
+  color: #fff;
+}
+
+#onboarding_page .onboarding-empty-cell {
+  text-align: center;
+  color: #999;
+  padding: 48px 0;
+}
+
+#onboarding_page .onboarding-action-bar {
+  flex-shrink: 0;
+  width: 100%;
+  background: #fff;
+  border-top: 1px solid #eee;
+  padding: 15px 40px;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  box-sizing: border-box;
+  z-index: 10;
+}
+
+#onboarding_page .onboarding-btn {
+  padding: 10px 30px;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+}
+
+#onboarding_page .onboarding-btn-save {
+  background: #eee;
+  color: #666;
+}
+
+#onboarding_page .onboarding-btn-submit {
+  background: var(--onboarding-text-main);
+  color: #fff;
+}
+
+#onboarding_page .onboarding-btn:hover,
+#onboarding_page .onboarding-tab:hover,
+#onboarding_page .onboarding-page-btn:hover,
+#onboarding_page .onboarding-file-btn:hover,
+#onboarding_page .onboarding-btn-approve:hover,
+#onboarding_page .onboarding-btn-reject:hover {
+  opacity: 0.85;
+}
