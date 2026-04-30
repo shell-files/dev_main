@@ -211,3 +211,7 @@ __marimo__/
 
 # ocr secrets
 secrets/
+*.pem
+
+# ocr
+secrets/

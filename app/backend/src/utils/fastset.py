@@ -4,11 +4,20 @@ from src.utils.settings import settings
 from src import apis 
 import importlib
 import pkgutil
+from contextlib import asynccontextmanager
+from src.utils.kafkasv import startConsumer
 
+# [STARTUP] 앱이 켜질 때 Kafka 실행
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startConsumer() 
+    print("🚀 Kafka Email Consumer Started...")
+    yield
+    
 def run():
     app = FastAPI(servers=[
         {"url": "/", "description": "API 기본 서버"}
-    ])
+    ], lifespan=lifespan)
     # 라우터 등록
     for _, module_name, _ in pkgutil.iter_modules(apis.__path__):
         module = importlib.import_module(f"src.apis.{module_name}")
@@ -30,3 +39,4 @@ def run():
     )
 
     return app
+
