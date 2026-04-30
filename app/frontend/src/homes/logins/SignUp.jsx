@@ -8,7 +8,7 @@ import ksicData from '@assets/data/ksicClassification.json';
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
  * 백엔드 서버가 준비되지 않았거나 403 에러 등의 이슈가 있을 때 프론트엔드 흐름 테스트용으로 사용합니다.
  */
-const USE_DUMMY = false;
+const USE_DUMMY = true;
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -44,6 +44,7 @@ const Signup = () => {
         headOffice: '',
         issueDate: '',
         texName: '',
+        companySize: ''
         
     });
     const addIndustry = () => {
@@ -58,7 +59,7 @@ const Signup = () => {
         );
 
         if (target) {
-            const code = target.standardIndustryClassification;
+            const code = Number(target.standardIndustryClassification);
             if (industryCodes.includes(code)) {
                 return alert("이미 추가된 업종 코드입니다.");
             }
@@ -257,7 +258,7 @@ const Signup = () => {
             newErrors.email = "이미 사용중인 이메일입니다.";
             
         }
-        if (!companySize) {
+        if (!formData.companySize) {
             newErrors.companySize = "기업 규모 선택 필요";
         }
         if (businessValid === false) {
@@ -318,8 +319,7 @@ const Signup = () => {
         { label: "본점 소재지", name: "headOffice" },
         { label: "발행일", name: "issueDate" },
         { label: "발행처", name: "texName" },
-        { label: "사업의 종류(업태)", name: "industryId" },
-        { label: "사업의 종류(종목)", name: "subCategory" }
+
     ];
 
     // --- [렌더링 구역] ---
@@ -437,75 +437,89 @@ const Signup = () => {
                                         ))}
                                     </select>
                                     
-                                    {/* 중분류 */}
+                                    {/* 중분류 -filtered 리스트에서 중복 제거 */}
                                     <select 
                                         disabled={!sel.large} 
                                         value={sel.medium} 
                                         onChange={(e) => setSel({...sel, medium: e.target.value, small:'', fine:'', detail:''})}
                                     >
                                         <option value="">중분류 선택</option>
-                                        {ksicData
+                                        {[...new Set(ksicData
                                             .filter(i => i.largeCategoryName === sel.large)
-                                            .map((item, idx) => (
-                                                <option key={idx} value={item.mediumCategoryName}>{item.mediumCategoryName}</option>
-                                            ))}
+                                            .map(item => item.mediumCategoryName)
+                                        )].map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
                                     </select>
-                                    
-                                    {/* 소분류 */}
+
+                                    {/* 소분류 - filtered 리스트에서 중복 제거 */}
                                     <select 
                                         disabled={!sel.medium} 
                                         value={sel.small} 
                                         onChange={(e) => setSel({...sel, small: e.target.value, fine:'', detail:''})}
                                     >
                                         <option value="">소분류 선택</option>
-                                        {ksicData
+                                        {[...new Set(ksicData
                                             .filter(i => i.mediumCategoryName === sel.medium)
-                                            .map((item, idx) => (
-                                                <option key={idx} value={item.smallCategoryName}>{item.smallCategoryName}</option>
-                                            ))}
+                                            .map(item => item.smallCategoryName)
+                                        )].map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
                                     </select>
 
-                                    {/* 세분류 */}
+                                    {/* 세분류 - filtered 리스트에서 중복 제거 */}
                                     <select 
                                         disabled={!sel.small} 
                                         value={sel.fine} 
                                         onChange={(e) => setSel({...sel, fine: e.target.value, detail:''})}
                                     >
                                         <option value="">세분류 선택</option>
-                                        {ksicData
+                                        {[...new Set(ksicData
                                             .filter(i => i.smallCategoryName === sel.small)
-                                            .map((item, idx) => (
-                                                <option key={idx} value={item.fineCategoryName}>{item.fineCategoryName}</option>
-                                            ))}
-                                            </select>
-                                    
+                                            .map(item => item.fineCategoryName)
+                                        )].map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
 
-                                    {/* 세세분류 (최종) */}
+                                    {/* 세세분류 (최종) - 마지막 단계는 보통 유니크하므로 그대로 두거나 동일하게 처리 */}
                                     <select 
                                         disabled={!sel.fine} 
                                         value={sel.detail} 
                                         onChange={(e) => setSel({...sel, detail: e.target.value})}
                                     >
                                         <option value="">세세분류 선택</option>
-                                        {ksicData
+                                        {[...new Set(ksicData
                                             .filter(i => i.fineCategoryName === sel.fine)
-                                            .map((item, idx) => (
-                                                <option key={idx} value={item.detailCategoryName}>{item.detailCategoryName}</option>
-                                            ))}
+                                            .map(item => item.detailCategoryName)
+                                        )].map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
                                     </select>
-                                    
-                                    <button type="button" className="btn-add" onClick={addIndustry}>업종 추가</button>
-                                </div>
 
                                 {/* 추가된 업종 코드 리스트 표시 */}
+                                </div>
                                 <div className="selected-codes-container">
                                     {industryCodes.map((code, idx) => (
                                         <div key={idx} className="code-tag">
-                                            세세분류: {ksicData.find(i => i.standardIndustryClassification === code)?.detailCategoryName}
+                                            업종 : {ksicData.find(i => i.standardIndustryClassification === code)?.detailCategoryName}
                                             <button type="button" onClick={() => setIndustryCodes(industryCodes.filter((_, i) => i !== idx))}>x</button>
                                         </div>
                                     ))}
-                                </div>
+                            </div>
+                            <button type="button" className="btn-add" onClick={addIndustry}>업종 추가</button>
+                            </div>
+                            {/* 기업규모 셀렉트 박스 */}
+                            <div className="input-group">
+                                <label>기업 규모</label>
+                                <select name="companySize" value={formData.companySize} 
+                                    onChange={(e) => setFormData({...formData, companySize: e.target.value})}>
+                                    <option value="">선택하세요</option>
+                                    <option value="소기업">소기업</option>
+                                    <option value="중기업">중기업</option>
+                                    <option value="중견기업">중견기업</option>
+                                    <option value="대기업">대기업</option>
+                                </select>
                             </div>
                         </section>
 

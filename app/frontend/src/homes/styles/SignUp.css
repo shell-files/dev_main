@@ -230,6 +230,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 /* 선택된 업종 태그 리스트 */
 #signup_page .selected-codes-container {
     display: flex;
+    margin-bottom: 20px;
     flex-wrap: wrap;
     gap: 8px;
     margin-top: 15px;
