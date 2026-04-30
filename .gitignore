@@ -208,3 +208,7 @@ __marimo__/
 
 # Mariadb
 .mariadb/data
+*.pem
+
+# ocr
+secrets/
