@@ -1,6 +1,7 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
 from src.utils.rediscl import setRedis, delRedis
+from src.utils.kafkasv import sendToKafka
 from src.models.model import responseModel
 import random
 import string
@@ -96,7 +97,6 @@ def findPwdProcess(emailModel):
                     """
         emailCheckParams = (emailModel.email,)
         user = findOne(emailCheckSql, emailCheckParams)
-        # print(user)
         if not user:
             return responseModel(False, "등록되지 않은 이메일이거나 탈퇴한 회원입니다.")
         
@@ -111,7 +111,9 @@ def findPwdProcess(emailModel):
         updatePwdParams = (tempPwd, user["id"])
         save(updatePwdSql, updatePwdParams)
 
-        # 3. 임시 비밀번호 포함된 메일(kafka이용) 발송       
+        # 3. 임시 비밀번호 포함된 메일(kafka이용) 발송 
+        kafkaData = {"email": user["email"], "tempPwd": tempPwd}
+        sendToKafka(kafkaData)      
 
         return responseModel(True, "임시 비밀번호가 메일로 발송 됐습니다.")
     except Exception as e:

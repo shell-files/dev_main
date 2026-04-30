@@ -49,17 +49,17 @@ html2 = f"""
 # html3 = 임시 비밀번호 발송 이메일
 html3 = """
     <h1>임시 비밀번호 안내</h1>
-    <p>요청하신 임시 비밀번호는 <strong>{temp_pwd}</strong> 입니다.</p>
+    <p>요청하신 임시 비밀번호는 <strong>{tempPwd}</strong> 입니다.</p>
     <p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>
 """
 
 # Consumer 이메일 발송 함수
 async def handleEmailJob(data):
-    """consumer1: 사내 직원 초대 이메일 발송"""
+    """ 이메일 발송 핸들러 """
     message = MessageSchema(
-        subject="사내 직원 초대",
+        subject="임시 비밀번호 발송",
         recipients=[data.get("email")],
-        body=html1,
+        body=html3.format(tempPwd=data.get("tempPwd")),
         subtype=MessageType.html
     )
     await fastMail.send_message(message)
