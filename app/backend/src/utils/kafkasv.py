@@ -56,10 +56,27 @@ html3 = """
 # Consumer 이메일 발송 함수
 async def handleEmailJob(data):
     """ 이메일 발송 핸들러 """
+
+    type = data.get("type")
+    email = data.get("email")
+
+    # 1. 타입에 따른 제목 및 본문 설정
+    if type == 1:
+        subject = "사내 직원 초대"
+        body = html1
+    elif type == 2:
+        subject = "컨설턴트 초대"
+        body = html2
+    elif type == 3:
+        subject = "임시 비밀번호 발송"
+        # tempPwd가 없는 경우를 대비해 기본값 설정
+        temp_pwd = data.get("tempPwd", "비밀번호 오류")
+        body = html3.format(tempPwd=temp_pwd)
+
     message = MessageSchema(
-        subject="임시 비밀번호 발송",
-        recipients=[data.get("email")],
-        body=html3.format(tempPwd=data.get("tempPwd")),
+        subject=subject,
+        recipients=[email],
+        body=body,
         subtype=MessageType.html
     )
     await fastMail.send_message(message)
