@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
+import ksicData from '@assets/data/ksicClassification.json';
 /**
  * [환경 설정]
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
@@ -16,9 +17,11 @@ const Signup = () => {
     // --- [상태 관리: 파일 및 인증] ---
     const [fileName, setFileName] = useState(''); // 선택된 파일의 이름 표시용
     const [file, setFile] = useState(null);       // 실제 서버로 전송할 파일 객체
+    const [fileId, setFileId] = useState(null);     //OCR 후 파일 ID 받기 위함
     const [isOcrDone, setIsOcrDone] = useState(false);   // 사업자 등록증 OCR 인증 완료 여부
     const [isUploading, setIsUploading] = useState(false); // OCR 업로드 중 로딩 상태
     const [isAgreed, setIsAgreed] = useState(false);     // 약관 동의 여부
+    
 
     // --- [상태 관리: 중복 검사 및 에러] ---
     const [emailValid, setEmailValid] = useState(null);    // 이메일 중복 검사 결과 (true: 가능, false: 중복)
@@ -27,20 +30,43 @@ const Signup = () => {
     const [signupLoading, setSignupLoading] = useState(false); // 최종 가입 버튼 클릭 시 로딩 상태
 
     // --- [상태 관리: 입력 폼 데이터] ---
+    const [industryCodes, setIndustryCodes] = useState([]);
+    const [sel, setSel] = useState({ large: '', medium: '', small: '', fine: '', detail: '' });
     const [formData, setFormData] = useState({
         email: '',
         password: '',
         ceoName: '',
+        userName: '',
         businessNumber: '',
         companyName: '',
         openingDate: '',
         corporateNumber: '',
         headOffice: '',
         issueDate: '',
-        issuer: '',
-        industryId: '',
-        subCategory: ''
+        texName: '',
+        
     });
+    const addIndustry = () => {
+        if (!sel.detail) return alert("5단계(세세분류)까지 모두 선택해주세요.");
+
+        const target = ksicData.find(i => 
+            i.largeCategoryName === sel.large &&
+            i.mediumCategoryName === sel.medium &&
+            i.smallCategoryName === sel.small &&
+            i.fineCategoryName === sel.fine &&
+            i.detailCategoryName === sel.detail
+        );
+
+        if (target) {
+            const code = target.standardIndustryClassification;
+            if (industryCodes.includes(code)) {
+                return alert("이미 추가된 업종 코드입니다.");
+            }
+            setIndustryCodes([...industryCodes, code]); // 코드만 배열에 추가
+            // 선택 창 초기화
+            setSel({ large: '', medium: '', small: '', fine: '', detail: '' });
+        }
+    };
 
     // 필드별 필수 입력 경고 메시지 정의
     const requiredFields = {
@@ -53,9 +79,7 @@ const Signup = () => {
         corporateNumber: "법인 등록번호는 필수입니다.",
         headOffice: "본점 소재지는 필수입니다.",
         issueDate: "발행일은 필수입니다.",
-        issuer: "발행처는 필수입니다.",
-        industryId: "업태는 필수입니다.",
-        subCategory: "종목은 필수입니다."
+        texName: "발행처는 필수입니다.",
     };
 
     // 현재 페이지가 통신 중(로딩 중)인지 확인하는 변수
@@ -129,7 +153,7 @@ const Signup = () => {
                     corporateNumber: '110111-0000000',
                     headOffice: '서울특별시 강남구...',
                     issueDate: '2024-04-29',
-                    issuer: '강남세무서',
+                    texName: '강남세무서',
                     industryId: '서비스업',
                     subCategory: '소프트웨어 개발'
                 }));
@@ -143,52 +167,82 @@ const Signup = () => {
         // 실제 모드: FormData에 파일을 담아 API 전송
         try {
             const formDataToSend = new FormData();
+            const ext = file.name.split('.').pop().toLowerCase();
+            const allowed = ['jpg', 'jpeg', 'png', 'pdf'];
+
+            if (!allowed.includes(ext)) {
+                alert("지원하지 않는 파일 형식입니다.");
+                setIsUploading(false);
+                return;
+            }
+
             formDataToSend.append("file", file);
-            const res = await api.post("/api/ocr", formDataToSend, {
-                headers: { "Content-Type": "multipart/form-data" }
-            });
+            formDataToSend.append("fileName", file.name);
+            formDataToSend.append("fileExt", ext);
+
+            const res = await api.post("/user", formDataToSend);
+
             if (res.data.status === true) {
                 setFormData(prev => ({ ...prev, ...res.data.data }));
+
+                // ✅ 안전 처리
+                if (res.data.fileId) {
+                    setFileId(res.data.fileId);
+                }
+
                 setIsOcrDone(true);
-            }else{
-                alert("OCR 처리에 실패했습니다. 다시 시도해주세요.");
+            } else {
+                alert("OCR 처리 실패");
             }
         } catch (err) {
-            alert(`서버 오류가 발생했습니다.`);
+            alert("서버 오류");
         } finally {
             setIsUploading(false);
         }
     };
 
     // --- [로직: 중복 검사] ---
+    // 1. 이메일 중복 검사 함수
     const checkEmail = async () => {
-        if (!formData.email) return false;
+        if (!formData.email || errors.email) return;
+
         try {
-            const res = await api.get('/api/user/check-email', { params: { email: formData.email } });
-            setEmailValid(res.data.status);
-            return res.data.status;
+            // 명세서: GET /user?email=값
+            const res = await api.get('/user', { 
+                params: { email: formData.email } 
+            });
+            setEmailValid(res.data.status); // true면 사용 가능, false면 중복
         } catch (err) {
-            console.error("이메일 중복 검사 실패", err);
-            return false;
+            console.error("이메일 중복 검사 에러:", err);
         }
     };
 
+    // 2. 사업자번호 중복 검사 함수
     const checkBusiness = async () => {
-        if (!formData.businessNumber) return false;
+        if (!formData.businessNumber) return;
+
         try {
-            const res = await api.get('/api/user/check-business', { params: { businessNumber: formData.businessNumber } });
+            // 명세서: GET /user?businessNumber=값
+            const res = await api.get('/user', { 
+                params: { businessNumber: formData.businessNumber } 
+            });
             setBusinessValid(res.data.status);
-            return res.data.status;
         } catch (err) {
-            console.error("사업자번호 중복 검사 실패", err);
-            return false;
+            console.error("사업자번호 중복 검사 에러:", err);
         }
     };
 
     // --- [로직: 최종 제출] ---
     const handleSubmit = async (e) => {
         e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
+
+        if (industryCodes.length === 0) return alert("업종을 최소 하나 이상 선택해야 합니다.");
+        if (!isAgreed) return alert("약관에 동의해주세요.");
+
         const newErrors = {};
+        if (!fileId) {
+            newErrors.ocr = "OCR 인증을 완료해주세요.";
+        }
         // 모든 필수 필드 자동 검사
         Object.keys(requiredFields).forEach(key => {
             if (!formData[key]) {
@@ -201,6 +255,10 @@ const Signup = () => {
         if (!isAgreed) newErrors.agree = "약관 동의 필요";
         if (emailValid === false) {
             newErrors.email = "이미 사용중인 이메일입니다.";
+            
+        }
+        if (!companySize) {
+            newErrors.companySize = "기업 규모 선택 필요";
         }
         if (businessValid === false) {
             newErrors.businessNumber = "이미 등록된 사업자번호입니다.";
@@ -223,7 +281,12 @@ const Signup = () => {
         }
 
         try {
-            const res = await api.post("/api/signup", { ...formData, fileName, agreed: isAgreed });
+            const res = await api.put("/user", {
+                ...formData,
+                licensefileId: fileId, 
+                industryCodes: industryCodes,
+                agreed: isAgreed
+            });
             
             // ✅ 수정: status === true 체크
             if (res.data.status === true) {
@@ -254,7 +317,7 @@ const Signup = () => {
         { label: "법인 등록번호", name: "corporateNumber" },
         { label: "본점 소재지", name: "headOffice" },
         { label: "발행일", name: "issueDate" },
-        { label: "발행처", name: "issuer" },
+        { label: "발행처", name: "texName" },
         { label: "사업의 종류(업태)", name: "industryId" },
         { label: "사업의 종류(종목)", name: "subCategory" }
     ];
@@ -272,6 +335,21 @@ const Signup = () => {
                         {/* 1. 가입 정보 섹션 (이메일, 비밀번호) */}
                         <section className="form-section">
                             <h2 className="section-title">가입 정보</h2>
+                            {/* 이름 입력 */}
+                            <div className="input-group">
+                                <label>성명</label>
+                                <div className="input-wrap">
+                                    <input 
+                                        type="text" 
+                                        name="userName" 
+                                        value={formData.userName} 
+                                        onChange={handleChange} 
+                                        onBlur={(e) => validateField("userName", e.target.value)}
+                                        placeholder="이름을 입력해주세요" 
+                                    />
+                                    {errors.userName && <p className="error">{errors.userName}</p>}
+                                </div>
+                            </div>
                             
                             {/* 이메일 입력 */}
                             <div className="input-group">
@@ -321,7 +399,7 @@ const Signup = () => {
                             {errors.ocr && <p className="error">{errors.ocr}</p>}
 
                             {/* 사업자 등록번호 (중복 검사 포함) */}
-                            <div className="input-group" style={{marginTop: '20px'}}>
+                            <div className="input-group">
                                 <label>사업자 등록번호</label>
                                 <div className="input-wrap">
                                     <input type="text" name="businessNumber" value={formData.businessNumber} onChange={handleChange}
@@ -344,7 +422,91 @@ const Signup = () => {
                                         {errors[field.name] && <p className="error">{errors[field.name]}</p>}
                                     </div>
                                 </div>
+                                
                             ))}
+                            {/* 업종 5단계 선택 UI 추가 */}
+                            <div className="industry-selection-wrapper">
+                                <h3 className="sub-title">업종 추가 (표준산업분류 기준)</h3>
+                                
+                                <div className="select-step-group">
+                                    {/* 대분류 */}
+                                    <select value={sel.large} onChange={(e) => setSel({...sel, large: e.target.value, medium:'', small:'', fine:'', detail:''})}>
+                                        <option value="">대분류 선택</option>
+                                        {[...new Set(ksicData.map(i => i.largeCategoryName))].map(name => (
+                                            <option key={name} value={name}>{name}</option>
+                                        ))}
+                                    </select>
+                                    
+                                    {/* 중분류 */}
+                                    <select 
+                                        disabled={!sel.large} 
+                                        value={sel.medium} 
+                                        onChange={(e) => setSel({...sel, medium: e.target.value, small:'', fine:'', detail:''})}
+                                    >
+                                        <option value="">중분류 선택</option>
+                                        {ksicData
+                                            .filter(i => i.largeCategoryName === sel.large)
+                                            .map((item, idx) => (
+                                                <option key={idx} value={item.mediumCategoryName}>{item.mediumCategoryName}</option>
+                                            ))}
+                                    </select>
+                                    
+                                    {/* 소분류 */}
+                                    <select 
+                                        disabled={!sel.medium} 
+                                        value={sel.small} 
+                                        onChange={(e) => setSel({...sel, small: e.target.value, fine:'', detail:''})}
+                                    >
+                                        <option value="">소분류 선택</option>
+                                        {ksicData
+                                            .filter(i => i.mediumCategoryName === sel.medium)
+                                            .map((item, idx) => (
+                                                <option key={idx} value={item.smallCategoryName}>{item.smallCategoryName}</option>
+                                            ))}
+                                    </select>
+
+                                    {/* 세분류 */}
+                                    <select 
+                                        disabled={!sel.small} 
+                                        value={sel.fine} 
+                                        onChange={(e) => setSel({...sel, fine: e.target.value, detail:''})}
+                                    >
+                                        <option value="">세분류 선택</option>
+                                        {ksicData
+                                            .filter(i => i.smallCategoryName === sel.small)
+                                            .map((item, idx) => (
+                                                <option key={idx} value={item.fineCategoryName}>{item.fineCategoryName}</option>
+                                            ))}
+                                            </select>
+                                    
+
+                                    {/* 세세분류 (최종) */}
+                                    <select 
+                                        disabled={!sel.fine} 
+                                        value={sel.detail} 
+                                        onChange={(e) => setSel({...sel, detail: e.target.value})}
+                                    >
+                                        <option value="">세세분류 선택</option>
+                                        {ksicData
+                                            .filter(i => i.fineCategoryName === sel.fine)
+                                            .map((item, idx) => (
+                                                <option key={idx} value={item.detailCategoryName}>{item.detailCategoryName}</option>
+                                            ))}
+                                    </select>
+                                    
+                                    <button type="button" className="btn-add" onClick={addIndustry}>업종 추가</button>
+                                </div>
+
+                                {/* 추가된 업종 코드 리스트 표시 */}
+                                <div className="selected-codes-container">
+                                    {industryCodes.map((code, idx) => (
+                                        <div key={idx} className="code-tag">
+                                            세세분류: {ksicData.find(i => i.standardIndustryClassification === code)?.detailCategoryName}
+                                            <button type="button" onClick={() => setIndustryCodes(industryCodes.filter((_, i) => i !== idx))}>x</button>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
                         </section>
 
                         <hr className="divider" />
