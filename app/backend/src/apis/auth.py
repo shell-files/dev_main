@@ -1,14 +1,14 @@
 from fastapi import APIRouter
-from src.models.model import loginModel, logoutModel
-from src.models.auth import loginProcess, logoutProcess
+from src.models.model import loginModel, logoutModel, emailModel
+from src.models.auth import loginProcess, logoutProcess, findPwdProcess
 
 router = APIRouter()
 
-@router.get("", 
+@router.post("/", 
         summary="비밀번호 찾기", 
         description="비밀번호 찾기")
-def findPwd():
-    pass
+def findPwd(emailModel: emailModel):
+    return findPwdProcess(emailModel)
 
 @router.post("",
         summary="로그인 api",

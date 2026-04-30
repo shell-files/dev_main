@@ -5,7 +5,7 @@ class Settings(BaseSettings):
   # --------------------------
   # kafka config
   # --------------------------
-  kafka_server: str = "kafka:9092"
+  kafka_server: str = "kafka:9094"
   kafka_topic: str = "email"
   # --------------------------
   # email config
@@ -18,6 +18,8 @@ class Settings(BaseSettings):
   mail_from_name: str = "W.I.T.H"
   mail_starttls: bool = True
   mail_ssl_tls: bool = False
+  use_credentials: bool = True
+  validate_certs: bool = True
   # tokenset.py
   # --------------------------
   # secret_key: str
