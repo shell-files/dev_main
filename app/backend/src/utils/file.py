@@ -9,14 +9,12 @@ from src.utils.db import save
 
 # app = FastAPI()
 
-
-# 파일 저장 디렉토리 설정
-UPLOAD_DIR = Path("licenseFiles")
-
 # --------------------------
 # 파일명 분리, 암호화 로직
 # --------------------------
+
 def licenseFile(file):
+    UPLOAD_DIR = Path("licenseFiles")
     UPLOAD_DIR.mkdir(exist_ok=True)
     origin = file.filename
     ext = origin.split(".")[-1].lower()
@@ -33,7 +31,7 @@ def licenseFile(file):
         path = UPLOAD_DIR / newName
     with path.open("wb") as f:
             shutil.copyfileobj(file.file, f)
-    return result
+    return result, id, ext
 
 
 # --------------------------
@@ -74,7 +72,7 @@ async def checkBusinessStatus(businessNumber: str):
                     "msg": "폐업 상태입니다."
                 }
             
-            return {"status": True, "data": businessInfo}
+            return {"status": True}
         
         return {"status": False, "msg": "응답 데이터가 올바르지 않습니다."}
     
