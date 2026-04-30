@@ -18,6 +18,8 @@ class Settings(BaseSettings):
   mail_from_name: str = "W.I.T.H"
   mail_starttls: bool = True
   mail_ssl_tls: bool = False
+  use_credentials: bool = True
+  validate_certs: bool = True
   # tokenset.py
   # --------------------------
   # secret_key: str

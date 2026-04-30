@@ -46,6 +46,12 @@ html2 = f"""
     <p>아래 링크를 통해 가입 후 로그인하세요.</p>
     <p>link</p>
   """
+# html3 = 임시 비밀번호 발송 이메일
+html3 = """
+    <h1>임시 비밀번호 안내</h1>
+    <p>요청하신 임시 비밀번호는 <strong>{temp_pwd}</strong> 입니다.</p>
+    <p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>
+"""
 
 # Consumer 이메일 발송 함수
 async def handleEmailJob(data):
