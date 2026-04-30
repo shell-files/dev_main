@@ -36,6 +36,10 @@ class Settings(BaseSettings):
   # --------------------------
   service_key: str
   # --------------------------
+  # ocr.py
+  # --------------------------
+  ocr_key_path: str = "secrets/ocr_key.json"
+  # --------------------------
   # db.py
   # --------------------------
   maria_db_user: str
@@ -43,6 +47,7 @@ class Settings(BaseSettings):
   maria_db_host: str
   maria_db_database: str
   maria_db_port: int
+
 
   model_config = SettingsConfigDict(
     env_file=".env",
