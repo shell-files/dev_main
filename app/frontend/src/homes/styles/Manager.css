@@ -1,38 +1,46 @@
-/* 기본 레이아웃 */
-.admin-page-container { padding: 20px; background-color: #fff; min-height: 100vh; }
-.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.admin-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+/* 컨테이너 및 기본 폰트 */
+.manager-content-container { font-family: 'Pretendard', sans-serif; color: #333; }
 
-/* KPI 카드 */
-.kpi-section { display: flex; gap: 15px; margin-bottom: 25px; }
-.kpi-card { flex: 1; background: #fff; padding: 15px; border-radius: 8px; text-align: center; border-top: 4px solid #ddd; }
-.kpi-card.approved { border-top-color: #28a745; }
-.kpi-card.pending { border-top-color: #ffc107; }
-.kpi-card.rejected { border-top-color: #dc3545; }
+/* 페이지 헤더 & 탭 */
+.page-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
+.page-title { font-size: 22px; font-weight: 700; margin: 0; }
+.tab-group { display: flex; gap: 8px; }
+.tab-item { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: 600; color: #999; border-radius: 8px 8px 0 0; transition: 0.2s; }
+.tab-item.active { background: #03a94d; color: #fff; }
 
-/* 섹션 공통 스타일 */
-.admin-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
-.search-bar { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ddd; }
-.admin-table { width: 100%; border-collapse: collapse; }
-.admin-table th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; font-size: 13px; }
-.admin-table td { padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+/* 필터바 */
+.filter-bar { display: flex; gap: 10px; background: #fff; padding: 15px; border: 1px solid #eee; border-radius: 12px; margin-bottom: 20px; }
+.search-input { flex: 2; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+.filter-select { flex: 1; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+.btn-primary { padding: 0 24px; background: #03a94d; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
 
-/* 버튼 스타일 */
-.btn-manage { background: #333; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
-.btn-app { background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-.btn-rej { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+/* 테이블 스타일 (HTML 레이아웃 계승) */
+.table-wrapper { background: #fff; border: 1px solid #eee; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
+table { width: 100%; border-collapse: collapse; }
+th { background: #f8f9fa; padding: 14px; text-align: left; font-size: 13px; color: #666; border-bottom: 1px solid #eee; }
+td { padding: 16px 14px; border-bottom: 1px solid #eee; vertical-align: middle; font-size: 14px; }
+
+/* 배지 및 태그 */
+.role-badge { padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: bold; color: #fff; }
+.role-badge.purple { background: #673AB7; }
+.role-badge.green { background: #03a94d; }
+.depth-tag { background: #f1f3f5; color: #666; font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 5px; }
+.tag-item { background: #eef2ff; color: #4338ca; border: 1px solid #c7d2fe; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-right: 4px; display: inline-block; }
+
+/* 버튼 */
+.btn-outline { padding: 6px 12px; border: 1px solid #ddd; background: #fff; border-radius: 4px; cursor: pointer; font-size: 12px; }
+.btn-outline:hover { border-color: #03a94d; color: #03a94d; }
 
 /* 모달 스타일 */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
-.modal-content { background: white; width: 500px; border-radius: 12px; padding: 25px; max-height: 80vh; overflow-y: auto; }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; z-index: 9999; }
+.modal-window { background: #fff; width: 500px; border-radius: 16px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-.modal-body { display: flex; flex-direction: column; gap: 10px; }
+.modal-tag-group { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.modal-tag { padding: 6px 14px; border-radius: 20px; font-size: 12px; cursor: pointer; border: 1px solid transparent; }
+.modal-tag.assigned { background: #e7f3ff; color: #007bff; border-color: #007bff; }
+.modal-tag.unassigned { background: #f5f5f5; color: #666; }
+.btn-confirm { width: 100%; padding: 12px; background: #03a94d; color: white; border: none; border-radius: 8px; font-weight: bold; margin-top: 20px; cursor: pointer; }
 
-/* 태그 시스템 */
-.tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
-.group-label { font-weight: bold; font-size: 14px; color: #555; }
-.tag { padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
-.tag.assigned { background: #e7f3ff; color: #007bff; border-color: #007bff; }
-.tag.assigned:hover { background: #fdeaea; color: #dc3545; border-color: #dc3545; } /* 제거 효과 */
-.tag.unassigned { background: #f0f0f0; color: #666; }
-.tag.unassigned:hover { background: #333; color: #fff; }
+/* 애니메이션 */
+.fade-in { animation: fadeIn 0.3s ease-in-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }

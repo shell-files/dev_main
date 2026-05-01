@@ -1,167 +1,301 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import '@styles/Manager.css'; 
+import React, { useState, useEffect } from 'react';
+import '@styles/Manager.css';
 
-// 23개 이상의 이슈 그룹 예시
 const ALL_ISSUE_GROUPS = [
-  "기업개요", "Climate", "Social", "Governance", "Ethics", "Waste", "Water", 
-  "Energy", "Labor", "Human Rights", "Community", "Product Safety", "Tax",
-  "Biodiversity", "Supply Chain", "Diversity", "Data Privacy", "Anti-Corruption",
-  "Safety", "Circular Economy", "Greenhouse Gas", "Air Quality", "ESG Strategy"
+  "기업개요","Climate","Social","Governance","Ethics","Waste","Water","Energy",
+  "Labor","Human Rights","Community","Product Safety","Tax","Biodiversity",
+  "Supply Chain","Diversity","Data Privacy","Anti-Corruption","Safety",
+  "Circular Economy","Greenhouse Gas","Air Quality","ESG Strategy"
 ];
 
+const PAGE_SIZE = 10;
+
 const Manager = () => {
+  const [activeTab, setActiveTab] = useState('user');
   const [users, setUsers] = useState([]);
   const [inputs, setInputs] = useState([]);
-  const [loading, setLoading] = useState(false);
-  
-  // 모달 상태 관리
+
+  const [userSearch, setUserSearch] = useState("");
+  const [userPage, setUserPage] = useState(1);
+  const [dataPage, setDataPage] = useState(1);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
-  // 검색 및 필터
-  const [userSearch, setUserSearch] = useState("");
-  const [dataSearch, setDataSearch] = useState("");
-
-  useEffect(() => { fetchInitialData(); }, []);
-
-  const fetchInitialData = () => {
-    setLoading(true);
-    // 실제 환경에선 API 호출 
+  useEffect(() => {
     setUsers([
-        { id: "U001", name: "이채훈", dept: "IT전략팀", groups: ["기업개요", "Climate"] },
-        { id: "U002", name: "이정빈", dept: "ESG경영팀", groups: ["Social"] },
-        { id: "U003", name: "이나라", dept: "ESG경영팀", groups: ["Social"] },
+      { id:"U001", name:"이채훈", email:"chaehoon@skm.com", company:"SKM", tier:"1 Tier", role:"Consultant", groups:["기업개요","Climate","Social","Waste","Energy"] },
+      { id:"U002", name:"이정빈", email:"lee@gmail.com", company:"SKM", tier:"1 Tier", role:"Consultant", groups:["Social"] },
+      { id:"U003", name:"이나라", email:"nara@gmail.com", company:"TV", tier:"2 Tier", role:"ESG Admin", groups:["Social","Waste"] },
     ]);
+
     setInputs([
-        { id: "INP-01", q_id: "Q-101", q_name: "에너지 사용량", group: "Climate", val: "450kWh", u_id: "U001", status: "pending" },
+      { id:"INP-01", q_name:"에너지 사용량", val:"450kWh", u_id:"U001", status:"pending" },
+      { id:"INP-02", q_name:"탄소 배출량", val:"120t", u_id:"U002", status:"approved" },
     ]);
-    setLoading(false);
-  };
+  }, []);
 
-  // 모달 열기
-  const openGroupModal = (user) => {
-    setCurrentUser(user);
-    setIsModalOpen(true);
+  // KPI
+  const kpi = {
+    approved: inputs.filter(i=>i.status==='approved').length,
+    pending: inputs.filter(i=>i.status==='pending').length,
+    rejected: inputs.filter(i=>i.status==='rejected').length
   };
+  const [statusFilter, setStatusFilter] = useState('all');
 
-  // 이슈 그룹 추가/삭제 (중복 방지 및 최소 1개 유지)
+  const kpiItems = [
+    { key: 'approved', label: '승인', count: kpi.approved, color: '#03a94d' },
+    { key: 'pending', label: '대기', count: kpi.pending, color: '#673AB7' },
+    { key: 'rejected', label: '반려', count: kpi.rejected, color: '#dc3545' }
+  ];
+
+  // 그룹 토글
   const toggleGroup = (groupName) => {
     setUsers(prev => prev.map(u => {
       if (u.id === currentUser.id) {
-        const hasGroup = u.groups.includes(groupName);
-        let newGroups;
-        if (hasGroup) {
-          newGroups = u.groups.filter(g => g !== groupName);
-          if (newGroups.length === 0) return u; // 최소 1개 유지
-        } else {
-          newGroups = [...u.groups, groupName]; // 중복은 UI에서 원천 차단됨
-        }
-        const updatedUser = { ...u, groups: newGroups };
-        setCurrentUser(updatedUser); // 모달 실시간 반영
-        return updatedUser;
+        const has = u.groups.includes(groupName);
+        let newGroups = has ? u.groups.filter(g=>g!==groupName) : [...u.groups, groupName];
+        if (newGroups.length === 0) return u;
+        const updated = { ...u, groups: newGroups };
+        setCurrentUser(updated);
+        return updated;
       }
       return u;
     }));
   };
 
-  const kpi = {
-    approved: inputs.filter(i => i.status === 'approved').length,
-    pending: inputs.filter(i => i.status === 'pending').length,
-    rejected: inputs.filter(i => i.status === 'rejected').length
+  // 승인/반려
+  const handleAction = (id, status) => {
+    setInputs(prev => prev.map(i => i.id===id ? { ...i, status } : i));
   };
 
+  // 유저 필터 + 페이징
+  const filteredUsers = users.filter(u =>
+    u.name.includes(userSearch) || u.company.includes(userSearch)
+  );
+
+  const pagedUsers = filteredUsers.slice(
+    (userPage-1)*PAGE_SIZE,
+    userPage*PAGE_SIZE
+  );
+
+  const totalUserPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
+
+  // 데이터 페이징
+  const pagedInputs = inputs.slice(
+    (dataPage-1)*PAGE_SIZE,
+    dataPage*PAGE_SIZE
+  );
+
+  const totalDataPages = Math.ceil(inputs.length / PAGE_SIZE);
+
   return (
-    <div className="admin-page-container">
-      <header className="admin-header">
-        <h2>ESG 통합 관리 시스템</h2>
-        <button className="btn-refresh" onClick={fetchInitialData}>데이터 새로고침 🔄</button>
-      </header>
+    <div className="manager-content-container">
 
-      {/* KPI 섹션 */}
-      <section className="kpi-section">
-        <div className="kpi-card approved"><span>승인완료</span><strong>{kpi.approved}</strong></div>
-        <div className="kpi-card pending"><span>승인대기</span><strong>{kpi.pending}</strong></div>
-        <div className="kpi-card rejected"><span>반려됨</span><strong>{kpi.rejected}</strong></div>
-      </section>
-
-      <div className="admin-grid">
-        {/* [구역 1] 유저 권한 관리 */}
-        <section className="admin-card">
-          <h3>👥 사원 권한 관리</h3>
-          <input className="search-bar" placeholder="사원명 검색..." onChange={(e) => setUserSearch(e.target.value)} />
-          <table className="admin-table">
-            <thead>
-              <tr><th>사원명</th><th>권한 상태</th><th>관리</th></tr>
-            </thead>
-            <tbody>
-              {users.filter(u => u.name.includes(userSearch)).map(u => (
-                <tr key={u.id}>
-                  <td>{u.name}<br/><small>{u.dept}</small></td>
-                  <td><span className="group-count">이슈 {u.groups.length}개 할당됨</span></td>
-                  <td>
-                    <button className="btn-manage" onClick={() => openGroupModal(u)}>이슈 그룹 관리</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
-
-        {/* [구역 2] 데이터 승인 */}
-        <section className="admin-card">
-          <h3>📝 데이터 검토 내역</h3>
-          <input className="search-bar" placeholder="항목 검색..." onChange={(e) => setDataSearch(e.target.value)} />
-          <table className="admin-table">
-            <thead>
-              <tr><th>항목</th><th>데이터</th><th>입력자</th><th>결정</th></tr>
-            </thead>
-            <tbody>
-              {inputs.filter(i => i.q_name.includes(dataSearch)).map(item => (
-                <tr key={item.id}>
-                  <td>{item.q_name}</td>
-                  <td className="data-val">{item.val}</td>
-                  <td>{users.find(u => u.id === item.u_id)?.name}</td>
-                  <td>
-                    <div className="btn-group">
-                      <button className="btn-app">승인</button>
-                      <button className="btn-rej">반려</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </section>
+      {/* KPI (CSS 건드리지 않기 위해 inline 최소만 사용) */}
+      <div style={{display:'flex', gap:'12px', marginBottom:'20px'}}>
+        {kpiItems.map(item => (
+          <div
+            key={item.key}
+            onClick={() => setStatusFilter(item.key)}
+            style={{
+              flex:1,
+              padding:'12px',
+              border:'1px solid #eee',
+              borderRadius:'10px',
+              cursor:'pointer',
+              background: statusFilter === item.key ? '#f8f9fa' : '#fff'
+            }}
+          >
+            <div style={{fontSize:'12px', color:'#666'}}>{item.label}</div>
+            <div style={{fontSize:'22px', fontWeight:'bold', color:item.color}}>
+              {item.count}
+            </div>
+          </div>
+        ))}
       </div>
 
-      {/* 이슈 그룹 관리 모달 */}
+      {/* 헤더 */}
+      <div className="page-header">
+        <h2 className="page-title">통합 관리 시스템</h2>
+        <div className="tab-group">
+          <button className={`tab-item ${activeTab==='user'?'active':''}`} onClick={()=>setActiveTab('user')}>유저</button>
+          <button className={`tab-item ${activeTab==='data'?'active':''}`} onClick={()=>setActiveTab('data')}>데이터</button>
+        </div>
+      </div>
+
+      {/* ===================== */}
+      {/* 유저 관리 */}
+      {/* ===================== */}
+      {activeTab === 'user' && (
+        <section className="fade-in">
+
+          <div className="filter-bar">
+            <input
+              className="search-input"
+              placeholder="검색"
+              value={userSearch}
+              onChange={(e)=>setUserSearch(e.target.value)}
+            />
+            <button className="btn-primary">조회</button>
+          </div>
+
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>사용자</th>
+                  <th>회사</th>
+                  <th>이슈 그룹</th>
+                  <th>관리</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {pagedUsers.map(u => {
+                  const visible = u.groups.slice(0,4);
+                  const remain = u.groups.length - 4;
+
+                  return (
+                    <tr key={u.id}>
+                      <td>
+                        <strong>{u.name}</strong><br/>
+                        <small>{u.email}</small>
+                      </td>
+
+                      <td>
+                        {u.company}
+                        <span className="depth-tag">{u.tier}</span>
+                      </td>
+
+                      <td>
+                        {visible.map(g=>(
+                          <span key={g} className="tag-item">{g}</span>
+                        ))}
+                        {remain > 0 && <span className="tag-item">+{remain}</span>}
+                      </td>
+
+                      <td>
+                        <button
+                          className="btn-outline"
+                          onClick={()=>{setCurrentUser(u); setIsModalOpen(true);}}
+                        >
+                          이슈 그룹 보기
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+
+          {/* 페이지네이션 */}
+          <div style={{marginTop:'10px'}}>
+            {Array.from({length: totalUserPages}).map((_,i)=>(
+              <button key={i} onClick={()=>setUserPage(i+1)} className="btn-outline">
+                {i+1}
+              </button>
+            ))}
+          </div>
+
+        </section>
+      )}
+
+      {/* ===================== */}
+      {/* 데이터 */}
+      {/* ===================== */}
+      {activeTab === 'data' && (
+        <section className="fade-in">
+
+          <div className="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>항목</th>
+                  <th>값</th>
+                  <th>작성자</th>
+                  <th>상태</th>
+                  <th>액션</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {pagedInputs.map(item=>(
+                  <tr key={item.id}>
+                    <td>{item.q_name}</td>
+                    <td>{item.val}</td>
+                    <td>{users.find(u=>u.id===item.u_id)?.name}</td>
+
+                    <td>
+                      <span className={`role-badge ${item.status==='approved'?'green':'purple'}`}>
+                        {item.status}
+                      </span>
+                    </td>
+
+                    <td>
+                      {item.status==='pending' && (
+                        <>
+                          <button className="btn-outline" onClick={()=>handleAction(item.id,'approved')}>승인</button>
+                          <button className="btn-outline" onClick={()=>handleAction(item.id,'rejected')}>반려</button>
+                        </>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div style={{marginTop:'10px'}}>
+            {Array.from({length: totalDataPages}).map((_,i)=>(
+              <button key={i} onClick={()=>setDataPage(i+1)} className="btn-outline">
+                {i+1}
+              </button>
+            ))}
+          </div>
+
+        </section>
+      )}
+
+      {/* ===================== */}
+      {/* 모달 */}
+      {/* ===================== */}
       {isModalOpen && (
         <div className="modal-overlay">
-          <div className="modal-content">
+          <div className="modal-window">
             <div className="modal-header">
-              <h3>[{currentUser?.name}] 이슈 그룹 설정</h3>
-              <button className="btn-close" onClick={() => setIsModalOpen(false)}>×</button>
+              <h3>{currentUser.name}</h3>
+              <button onClick={()=>setIsModalOpen(false)}>×</button>
             </div>
-            
-            <div className="modal-body">
-              <div className="group-label">현재 할당된 그룹 (클릭 시 제거)</div>
-              <div className="tag-container active-tags">
-                {currentUser?.groups.map(g => (
-                  <button key={g} className="tag assigned" onClick={() => toggleGroup(g)}>{g} ✕</button>
-                ))}
-              </div>
 
-              <div className="group-label" style={{ marginTop: '20px' }}>추가 가능한 그룹</div>
-              <div className="tag-container available-tags">
-                {ALL_ISSUE_GROUPS.filter(g => !currentUser?.groups.includes(g)).map(g => (
-                  <button key={g} className="tag unassigned" onClick={() => toggleGroup(g)}>+ {g}</button>
+            <div>
+              <p>현재 그룹</p>
+              <div className="modal-tag-group">
+                {currentUser.groups.map(g=>(
+                  <button key={g} className="modal-tag assigned" onClick={()=>toggleGroup(g)}>
+                    {g} ✕
+                  </button>
                 ))}
               </div>
             </div>
 
-            <div className="modal-footer">
-              <button className="btn-save-confirm" onClick={() => setIsModalOpen(false)}>설정 완료</button>
+            <div style={{marginTop:'20px'}}>
+              <p>추가</p>
+              <div className="modal-tag-group">
+                {ALL_ISSUE_GROUPS
+                  .filter(g=>!currentUser.groups.includes(g))
+                  .map(g=>(
+                    <button key={g} className="modal-tag unassigned" onClick={()=>toggleGroup(g)}>
+                      + {g}
+                    </button>
+                  ))}
+              </div>
             </div>
+
+            <button className="btn-confirm" onClick={()=>setIsModalOpen(false)}>
+              설정 완료
+            </button>
           </div>
         </div>
       )}
