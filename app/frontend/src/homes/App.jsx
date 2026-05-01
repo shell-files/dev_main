@@ -30,8 +30,9 @@ function App() {
     { path: "/main/onboarding", element: <Onboarding />},
     { path: "main/*", element: <NotFound /> },
   ]
-  const [ isNav, setIsNav ] = useState(true);
   const location = useLocation();
+  const [ isNav, setIsNav ] = useState(location.pathname.includes("/main"));
+  
   useEffect(()=>{
     setIsNav(location.pathname.includes("/main"))
   }, [location.pathname])
