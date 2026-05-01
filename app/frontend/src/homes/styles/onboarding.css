@@ -171,16 +171,22 @@
   box-shadow: 0 6px 16px rgba(3, 199, 90, 0.4);
 }
 
+#onboarding_page .ob-status-circular-trigger svg {
+  stroke: #fff !important;
+}
+
 #onboarding_page .ob-status-circular-trigger.active {
   background: #fff;
-  border: 2.5px solid #03C75A; /* Bolder border */
-  color: #03C75A;
+  border: 2.5px solid #03C75A; 
   box-shadow: 0 4px 15px rgba(3, 199, 90, 0.2);
 }
 
+#onboarding_page .ob-status-circular-trigger.active svg {
+  stroke: #000 !important;
+}
+
 #onboarding_page .ob-status-circular-trigger.filtering:not(.active) {
-  border-color: var(--ob-primary);
-  color: var(--ob-primary);
+  border-color: #fff;
 }
 
 #onboarding_page .ob-status-dot {
@@ -271,6 +277,8 @@
   font-weight: 850;
   color: #475569;
   letter-spacing: -0.2px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* 상태별 세련된 컬러 테마 */
@@ -522,17 +530,18 @@
 #onboarding_page .ob-table th:nth-child(3) { text-align: left; } /* Checklist Header Left */
 
 #onboarding_page .ob-table td {
-  padding: 12px 8px; /* Slightly tighter padding */
+  padding: 10px 6px; /* Tighter padding */
   border-bottom: 1px solid #e2e8f0;
   vertical-align: middle;
   font-size: 14px;
-  height: 100px; /* Fixed row height */
-  text-align: center; /* Default to center */
+  height: 90px; /* Reduced height for more efficiency */
+  text-align: center; 
 }
-#onboarding_page .ob-table .cell-checklist { text-align: left; padding-left: 16px; }
-#onboarding_page .ob-table .cell-input { text-align: right; padding-right: 8px; }
-#onboarding_page .ob-table .cell-unit { text-align: left; padding-left: 0; }
-#onboarding_page .ob-table .cell-evidence { padding-left: 8px; }
+#onboarding_page .ob-table .cell-checklist { text-align: left; padding-left: 12px; }
+#onboarding_page .ob-table .cell-input { text-align: right; padding-right: 0; }
+#onboarding_page .ob-table .cell-unit { text-align: left; padding-left: 6px; }
+#onboarding_page .ob-table .cell-evidence { padding: 0 16px; }
+#onboarding_page .ob-table .cell-status { padding: 0 16px; }
 
 #onboarding_page .ob-table td[rowspan] {
   text-align: center;
@@ -592,7 +601,9 @@
   font-weight: 700;
   background: #f1f5f9;
   color: #334155;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   display: inline-block;
   border: 1px solid transparent;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
@@ -631,35 +642,33 @@
 #onboarding_page .cell-checklist .checklist-text { 
   font-weight: 600; 
   color: #0f172a; 
-  line-height: 1.5;
+  line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 3;
-  line-clamp: 3; /* Standard property for compatibility */
+  line-clamp: 3; 
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
   word-break: keep-all;
+  overflow-wrap: break-word;
+  font-size: 13.5px;
 }
 #onboarding_page .cell-unit .unit-text { 
-  font-size: 11.5px; 
-  color: #64748b; 
-  font-weight: 500; 
-  white-space: normal; 
-  word-break: break-all;
+  font-size: 13px; 
+  color: #475569; 
+  font-weight: 600; 
+  white-space: nowrap; 
   display: block;
-  max-width: 80px;
-  margin: 0 auto;
+  text-align: left;
 }
 
 /* ── 입력 필드 ── */
 #onboarding_page .ob-input-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Aligned to input start */
+  align-items: stretch; /* Stretch to fill the column */
   position: relative;
   width: 100%;
-  max-width: 240px;
-  margin: 0 auto;
 }
 #onboarding_page .ob-input {
   padding: 8px 12px;
@@ -1013,6 +1022,8 @@
   font-weight: 800;
   color: #1e293b;
   letter-spacing: -0.02em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
 }
 
 /* ── 모달 바디 ── */
@@ -1036,6 +1047,8 @@
   font-weight: 700;
   color: #64748b;
   margin-bottom: 16px;
+  word-break: keep-all;
+  overflow-wrap: break-word;
   display: flex;
   align-items: center;
   gap: 6px;

@@ -52,6 +52,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
+import { showDefaultAlert } from "@components/ServiceAlert/ServiceAlert";
 // import LoginVisual from "@logins/LoginVisual";
 import "@styles/logins.css";
 import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
@@ -194,7 +195,7 @@ const Login = () => {
       // 1. navigateToHome
       navigate("/main");
     } catch (error) {
-      alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+      showDefaultAlert("로그인 실패", "이메일과 비밀번호를 확인해 주세요.", "error");
     } finally {
       setLoginLoading(false);
     }
@@ -284,7 +285,7 @@ const Login = () => {
       // 2. showSuccessView
       setView("success");
     } catch (error) {
-      alert("이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
+      showDefaultAlert("전송 실패", "이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
     } finally {
       setPasswordResetLoading(false);
     }
@@ -314,11 +315,13 @@ const goToPasswordResetViewAgain = () => {
   // 0. handleAccountInquiry
   // 설명: 이메일 찾기 / 아이디 문의 클릭 시 안내
   const handleAccountInquiry = () => {
-    alert(
-      "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
-        "담당자: 고객지원팀\n" +
-        "연락처: 010-0000-0000\n" +
-        "운영시간: 평일 09:00 ~ 18:00"
+    showDefaultAlert(
+      "계정 문의 안내",
+      "계정 관련 문의는 아래 연락처로 부탁드립니다.<br/><br/>" +
+        "<b>담당자</b>: 고객지원팀<br/>" +
+        "<b>연락처</b>: 010-0000-0000<br/>" +
+        "<b>운영시간</b>: 평일 09:00 ~ 18:00",
+      "info"
     );
   };
 

@@ -2,6 +2,7 @@ import { useMemo, useState, useRef, useEffect } from "react";
 import "@styles/onboarding.css";
 import INITIAL_METRICS from "@mains/onboarding/onboardingData.js";
 import { showDefaultAlert, showConfirmAlert } from "@components/ServiceAlert/ServiceAlert";
+import { useAlarm } from '@hooks/AlarmContext.jsx';
 import Swal from 'sweetalert2';
 
 // =====================================================================================
@@ -113,6 +114,7 @@ const rnrDisplay = (assignees) => {
 
 // =====================================================================================
 const Onboarding = () => {
+  const { addNotification } = useAlarm();
   const [metrics, setMetrics] = useState(() => INITIAL_METRICS.map(m => ({ ...m })));
   const [currentUser, setCurrentUser] = useState(DUMMY_USERS[0]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -217,6 +219,13 @@ const Onboarding = () => {
   }, [metrics, searchTerm, activeCategory, selectedIGs, currentUser, canViewAll, activeStatusFilters]);
 
   const pageCount = Math.ceil(filteredData.length / ROWS_PER_PAGE);
+
+  // 페이지 범위를 벗어나지 않도록 보정 (필터 변경이나 빠른 클릭 대응)
+  useEffect(() => {
+    if (pageCount > 0 && currentPage > pageCount) {
+      setCurrentPage(pageCount);
+    }
+  }, [pageCount, currentPage]);
   const pageData = useMemo(() => {
     const start = (currentPage - 1) * ROWS_PER_PAGE;
     return filteredData.slice(start, start + ROWS_PER_PAGE);
@@ -405,6 +414,17 @@ const Onboarding = () => {
       setMetrics(prev => prev.map(m => m.issueGroup === modalIG ? { ...m, assignees: [...m.assignees, ...r.data.assignees] } : m));
       setModalInputs([{ email: "", name: "", department: "" }]);
       showDefaultAlert("초대 완료", "담당자 초대가 완료되었습니다.", "success");
+      const m = metrics.find(x => x.issueGroup === modalIG);
+      const cat = m ? m.category : 'default';
+      const colorId = cat === 'E' ? 'E' : cat === 'S' ? 'S' : cat === 'G' ? 'G' : 'default';
+      
+      const names = valid.map(v => v.name).join(', ');
+      addNotification(
+        `${names} 담당자님께 초대 요청했습니다.`, 
+        'USER', 
+        '담당자 초대 발송', 
+        { text: modalIG, colorId }
+      );
     }
   };
 
@@ -617,13 +637,13 @@ const Onboarding = () => {
                     ID
                   </div>
                 </th>
-                <th style={{width:"12%"}}>이슈그룹 / R&R</th>
-                <th style={{width:"35%"}}>체크리스트 내용</th>
-                <th style={{width:"18%"}}>데이터 입력</th>
-                <th style={{width:"5%"}}>단위</th>
+                <th style={{width:"11%"}}>이슈그룹 / R&R</th>
+                <th style={{width:"29%"}}>체크리스트 내용</th>
+                <th style={{width:"24%"}}>데이터 입력</th>
+                <th style={{width:"6%"}}></th>
                 <th style={{width:"8%"}}>증빙</th>
                 <th style={{width:"7%"}}>상태</th>
-                <th style={{width:"10%"}}>액션</th>
+                <th style={{width:"9%"}}>액션</th>
               </tr>
             </thead>
             <tbody>
@@ -756,8 +776,9 @@ const Onboarding = () => {
             <button 
               type="button" 
               className="ob-page-btn ob-page-nav" 
+              disabled={currentPage <= 1}
               style={{ visibility: currentPage > 1 ? "visible" : "hidden" }}
-              onClick={() => setCurrentPage(p => p - 1)}
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
             >‹</button>
             
             <div className="ob-page-numbers">
@@ -776,8 +797,9 @@ const Onboarding = () => {
             <button 
               type="button" 
               className="ob-page-btn ob-page-nav" 
+              disabled={currentPage >= pageCount}
               style={{ visibility: currentPage < pageCount ? "visible" : "hidden" }}
-              onClick={() => setCurrentPage(p => p + 1)}
+              onClick={() => setCurrentPage(p => Math.min(pageCount, p + 1))}
             >›</button>
           </div>
         )}
