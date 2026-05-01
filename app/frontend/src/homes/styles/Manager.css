@@ -1,0 +1,38 @@
+/* 기본 레이아웃 */
+.admin-page-container { padding: 20px; background-color: #fff; min-height: 100vh; }
+.admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.admin-grid { display: grid; grid-template-columns: 1fr 1.5fr; gap: 20px; }
+
+/* KPI 카드 */
+.kpi-section { display: flex; gap: 15px; margin-bottom: 25px; }
+.kpi-card { flex: 1; background: #fff; padding: 15px; border-radius: 8px; text-align: center; border-top: 4px solid #ddd; }
+.kpi-card.approved { border-top-color: #28a745; }
+.kpi-card.pending { border-top-color: #ffc107; }
+.kpi-card.rejected { border-top-color: #dc3545; }
+
+/* 섹션 공통 스타일 */
+.admin-card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+.search-bar { width: 100%; padding: 10px; margin-bottom: 15px; border-radius: 6px; border: 1px solid #ddd; }
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { text-align: left; padding: 10px; border-bottom: 2px solid #eee; font-size: 13px; }
+.admin-table td { padding: 12px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+
+/* 버튼 스타일 */
+.btn-manage { background: #333; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; }
+.btn-app { background: #28a745; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.btn-rej { background: #dc3545; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+
+/* 모달 스타일 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+.modal-content { background: white; width: 500px; border-radius: 12px; padding: 25px; max-height: 80vh; overflow-y: auto; }
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.modal-body { display: flex; flex-direction: column; gap: 10px; }
+
+/* 태그 시스템 */
+.tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
+.group-label { font-weight: bold; font-size: 14px; color: #555; }
+.tag { padding: 6px 12px; border-radius: 20px; font-size: 12px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+.tag.assigned { background: #e7f3ff; color: #007bff; border-color: #007bff; }
+.tag.assigned:hover { background: #fdeaea; color: #dc3545; border-color: #dc3545; } /* 제거 효과 */
+.tag.unassigned { background: #f0f0f0; color: #666; }
+.tag.unassigned:hover { background: #333; color: #fff; }

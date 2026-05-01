@@ -8,6 +8,7 @@ import Login from '@logins/Login.jsx'
 import Signup from '@logins/SignUp.jsx'
 import Main from '@mains/Main.jsx'
 import Dashboard from '@mains/Dashboard.jsx'
+import Manager from '@mains/Manager.jsx'
 import Headernav from "@components/HeaderNav.jsx"
 import Sidebarnav from "@components/SidebarNav.jsx"
 import Alarm from "@components/Alarm.jsx"
@@ -27,6 +28,7 @@ function App() {
   const paths2 = [
     { path: "/main", element: <Main /> },
     { path: "/main/dashboard", element: <Dashboard />},
+    { path: "/main/manager", element: <Manager />},
     { path: "/main/Invite", element: <Invite />},
     { path: "main/*", element: <NotFound /> },
   ]
