@@ -289,24 +289,33 @@ const Onboarding = () => {
 
   const handleSaveDraft = async (id) => {
     const m = metrics.find(x => x.issueId === id);
+    if (!m.value || !m.value.trim()) {
+      setErrors(prev => ({ ...prev, [id]: true }));
+      setShakeIds(prev => ({ ...prev, [id]: true }));
+      setTimeout(() => setShakeIds(prev => ({ ...prev, [id]: false })), 400);
+      return false;
+    }
     const r = await requestSaveMetricDraftApi(id, { value: m.value, unit: m.unit });
     if (r.status) {
       setMetrics(prev => prev.map(x => x.issueId === id ? { ...x, status: x.status === "NOT_STARTED" ? "DRAFT" : x.status } : x));
+      return true;
     }
+    return false;
   };
   const handleSubmit = async (id) => {
     const m = metrics.find(x => x.issueId === id);
     if (!m.value || !m.value.trim()) {
       setErrors(prev => ({ ...prev, [id]: true }));
-      // 흔들림 효과 트리거
       setShakeIds(prev => ({ ...prev, [id]: true }));
       setTimeout(() => setShakeIds(prev => ({ ...prev, [id]: false })), 400);
-      return;
+      return false;
     }
     const r = await requestSubmitMetricApi(id);
     if (r.status) {
       setMetrics(prev => prev.map(x => x.issueId === id ? { ...x, status: "SUBMITTED" } : x));
+      return true;
     }
+    return false;
   };
   const handleResubmit = (id) => {
     // 재제출을 누르면 다시 수정 가능한 DRAFT 상태로 변경
@@ -363,10 +372,14 @@ const Onboarding = () => {
     else setSelectedIds([]);
   };
   const handleBatchSave = async () => {
+    let hasError = false;
     for (const id of selectedIds) {
-      await handleSaveDraft(id);
+      const success = await handleSaveDraft(id);
+      if (!success) hasError = true;
     }
-    setSelectedIds([]);
+    if (!hasError) {
+      setSelectedIds([]);
+    }
   };
   const handleBatchSubmit = async () => {
     let hasError = false;
@@ -697,6 +710,9 @@ const Onboarding = () => {
                           disabled={["SUBMITTED", "APPROVED"].includes(item.status)}
                           onChange={(e) => {
                             handleValueChange(item.issueId, e.target.value);
+                            setErrors(prev => ({ ...prev, [item.issueId]: false }));
+                          }}
+                          onFocus={() => {
                             setErrors(prev => ({ ...prev, [item.issueId]: false }));
                           }}
                         />

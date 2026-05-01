@@ -174,7 +174,7 @@ const Alarm = () => {
                                                 {noti.title}
                                             </span>
                                             {noti.chip && (
-                                                <span className={`alarm-chip bg-${noti.chip.colorId}`}>
+                                                <span className={`alarm-chip bg-${noti.chip.colorId} ${/^[A-Z]\d+/.test(noti.chip.text) ? 'type-id' : 'type-ig'}`}>
                                                     {noti.chip.text}
                                                 </span>
                                             )}
