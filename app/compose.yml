@@ -49,6 +49,7 @@ services:
       - ./backend/uv.lock:/workspace/uv.lock
       - ./backend/.python-version:/workspace/.python-version
       - ./backend/src:/workspace/src
+      - auth_keys:/workspace/secrets
     environment:
       - HOST_IP=http://weareithero.cloud
       - MAIL_USERNAME=${MAIL_USERNAME}
@@ -59,9 +60,11 @@ services:
       - MARIA_DB_PASSWORD=${MARIA_DB_PASSWORD}
       - MARIA_DB_HOST=${MARIA_DB_HOST}
       - MARIA_DB_PORT=${MARIA_DB_PORT}
-      - SECRET_KEY=${SECRET_KEY}
       - ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES}
       - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS}
+      - REDIS_HOST=${REDIS_HOST}
+      - REDIS_PORT=${REDIS_PORT}
+      - REDIS_DB=${REDIS_DB}
       - SERVICE_KEY=${SERVICE_KEY}
     command: ["uv", "run", "fastapi", "run"]
 
@@ -71,3 +74,5 @@ networks:
 
 volumes:
   data-mariadb:
+  auth_keys:
+    external: true

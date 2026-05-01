@@ -1,4 +1,4 @@
-from settings import settings
+from src.utils.settings import settings
 import redis
 
 # --------------------------

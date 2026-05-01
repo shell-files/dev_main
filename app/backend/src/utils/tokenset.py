@@ -2,20 +2,23 @@ import uuid
 from datetime import datetime, timedelta
 from jwcrypto import jwk, jwe  # jwcrypto 라이브러리 사용 가정
 import json
-from .settings import settings
+from src.utils.settings import settings
 
 # --------------------------
 # 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)
 # --------------------------
 def encryptToJwe(payload: dict):
     """ 공통 복호화/암호화 로직: 데이터를 JWE로 암호화 (AES-GCM)"""
+    with open(settings.public_key, 'rb') as f:
+        pemData = f.read()
+
+    # from_pem은 라이브러리 제공 클래스 형식이라 카멜케이스 불가
+    key = jwk.JWK.from_pem(pemData)
     payloadStr = json.dumps(payload)
-    # settings에서 가져온 키를 바탕으로 JWK 객체 생성
-    key = jwk.JWK(k=settings.secret_key, kty='oct')
     
-    # A256KW(키 암호화) + A256GCM(데이터 암호화) 조합, add_recipient는 반드시 스네이크 형식이어야 함(jwcrypto 라이브러리 제작자가 함수 이름을 add_recipient라고 지어놓았기 때문).
-    jwetoken = jwe.JWE(payloadStr.encode('utf-8'),
-                       json.dumps({"alg": "A256KW", "enc": "A256GCM"}))
+    header = {"alg": "RSA-OAEP", "enc": "A256GCM"}
+    # RSA-OAEP(RSA 키 암호화) + A256GCM(데이터 암호화) 조합, add_recipient는 반드시 스네이크 형식이어야 함(jwcrypto 라이브러리 제작자가 함수 이름을 add_recipient라고 지어놓았기 때문).
+    jwetoken = jwe.JWE(payloadStr.encode('utf-8'), json.dumps(header))
     jwetoken.add_recipient(key)
     return jwetoken.serialize(compact=True)
 
@@ -25,7 +28,9 @@ def encryptToJwe(payload: dict):
 def decryptFromJwe(token: str):
     """ 복호화 함수: JWE 토큰을 해독하여 파이썬 딕셔너리로 반환"""
     try:
-        key = jwk.JWK(k=settings.secret_key, kty='oct')
+        with open(settings.private_key, 'rb') as f:
+            pemData = f.read()
+        key = jwk.JWK.from_pem(pemData)
         jwetoken = jwe.JWE()
         jwetoken.deserialize(token)
         jwetoken.decrypt(key)
@@ -37,8 +42,9 @@ def decryptFromJwe(token: str):
 # --------------------------
 def generateAccessWithUuid(userId: str):
     """ 액세스 토큰과 UUID 생성 함수 (공통 모듈)"""
-    tokenUuid = str(uuid.uuid4())
+    tokenUuid = str(uuid.uuid4().hex)
     payload = {
+        "iss": "withProject",
         "sub": userId,
         "iat": int(datetime.utcnow().timestamp()),
         "exp": int((datetime.utcnow() + timedelta(minutes=settings.access_token_expire_minutes)).timestamp())
@@ -57,6 +63,7 @@ def createUserTokens(userId: str):
     
     # 리프레시 토큰 생성 (30일)
     refreshPayload = {
+        "iss": "withProject",
         "sub": userId,
         "iat": int(datetime.utcnow().timestamp()),
         "exp": int((datetime.utcnow() + timedelta(days=settings.refresh_token_expire_days)).timestamp())

@@ -1,5 +1,4 @@
 import uuid
-import mariadb
 import shutil
 from pathlib import Path
 import httpx

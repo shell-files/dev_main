@@ -61,9 +61,11 @@ jobs:
           MARIA_DB_PASSWORD: ${{ secrets.MARIA_DB_PASSWORD }}
           MARIA_DB_HOST: ${{ secrets.MARIA_DB_HOST }}
           MARIA_DB_PORT: ${{ secrets.MARIA_DB_PORT }}
-          SECRET_KEY: ${{ secrets.SECRET_KEY }}
           ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
           REFRESH_TOKEN_EXPIRE_DAYS: ${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }}
+          REDIS_HOST: ${{ secrets.REDIS_HOST }}
+          REDIS_PORT: ${{ secrets.REDIS_PORT }}
+          REDIS_DB: ${{ secrets.REDIS_DB }}
           SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
         working-directory: ./app
         run: docker compose up -d
