@@ -63,6 +63,8 @@ import gateBg3 from '@assets/backgrounds/GateBg3.png'
 import blobMain from '@assets/backgrounds/login-blob-main.png';
 import softCube from '@assets/backgrounds/login-soft-cube.png';
 import floatingOrb from '@assets/backgrounds/login-floating-orb.png';
+import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
+
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
@@ -211,6 +213,14 @@ const Login = () => {
       navigate("/main");
     } catch (error) {
       setErrors(prev => ({ ...prev, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
+      // ----------- 커스텀 알럿 추가 ----------
+      showDefaultAlert(
+        "로그인 실패",
+        "이메일 또는 비밀번호가 일치하지 않습니다.\n"+
+        "다시 시도해주세요.",
+        "error"
+      )
+      // alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
     } finally {
       setLoginLoading(false);
     }
@@ -285,6 +295,14 @@ const Login = () => {
       setView("success");
     } catch (error) {
       setErrors(prev => ({ ...prev, passwordResetSubmit: "이메일 발송에 실패했습니다. 다시 시도해주세요." }));
+      // ----------- 커스텀 알럿 추가 ----------
+      showDefaultAlert(
+        "이메일 발송 실패",
+        "이메일 발송에 실패했습니다.\n"+
+        "잠시 후 다시 시도해 주세요.",
+        "error"
+      )
+      // alert("이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
     } finally {
       setPasswordResetLoading(false);
     }
@@ -313,7 +331,51 @@ const Login = () => {
     setView("forgot");
     setPasswordResetEmail("");
     setErrors({});
+  
+  // 3. success_이메일 다시 받기 클릭 함수
+  // 설명: success 화면 → forgot 화면으로 이동하고 이메일 입력값 초기화
+const goToPasswordResetViewAgain = () => {
+  setPasswordResetEmail("");
+  setView("forgot");
+};
+
+  // =========================
+  // 4. 공통: 이메일 문의 안내 함수
+  // =========================
+
+  // 0. handleAccountInquiry
+  // 설명: 이메일 찾기/문의 클릭 시 안내
+  const handleAccountInquiry = () => {
+    // ----------- 커스텀 알럿 추가 ----------
+    showDefaultAlert(
+      "이메일 정보를 잊으셨나요?", 
+      "보안 정책상 계정 조회는\n" +
+      "<span class='text-point'>소속 기업별 ESG 시스템 관리자</span>를 통해 진행됩니다.\n" +
+      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의하여 주시기 바랍니다.", 
+      "info"
+    );
+    // alert(
+    //   "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
+    //     "담당자: 고객지원팀\n" +
+    //     "연락처: 010-0000-0000\n" +
+    //     "운영시간: 평일 09:00 ~ 18:00"
+    // );
   };
+
+  // =========================
+  // 5. 고객센터 문의 안내 함수
+  // =========================
+  const handleSupportInquiry = () => {
+    showDefaultAlert(
+      "도움이 필요하신가요?", 
+      "<span class='text-point'>platformanagers@gmail.com</span>\n\n"+
+      "플랫폼 운영 및 기술 관련 문의사항은\n" +
+      "위의 고객센터 메일로 접수해 주시기 바랍니다.\n\n" +
+      "계정 분실 및 권한 승인 관련 문의사항은\n" + 
+      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의 바랍니다.",
+      "question"
+    );
+  }
 
   return (
     <div id="login">
@@ -542,6 +604,114 @@ const Login = () => {
               </div>
             </div>
           </section>
+        {/* ========================= */}
+        {/* 2. forgot: 비밀번호 찾기 화면 */}
+        {/* ========================= */}
+        <div
+          className="container"
+          id="forgot-section"
+          style={{ display: view === "forgot" ? "block" : "none" }}
+        >
+          <div className="header-nav">
+            <span className="back-btn" onClick={goToLoginView}>
+              ←
+            </span>
+          </div>
+
+          <div className="logo-placeholder">로고 추가 예정</div>
+
+          <h1>비밀번호 찾기</h1>
+
+          <div className="forgot-icon-wrapper">
+            <img 
+              src={emailIcon} 
+              alt="이메일 비밀번호 찾기" 
+            />
+          </div>
+
+          <form className="input-group" onSubmit={handleSendPasswordEmail}>
+            <input
+              type="email"
+              autoComplete="off"
+              name="passwordResetEmail"
+              className={errors.passwordResetEmail ? "input-error" : ""}
+              placeholder="이메일을 입력해주세요"
+              value={passwordResetEmail}
+              onChange={(e) => {
+                setPasswordResetEmail(e.target.value);
+                setErrors((prev) => ({ ...prev, passwordResetEmail: "" }));
+              }}
+              onBlur={(e) => validateRequiredField("passwordResetEmail", e.target.value)}
+            />
+            {errors.passwordResetEmail && <p className="error">{errors.passwordResetEmail}</p>}
+
+            <div className="info-box">
+              <strong>임시 비밀번호 발송 안내</strong>
+              입력하신 이메일로 임시 비밀번호가 발송됩니다.
+            </div>
+
+            <button
+              className="login-action-button"
+              type="submit"
+              disabled={passwordResetLoading}
+            >
+              {passwordResetLoading ? (
+                <span className="button-spinner" />
+              ) : (
+                "이메일 전송"
+              )}
+            </button>
+
+            <div className="links">
+              <span onClick={handleAccountInquiry}>
+                이메일 정보를 잊으셨나요?
+              </span>
+            </div>
+          </form>
+        </div>
+
+        {/* ========================= */}
+        {/* 3. success: 이메일 발송 완료 화면 */}
+        {/* ========================= */}
+        <div
+          className="container"
+          id="success-section"
+          style={{ display: view === "success" ? "block" : "none" }}
+          >
+          <div className="logo-placeholder">로고 추가 예정</div>
+
+          <h1>이메일 발송 완료</h1>
+
+          <div className="success-check-wrap">
+            <div className="success-check-icon">✓</div>
+          </div>
+
+          <div className="success-message-box">
+            <div className="success-message-main">
+              {maskEmail(passwordResetEmail)}
+              <br />
+              임시 비밀번호를 발송했습니다.
+            </div>
+
+            <div className="success-message-sub">
+              메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
+              <br />
+              로그인 확인 후 비밀번호를 변경해 주세요.
+            </div>
+          </div>
+
+          <button
+            className="login-action-button success-button"
+            onClick={goToLoginView}
+          >
+            로그인으로 돌아가기
+          </button>
+
+          <div className="success-help-links">
+            <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
+            <span className="divider">|</span>
+            <span onClick={handleSupportInquiry}>고객센터 문의</span>
+          </div>
         </div>
       </div>
     </div>
