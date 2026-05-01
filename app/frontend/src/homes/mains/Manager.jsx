@@ -11,6 +11,7 @@ const ALL_ISSUE_GROUPS = [
 const PAGE_SIZE = 10;
 
 const Manager = () => {
+  const [selectedIds, setSelectedIds] = useState([]);
   const [activeTab, setActiveTab] = useState('user');
   const [users, setUsers] = useState([]);
   const [inputs, setInputs] = useState([]);
@@ -21,6 +22,8 @@ const Manager = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
+
+  const [statusFilter, setStatusFilter] = useState('all');
 
   useEffect(() => {
     setUsers([
@@ -41,7 +44,6 @@ const Manager = () => {
     pending: inputs.filter(i=>i.status==='pending').length,
     rejected: inputs.filter(i=>i.status==='rejected').length
   };
-  const [statusFilter, setStatusFilter] = useState('all');
 
   const kpiItems = [
     { key: 'approved', label: '승인', count: kpi.approved, color: '#03a94d' },
@@ -64,9 +66,36 @@ const Manager = () => {
     }));
   };
 
-  // 승인/반려
+  // 개별 승인
   const handleAction = (id, status) => {
     setInputs(prev => prev.map(i => i.id===id ? { ...i, status } : i));
+  };
+
+  // 선택 관련
+  const toggleSelect = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id)
+        ? prev.filter(v => v !== id)
+        : [...prev, id]
+    );
+  };
+
+  const toggleSelectAll = (list) => {
+    const ids = list.map(i => i.id);
+    if (ids.every(id => selectedIds.includes(id))) {
+      setSelectedIds(prev => prev.filter(id => !ids.includes(id)));
+    } else {
+      setSelectedIds(prev => [...new Set([...prev, ...ids])]);
+    }
+  };
+
+  const handleBulkAction = (status) => {
+    setInputs(prev =>
+      prev.map(i =>
+        selectedIds.includes(i.id) ? { ...i, status } : i
+      )
+    );
+    setSelectedIds([]);
   };
 
   // 유저 필터 + 페이징
@@ -81,18 +110,22 @@ const Manager = () => {
 
   const totalUserPages = Math.ceil(filteredUsers.length / PAGE_SIZE);
 
-  // 데이터 페이징
-  const pagedInputs = inputs.slice(
+  // 데이터 필터 + 페이징 (KPI 필터 적용)
+  const filteredInputs = statusFilter === 'all'
+    ? inputs
+    : inputs.filter(i => i.status === statusFilter);
+
+  const pagedInputs = filteredInputs.slice(
     (dataPage-1)*PAGE_SIZE,
     dataPage*PAGE_SIZE
   );
 
-  const totalDataPages = Math.ceil(inputs.length / PAGE_SIZE);
+  const totalDataPages = Math.ceil(filteredInputs.length / PAGE_SIZE);
 
   return (
     <div className="manager-content-container">
 
-      {/* KPI (CSS 건드리지 않기 위해 inline 최소만 사용) */}
+      {/* KPI */}
       <div style={{display:'flex', gap:'12px', marginBottom:'20px'}}>
         {kpiItems.map(item => (
           <div
@@ -125,7 +158,7 @@ const Manager = () => {
       </div>
 
       {/* ===================== */}
-      {/* 유저 관리 */}
+      {/* 유저 */}
       {/* ===================== */}
       {activeTab === 'user' && (
         <section className="fade-in">
@@ -190,7 +223,6 @@ const Manager = () => {
             </table>
           </div>
 
-          {/* 페이지네이션 */}
           <div style={{marginTop:'10px'}}>
             {Array.from({length: totalUserPages}).map((_,i)=>(
               <button key={i} onClick={()=>setUserPage(i+1)} className="btn-outline">
@@ -208,10 +240,39 @@ const Manager = () => {
       {activeTab === 'data' && (
         <section className="fade-in">
 
+          {/* 선택 액션 */}
+          {selectedIds.length > 0 && (
+            <div style={{
+              marginBottom:'10px',
+              padding:'10px',
+              background:'#f8f9fa',
+              border:'1px solid #eee',
+              borderRadius:'8px',
+              display:'flex',
+              justifyContent:'space-between'
+            }}>
+              <span>선택 {selectedIds.length}건</span>
+              <div>
+                <button className="btn-outline" onClick={()=>handleBulkAction('approved')}>선택 승인</button>
+                <button className="btn-outline" onClick={()=>handleBulkAction('rejected')}>선택 반려</button>
+              </div>
+            </div>
+          )}
+
           <div className="table-wrapper">
             <table>
               <thead>
                 <tr>
+                  <th>
+                    <input
+                      type="checkbox"
+                      onChange={() => toggleSelectAll(pagedInputs)}
+                      checked={
+                        pagedInputs.length > 0 &&
+                        pagedInputs.every(i => selectedIds.includes(i.id))
+                      }
+                    />
+                  </th>
                   <th>항목</th>
                   <th>값</th>
                   <th>작성자</th>
@@ -223,6 +284,14 @@ const Manager = () => {
               <tbody>
                 {pagedInputs.map(item=>(
                   <tr key={item.id}>
+                    <td>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.id)}
+                        onChange={() => toggleSelect(item.id)}
+                      />
+                    </td>
+
                     <td>{item.q_name}</td>
                     <td>{item.val}</td>
                     <td>{users.find(u=>u.id===item.u_id)?.name}</td>
@@ -234,13 +303,29 @@ const Manager = () => {
                     </td>
 
                     <td>
-                      {item.status==='pending' && (
-                        <>
-                          <button className="btn-outline" onClick={()=>handleAction(item.id,'approved')}>승인</button>
-                          <button className="btn-outline" onClick={()=>handleAction(item.id,'rejected')}>반려</button>
-                        </>
-                      )}
-                    </td>
+                    {item.status === 'pending' && (
+                      <>
+                        <button className="btn-outline" onClick={()=>handleAction(item.id,'approved')}>
+                          승인
+                        </button>
+                        <button className="btn-outline" onClick={()=>handleAction(item.id,'rejected')}>
+                          반려
+                        </button>
+                      </>
+                    )}
+
+                    {item.status === 'approved' && (
+                      <button className="btn-outline" onClick={()=>handleAction(item.id,'pending')}>
+                        승인 취소
+                      </button>
+                    )}
+
+                    {item.status === 'rejected' && (
+                      <button className="btn-outline" onClick={()=>handleAction(item.id,'pending')}>
+                        반려 취소
+                      </button>
+                    )}
+                  </td>
                   </tr>
                 ))}
               </tbody>
@@ -258,9 +343,7 @@ const Manager = () => {
         </section>
       )}
 
-      {/* ===================== */}
       {/* 모달 */}
-      {/* ===================== */}
       {isModalOpen && (
         <div className="modal-overlay">
           <div className="modal-window">
@@ -299,6 +382,7 @@ const Manager = () => {
           </div>
         </div>
       )}
+
     </div>
   );
 };
