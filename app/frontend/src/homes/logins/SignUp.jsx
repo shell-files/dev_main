@@ -1,3 +1,41 @@
+// =====================================================================================
+// Signup.jsx 페이지 흐름설명 (유저 행동 기준)
+
+// 1. OCR 인증 흐름
+// 파일 선택 → handleFileChange → handleUpload → OCR API 요청
+// → 성공 시 formData 자동 채움 + isOcrDone = true
+
+// 2. 중복 검사 흐름
+// 이메일 입력 → handleChange → onBlur → checkEmail → emailValid 상태 변경
+// 사업자번호 입력 → handleChange → onBlur → checkBusiness → businessValid 상태 변경
+
+// 3. 회원가입 제출 흐름
+// 가입 버튼 클릭 → handleSubmit 실행
+// → 필수값 검증 + OCR 여부 + 중복 여부 확인
+// → 성공 시 API 요청 → 완료 alert → navigate("/main")
+
+// 4. 업종 선택 흐름
+// select 5단계 선택 → addIndustry → industryCodes 배열 추가
+
+// 5. 취소 흐름
+// 취소 버튼 클릭 → handleCancel → confirm alert → navigate("/login")
+
+// =====================================================================================
+// API 연결 위치 (수정 포인트)
+// =========================
+
+// 1. OCR 업로드
+// → api.post("/user", formData)
+
+// 2. 회원가입
+// → api.put("/user", payload)
+
+// 3. 이메일 중복 검사
+// → api.get("/user?email=")
+
+// 4. 사업자번호 중복 검사
+// → api.get("/user?businessNumber=")
+
 import { useState, useRef } from 'react'
 import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
@@ -26,7 +64,7 @@ const Signup = () => {
     
 
     // --- [상태 관리: 중복 검사 및 에러] ---
-    const [emailValid, setEmailValid] = useState(null);    // 이메일 중복 검사 결과 (true: 가능, false: 중복)
+    const [emailValid, setEmailValid] = useState(null);    // 이메일 중복 검사 결과 (null: 미검사, true: 가능, false: 중복)
     const [businessValid, setBusinessValid] = useState(null); // 사업자번호 중복 검사 결과
     const [errors, setErrors] = useState({});               // 필드별 에러 메시지 저장 객체
     const [signupLoading, setSignupLoading] = useState(false); // 최종 가입 버튼 클릭 시 로딩 상태
@@ -50,7 +88,13 @@ const Signup = () => {
         
     });
     const addIndustry = () => {
-        if (!sel.detail) return alert("5단계(세세분류)까지 모두 선택해주세요.");
+        if (!sel.detail) {
+            return showDefaultAlert(
+                "업종 선택 필요",
+                "세세분류까지 모두 선택해주세요.",
+                "warning"
+            )
+        }
 
         const target = ksicData.find(i => 
             i.largeCategoryName === sel.large &&
@@ -59,11 +103,17 @@ const Signup = () => {
             i.fineCategoryName === sel.fine &&
             i.detailCategoryName === sel.detail
         );
-
+        // console.log("sel:", sel);
+        // console.log("target:", target);
+        // console.log("ksic sample:", ksicData[0]);
         if (target) {
-            const code = Number(target.standardIndustryClassification);
+            const code = target.standardIndustryClassification;
             if (industryCodes.includes(code)) {
-                return alert("이미 추가된 업종 코드입니다.");
+                return showDefaultAlert(
+                    "중복 업종",
+                    "이미 추가된 업종입니다.",
+                    "warning"
+                );
             }
             setIndustryCodes([...industryCodes, code]); // 코드만 배열에 추가
             // 선택 창 초기화
@@ -134,9 +184,13 @@ const Signup = () => {
         }
     };
 
-    /**
-     * [등록] 버튼 클릭 시 동작: 서버에 이미지 파일을 보내 텍스트를 추출(OCR)합니다.
-     */
+// 1. handleUpload
+// 설명: 사업자등록증 OCR 업로드 실행
+// 역할:
+// - 파일 존재 여부 검사
+// - 파일 형식 검증 (jpg, png, pdf)
+// - API 요청 또는 더미 처리
+// - 성공 시 formData 자동 입력 + fileId 저장 + OCR 완료 상태 변경
     const handleUpload = async () => {
         if (!file) {
             // ----------- 커스텀 알럿 추가 ----------
@@ -164,9 +218,8 @@ const Signup = () => {
                     headOffice: '서울특별시 강남구...',
                     issueDate: '2024-04-29',
                     texName: '강남세무서',
-                    industryId: '서비스업',
-                    subCategory: '소프트웨어 개발'
                 }));
+                setFileId(1);
                 setIsOcrDone(true);
                 setIsUploading(false);
                 // ----------- 커스텀 알럿 추가 ----------
@@ -188,7 +241,11 @@ const Signup = () => {
             const allowed = ['jpg', 'jpeg', 'png', 'pdf'];
 
             if (!allowed.includes(ext)) {
-                alert("지원하지 않는 파일 형식입니다.");
+                showDefaultAlert(
+                    "파일 형식 오류",
+                    "jpg, jpeg, png, pdf 파일만 업로드 가능합니다.",
+                    "error"
+                )
                 setIsUploading(false);
                 return;
             }
@@ -209,7 +266,11 @@ const Signup = () => {
 
                 setIsOcrDone(true);
             } else {
-                alert("OCR 처리 실패");
+                showDefaultAlert(
+                    "OCR 실패",
+                    "사업자등록증 정보를 읽지 못했습니다.",
+                    "error"
+                )
             }
         } catch (err) {
 
@@ -226,8 +287,12 @@ const Signup = () => {
         }
     };
 
-    // --- [로직: 중복 검사] ---
-    // 1. 이메일 중복 검사 함수
+// 2. checkEmail
+// 설명: 이메일 중복 검사 API 호출
+// 결과:
+// - true: 사용 가능
+// - false: 중복
+// → emailValid 상태 업데이트
     const checkEmail = async () => {
         if (!formData.email || errors.email) return;
 
@@ -241,8 +306,12 @@ const Signup = () => {
             console.error("이메일 중복 검사 에러:", err);
         }
     };
-
-    // 2. 사업자번호 중복 검사 함수
+// 2-1. checkBusiness
+// 설명: 사업자등록번호 중복 검사 API 호출
+// 결과:
+// - true: 사용 가능
+// - false: 중복
+// → businessValid 상태 업데이트
     const checkBusiness = async () => {
         if (!formData.businessNumber) return;
 
@@ -257,83 +326,89 @@ const Signup = () => {
         }
     };
 
-    // --- [로직: 최종 제출] ---
+// 3. handleSubmit
+// 설명: 회원가입 최종 제출 핸들러
+// 역할:
+// - 필수값 검증
+// - OCR 완료 여부 체크
+// - 중복 검사 결과 확인
+// - payload 가공 (숫자 변환 등)
+// - API 요청
+// - 성공 시 confirm alert → 메인 페이지 이동
     const handleSubmit = async (e) => {
-        e.preventDefault(); // 폼 제출 시 페이지 새로고침 방지
-
-        if (industryCodes.length === 0) return alert("업종을 최소 하나 이상 선택해야 합니다.");
-        if (!isAgreed) return alert("약관에 동의해주세요.");
-
-        const newErrors = {};
-        if (!fileId) {
-            newErrors.ocr = "OCR 인증을 완료해주세요.";
+        e.preventDefault();
+        // 1️⃣ 즉시 차단 (UX alert)
+        if (industryCodes.length === 0) {
+            return showDefaultAlert("업종 선택 필요", "최소 하나 이상의 업종을 선택해주세요.", "warning");
         }
-        // 모든 필수 필드 자동 검사
+        if (!formData.companySize) {
+            return showDefaultAlert("기업 규모 선택 필요", "기업 규모를 선택해주세요.", "warning");
+        }
+        if (!isAgreed) {
+            return showDefaultAlert("약관 동의 필요", "서비스 이용을 위해 약관에 동의해주세요.", "warning");
+        }
+        if (!isOcrDone || !fileId) {
+            return showDefaultAlert("OCR 필요", "사업자 인증을 완료해주세요.", "warning");
+        }
+        if (emailValid === false) {
+            return showDefaultAlert("이메일 중복", "이미 사용중인 이메일입니다.", "error");
+        }
+        if (businessValid === false) {
+            return showDefaultAlert("사업자번호 확인", "이미 사용중인 사업자번호입니다.", "error");
+        }
+
+        // 2️⃣ 폼 에러 표시용 검증
+        const newErrors = {};
         Object.keys(requiredFields).forEach(key => {
             if (!formData[key]) {
                 newErrors[key] = requiredFields[key];
             }
         });
-        // 추가 조건들
         if (!file) newErrors.file = "파일 업로드 필수";
-        if (!isOcrDone) newErrors.ocr = "사업자 인증 필요 (등록 버튼을 눌러주세요)";
-        if (!isAgreed) newErrors.agree = "약관 동의 필요";
-        if (emailValid === false) {
-            newErrors.email = "이미 사용중인 이메일입니다.";
-            
-        }
-        if (!formData.companySize) {
-            newErrors.companySize = "기업 규모 선택 필요";
-        }
-        if (businessValid === false) {
-            newErrors.businessNumber = "이미 등록된 사업자번호입니다.";
-        }
-        // 에러 있으면 중단
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
         }
-
+        // 3️⃣ API 요청
         setSignupLoading(true);
-
-        if (USE_DUMMY) {
-            setTimeout(() => {
-                setSignupLoading(false);
+        try {
+            const payload = {
+                ...formData,
+                licensefileId: fileId,
+                industryCodes: industryCodes.map(code => Number(code)),
+                agreed: isAgreed,
+                businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
+                corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
+            };
+            if (USE_DUMMY) {
+                setTimeout(async () => {
+                    setSignupLoading(false);
+                    showDefaultAlert(
+                        "회원가입 완료",
+                        "회원가입이 완료되었습니다.",
+                        "success"
+                    );
+                    navigate("/main");
+                }, 500);
+                return;
+            }
+            const res = await api.put("/user", payload);
+            if (res.data.status === true) {
                 showDefaultAlert(
                     "회원가입 완료",
-                    "회원가입을 진심으로 환영합니다!\n"+ 
-                    "스마트한 ESG 경영 관리를 시작해 보세요.",
+                    "회원가입이 완료되었습니다.",
                     "success"
-                )
-                // alert("더미 모드로 가입되었습니다!");
-                navigate("/main");
-            }, 1500);
-            return;
-        }
-
-        try {
-            const res = await api.put("/user", {
-                ...formData,
-                licensefileId: fileId, 
-                industryCodes: industryCodes,
-                agreed: isAgreed
-            });
-            
-            // ✅ 수정: status === true 체크
-            if (res.data.status === true) {
-                alert("회원가입이 완료되었습니다!");
+                );
                 navigate("/main");
             } else {
-                // ✅ 수정: 서버 응답 메시지 활용
-                alert("회원가입 요청을 처리할 수 없습니다. 입력 정보를 확인해주세요.");
+                showDefaultAlert("가입 실패", "입력 정보를 다시 확인해주세요.", "error");
             }
         } catch (err) {
-            alert(`서버 오류가 발생했습니다.`);
+            showDefaultAlert("서버 오류", "잠시 후 다시 시도해주세요.", "error");
         } finally {
             setSignupLoading(false);
         }
     };
-
     const handleCancel = async () => {
         const isConfirmed = await showConfirmAlert(
             "가입 취소",
@@ -463,6 +538,23 @@ const Signup = () => {
                                 </div>
                                 
                             ))}
+                            {/* 기업규모 셀렉트 박스 */}
+                            <div className="input-group">
+                                <label>기업 규모</label>
+                                <div className="input-wrap">   {/* ✅ 이렇게 */}
+                                    <select 
+                                        name="companySize"
+                                        value={formData.companySize} 
+                                        onChange={(e) => setFormData({...formData, companySize: e.target.value})}
+                                    >
+                                        <option value="">규모를 선택해주세요.</option>
+                                        <option value="소기업">소기업</option>
+                                        <option value="중기업">중기업</option>
+                                        <option value="중견기업">중견기업</option>
+                                        <option value="대기업">대기업</option>
+                                    </select>
+                                </div>
+                            </div>
                             {/* 업종 5단계 선택 UI 추가 */}
                             <div className="industry-selection-wrapper">
                                 <h3 className="sub-title">업종 추가 (표준산업분류 기준)</h3>
@@ -548,18 +640,7 @@ const Signup = () => {
                             </div>
                             <button type="button" className="btn-add" onClick={addIndustry}>업종 추가</button>
                             </div>
-                            {/* 기업규모 셀렉트 박스 */}
-                            <div className="input-group">
-                                <label>기업 규모</label>
-                                <select name="companySize" value={formData.companySize} 
-                                    onChange={(e) => setFormData({...formData, companySize: e.target.value})}>
-                                    <option value="">선택하세요</option>
-                                    <option value="소기업">소기업</option>
-                                    <option value="중기업">중기업</option>
-                                    <option value="중견기업">중견기업</option>
-                                    <option value="대기업">대기업</option>
-                                </select>
-                            </div>
+                            
                         </section>
 
                         <hr className="divider" />

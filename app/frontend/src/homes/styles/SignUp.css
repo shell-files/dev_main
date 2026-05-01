@@ -210,6 +210,21 @@ a {text-decoration: none; color: #333; display: inline-block;}
     color: #ccc;
 }
 
+#signup_page .input-group select {
+    flex: 1;
+    padding: 12px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: #fff;
+}
+
+/* focus 상태 */
+#signup_page .input-group select:focus {
+    border-color: #00B050;
+    outline: none;
+}
+
 /* 업종 추가 버튼 */
 #signup_page .btn-add {
     background-color: #333;
@@ -260,6 +275,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 #signup_page .code-tag button:hover {
     color: #ff4d4d;
 }
+
 
 /* 📱 모바일 대응 가로 배치 (화면이 넓을 때) */
 @media (min-width: 601px) {
