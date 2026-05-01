@@ -200,8 +200,6 @@ const Login = () => {
         throw new Error(result.message || "로그인 실패");
       }
 
-      // 1. navigateToHome 전 토큰 저장
-      // 실제 로그인 API 응답 구조 확정 후 key 이름은 조정 가능
       if (result.data?.accessToken) {
         localStorage.setItem("accessToken", result.data.accessToken);
       }
@@ -210,10 +208,9 @@ const Login = () => {
         localStorage.setItem("userId", result.data.user.userId);
       }
 
-      // 1. navigateToHome
       navigate("/main");
     } catch (error) {
-      showDefaultAlert("로그인 실패", "이메일과 비밀번호를 확인해 주세요.", "error");
+      setErrors(prev => ({ ...prev, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
     } finally {
       setLoginLoading(false);
     }
@@ -285,10 +282,9 @@ const Login = () => {
         throw new Error(result.message || "발송 실패");
       }
 
-      // 성공 시 성공 화면으로 전환
       setView("success");
     } catch (error) {
-      showDefaultAlert("발송 실패", "이메일 주소를 다시 확인해 주세요.", "error");
+      setErrors(prev => ({ ...prev, passwordResetSubmit: "이메일 발송에 실패했습니다. 다시 시도해주세요." }));
     } finally {
       setPasswordResetLoading(false);
     }
@@ -334,12 +330,21 @@ const Login = () => {
           <img className="login-page-decor-object decor-object-3" src={gateBg3} width="70" height="70" alt="" />
           
           <img className="login-page-decor-object generated-bg-1" src={blobMain} width="600" height="600" alt="" />
-          <img className="login-page-decor-object generated-bg-2" src={softCube} width="300" height="300" alt="" />
           <img className="login-page-decor-object generated-bg-3" src={floatingOrb} width="200" height="200" alt="" />
+
+          {/* Decorative Nodes for Background */}
+          <div className="login-page-node node-bg-1" style={{ top: '15%', left: '10%' }} />
+          <div className="login-page-node node-bg-2" style={{ top: '45%', right: '15%' }} />
+          <div className="login-page-node node-bg-3" style={{ bottom: '25%', left: '20%' }} />
+          <div className="login-page-node node-bg-4" style={{ bottom: '15%', right: '10%', opacity: 0.2 }} />
+          <div className="login-page-node node-bg-5" style={{ bottom: '30%', right: '5%', opacity: 0.15 }} />
 
           {/* Decorative Shapes & Lines */}
           <div className="login-page-shape shape-circle-1" />
           <div className="login-page-shape shape-square-1" />
+          <img className="login-page-decor-object generated-bg-4" src={floatingOrb} width="200" height="200" style={{ bottom: '5%', right: '5%', opacity: 0.5, filter: 'blur(40px)' }} alt="" />
+          <div className="login-page-node node-bg-4" style={{ bottom: '15%', right: '12%', width: '12px', height: '12px', background: 'rgba(3, 169, 77, 0.4)' }} />
+          <div className="login-page-node node-bg-5" style={{ bottom: '25%', right: '8%', width: '8px', height: '8px', background: 'rgba(3, 169, 77, 0.3)' }} />
           <div className="login-page-line login-page-line-1" />
           <div className="login-page-line login-page-line-2" />
           <div className="login-page-line login-page-line-3" />
@@ -362,7 +367,7 @@ const Login = () => {
                   <span className="back-btn" onClick={goToGatePage}>←</span>
                 </div>
 
-                <div className="logo-placeholder">로고 추가 예정</div>
+                <div className="login-logo-mark">ESG DATA PLATFORM</div>
 
                 <h1>Login</h1>
 
@@ -416,6 +421,7 @@ const Login = () => {
                   >
                     {loginLoading ? <span className="button-spinner" /> : "로그인"}
                   </button>
+                  {errors.loginSubmit && <p className="error-text submit-error">{errors.loginSubmit}</p>}
                 </form>
               </div>
 
@@ -433,14 +439,14 @@ const Login = () => {
                   </span>
                 </div>
 
-                <div className="logo-placeholder">로고 추가 예정</div>
+                <div className="login-logo-mark">ESG DATA PLATFORM</div>
 
                 <div className="forgot-view-header">
                   <h1>비밀번호 찾기</h1>
                   <div className="forgot-visual-wrap">
                     <img 
                       src={emailIcon} 
-                      alt="이메일 비밀번호 찾기" 
+                      alt="" 
                       className="forgot-visual-image"
                     />
                   </div>
@@ -480,6 +486,7 @@ const Login = () => {
                       "이메일 전송"
                     )}
                   </button>
+                  {errors.passwordResetSubmit && <p className="error-text submit-error">{errors.passwordResetSubmit}</p>}
 
                   <div className="links">
                     <span onClick={handleAccountInquiry}>
@@ -497,7 +504,7 @@ const Login = () => {
                 id="success-section"
                 style={{ display: view === "success" ? "flex" : "none" }}
               >
-                <div className="logo-placeholder">로고 추가 예정</div>
+                <div className="login-logo-mark">ESG DATA PLATFORM</div>
 
                 <h1>이메일 발송 완료</h1>
 
@@ -506,9 +513,10 @@ const Login = () => {
                 </div>
 
                 <div className="success-message-box">
+                  <div className="success-message-id">
+                    {maskEmail(passwordResetEmail || "user@naver.com")}
+                  </div>
                   <div className="success-message-main">
-                    {maskEmail(passwordResetEmail)}
-                    <br />
                     임시 비밀번호를 발송했습니다.
                   </div>
 
