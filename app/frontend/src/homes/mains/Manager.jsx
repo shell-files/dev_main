@@ -8,7 +8,7 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
  *  true: mock 데이터
  *  false: 실제 API
  */
-const USE_MOCK = false;
+const UseMock = true;
 
 /**
  * [CONSTANTS]
@@ -20,7 +20,7 @@ const CATEGORY_MAP = {
   governance: ["Governance", "Ethics"]
 };
 
-const ALL_ISSUE_GROUPS = [
+const AllIssueGroups = [
   "기업개요", "Climate", "Social", "Governance", "Ethics", "Waste", "Water", "Energy",
   "Labor", "Human Rights", "Community", "Product Safety", "Tax", "Biodiversity",
   "Supply Chain", "Diversity", "Data Privacy", "Anti-Corruption", "Safety",
@@ -28,135 +28,152 @@ const ALL_ISSUE_GROUPS = [
 ];
 const mockUsers = [
   // SKM 팀
-  { id: 1, name: '이채훈', email: 'chaehoon@skm.com', company: 'SKM', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
-  { id: 2, name: '김하영', email: 'hayoung@skm.com', company: 'SKM', tier: 'Staff', groups: ['Water', 'Waste'] },
-  { id: 3, name: '이정빈', email: 'jungbin@skm.com', company: 'SKM', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
-  { id: 4, name: '최수아', email: 'sua@skm.com', company: 'SKM', tier: 'Staff', groups: ['Governance', 'Tax'] },
+  { id: 1, name: '이채훈', email: 'chaehoon@skm.com', company: 'SKM', role: '관리자', groups: AllIssueGroups },
+  { id: 2, name: '김하영', email: 'hayoung@skm.com', company: 'SKM', role: '부서 담당자', groups: ['Water', 'Waste'] },
+  { id: 3, name: '이정빈', email: 'jungbin@skm.com', company: 'SKM', role: '관리자', groups: AllIssueGroups },
+  { id: 4, name: '최수아', email: 'sua@skm.com', company: 'SKM', role: 'ESG 담당자', groups: ['Governance', 'Tax'] },
 
   // HG 팀
-  { id: 5, name: '김지환', email: 'jihwan@hg.com', company: 'HG', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
-  { id: 6, name: '조윤주', email: 'yunju@hg.com', company: 'HG', tier: 'Staff', groups: ['Social', 'Community'] },
-  { id: 7, name: '최가영', email: 'gayoung@hg.com', company: 'HG', tier: 'Staff', groups: ['Biodiversity', 'Circular Economy'] },
-  { id: 8, name: '최윤우', email: 'yunu@hg.com', company: 'HG', tier: 'Staff', groups: ['Waste', 'Greenhouse Gas'] },
+  { id: 5, name: '김지환', email: 'jihwan@hg.com', company: 'HG', role: '관리자', groups: AllIssueGroups },
+  { id: 6, name: '조윤주', email: 'yunju@hg.com', company: 'HG', role: '부서 담당자', groups: ['Social', 'Community'] },
+  { id: 7, name: '최가영', email: 'gayoung@hg.com', company: 'HG', role: 'ESG 담당자', groups: ['Biodiversity', 'Circular Economy'] },
+  { id: 8, name: '최윤우', email: 'yunu@hg.com', company: 'HG', role: '컨설턴트', groups: ['Waste', 'Greenhouse Gas'] },
 
   // TV 팀
-  { id: 9, name: '남영준', email: 'youngjun@tv.com', company: 'TV', tier: 'Staff', groups: ['Human Rights', 'Diversity'] },
-  { id: 10, name: '이나라', email: 'nara@tv.com', company: 'TV', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
-  { id: 11, name: '이현서', email: 'hyunseo@tv.com', company: 'TV', tier: 'Staff', groups: ['Supply Chain', 'Data Privacy'] },
+  { id: 9, name: '남영준', email: 'youngjun@tv.com', company: 'TV', role: '부서 담당자', groups: ['Human Rights', 'Diversity'] },
+  { id: 10, name: '이나라', email: 'nara@tv.com', company: 'TV', role: '관리자', groups: AllIssueGroups },
+  { id: 11, name: '이현서', email: 'hyunseo@tv.com', company: 'TV', role: 'ESG 담당자', groups: ['Supply Chain', 'Data Privacy'] },
 
   // MT (강사님)
-  { id: 12, name: '강사님', email: 'mentor@mt.com', company: 'MT', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+  { id: 12, name: '강사님', email: 'mentor@mt.com', company: 'MT', role: '관리자', groups: AllIssueGroups },
 ];
 
 const mockInputs = [
-  // SKM 팀: 환경(E) 및 윤리(G) 중심
-  { id: 101, group: 'Climate', q_name: '온실가스 배출량 (Scope 1&2)', val: '450 tCO2eq', u_name: '이채훈', status: 'pending', file: 'skm_env_01.pdf' },
-  { id: 102, group: 'Energy', q_name: '전력 사용 효율성 지수', val: '0.85', u_name: '이채훈', status: 'approved', file: null },
-  { id: 103, group: 'Water', q_name: '용수 취수량 및 재이용률', val: '1,200톤 / 15%', u_name: '김하영', status: 'pending', file: 'water_usage.xlsx' },
-  { id: 104, group: 'Waste', q_name: '지정폐기물 처리 현황', val: '25.4톤', u_name: '김하영', status: 'rejected', file: 'waste_error.png' },
-  { id: 105, group: 'Ethics', q_name: '임직원 윤리강령 서약률', val: '100%', u_name: '이정빈', status: 'approved', file: null },
-  { id: 106, group: 'Anti-Corruption', q_name: '부패방지 교육 이수 현황', val: '95%', u_name: '이정빈', status: 'pending', file: 'edu_report.pdf' },
-  { id: 107, group: 'Governance', q_name: '사외이사 이사회 참석률', val: '92%', u_name: '최수아', status: 'approved', file: 'board_min.pdf' },
-  { id: 108, group: 'Tax', q_name: '국가별 조세 납부 내역', val: '공시 완료', u_name: '최수아', status: 'pending', file: null },
+  { id: 101, issueGroup: 'Climate', questionName: '온실가스 배출량 (Scope 1&2)', value: '450 tCO2eq', userName: '이채훈', status: 'pending', attachmentFile: 'skm_env_01.pdf' },
+  { id: 102, issueGroup: 'Energy', questionName: '전력 사용 효율성 지수', value: '0.85', userName: '이채훈', status: 'approved', attachmentFile: null },
+  
+  { id: 103, issueGroup: 'Water', questionName: '용수 취수량 및 재이용률', value: '1,200톤 / 15%', userName: '김하영', status: 'pending', attachmentFile: 'water_usage.xlsx' },
+  { id: 104, issueGroup: 'Waste', questionName: '지정폐기물 처리 현황', value: '25.4톤', userName: '김하영', status: 'rejected', attachmentFile: 'waste_error.png' },
 
-  // HG 팀: 환경(E) 및 사회(S) 중심
-  { id: 109, group: 'Energy', q_name: '재생에너지 사용 전환율', val: '22%', u_name: '김지환', status: 'pending', file: 're100_plan.pdf' },
-  { id: 110, group: 'Air Quality', q_name: '대기오염물질 배출 농도', val: '기준치 대비 40%', u_name: '김지환', status: 'approved', file: 'air_sensor.log' },
-  { id: 111, group: 'Social', q_name: '지역사회 기부금 총액', val: '1.2억원', u_name: '조윤주', status: 'approved', file: 'donation_receipt.zip' },
-  { id: 112, group: 'Community', q_name: '봉사활동 참여 인원', val: '340명', u_name: '조윤주', status: 'pending', file: null },
-  { id: 113, group: 'Biodiversity', q_name: '사업장 인근 생태계 영향 평가', val: '영향 낮음', u_name: '최가영', status: 'pending', file: 'bio_eval.pdf' },
-  { id: 114, group: 'Circular Economy', q_name: '제품 재활용 설계 비율', val: '60%', u_name: '최가영', status: 'approved', file: null },
-  { id: 115, group: 'Waste', q_name: '일반 폐기물 배출량', val: '150톤', u_name: '최윤우', status: 'pending', file: null },
-  { id: 116, group: 'Greenhouse Gas', q_name: '공급망 탄소 배출 데이터', val: '수집 중', u_name: '최윤우', status: 'pending', file: 'supply_ghg.csv' },
+  { id: 105, issueGroup: 'Ethics', questionName: '임직원 윤리강령 서약률', value: '100%', userName: '이정빈', status: 'approved', attachmentFile: null },
+  { id: 106, issueGroup: 'Anti-Corruption', questionName: '부패방지 교육 이수 현황', value: '95%', userName: '이정빈', status: 'pending', attachmentFile: 'edu_report.pdf' },
 
-  // TV 팀: 노동(S) 및 공급망 중심
-  { id: 117, group: 'Human Rights', q_name: '인권 실사 이행 여부', val: '이행 완료', u_name: '남영준', status: 'approved', file: 'hr_audit.pdf' },
-  { id: 118, group: 'Diversity', q_name: '여성 관리자 비율', val: '28.5%', u_name: '남영준', status: 'pending', file: null },
-  { id: 119, group: 'Labor', q_name: '산업재해율 (LTIFR)', val: '0.02', u_name: '이나라', status: 'approved', file: 'safety_stat.xlsx' },
-  { id: 120, group: 'Safety', q_name: '안전보건 경영시스템 인증', val: 'ISO 45001 유지', u_name: '이나라', status: 'pending', file: 'iso_cert.jpg' },
-  { id: 121, group: 'Supply Chain', q_name: '협력사 ESG 평가 비율', val: '82%', u_name: '이현서', status: 'pending', file: 'partner_eval.pdf' },
-  { id: 122, group: 'Data Privacy', q_name: '개인정보 보호 위반 건수', val: '0건', u_name: '이현서', status: 'approved', file: null },
+  { id: 107, issueGroup: 'Governance', questionName: '사외이사 이사회 참석률', value: '92%', userName: '최수아', status: 'approved', attachmentFile: 'board_min.pdf' },
+  { id: 108, issueGroup: 'Tax', questionName: '국가별 조세 납부 내역', value: '공시 완료', userName: '최수아', status: 'pending', attachmentFile: null },
+
+  { id: 109, issueGroup: 'Energy', questionName: '재생에너지 사용 전환율', value: '22%', userName: '김지환', status: 'pending', attachmentFile: 're100_plan.pdf' },
+  { id: 110, issueGroup: 'Air Quality', questionName: '대기오염물질 배출 농도', value: '기준치 대비 40%', userName: '김지환', status: 'approved', attachmentFile: 'air_sensor.log' },
+
+  { id: 111, issueGroup: 'Social', questionName: '지역사회 기부금 총액', value: '1.2억원', userName: '조윤주', status: 'approved', attachmentFile: 'donation_receipt.zip' },
+  { id: 112, issueGroup: 'Community', questionName: '봉사활동 참여 인원', value: '340명', userName: '조윤주', status: 'pending', attachmentFile: null },
+
+  { id: 113, issueGroup: 'Biodiversity', questionName: '사업장 인근 생태계 영향 평가', value: '영향 낮음', userName: '최가영', status: 'pending', attachmentFile: 'bio_eval.pdf' },
+  { id: 114, issueGroup: 'Circular Economy', questionName: '제품 재활용 설계 비율', value: '60%', userName: '최가영', status: 'approved', attachmentFile: null },
+
+  { id: 115, issueGroup: 'Waste', questionName: '일반 폐기물 배출량', value: '150톤', userName: '최윤우', status: 'pending', attachmentFile: null },
+  { id: 116, issueGroup: 'Greenhouse Gas', questionName: '공급망 탄소 배출 데이터', value: '수집 중', userName: '최윤우', status: 'pending', attachmentFile: 'supply_ghg.csv' },
+
+  { id: 117, issueGroup: 'Human Rights', questionName: '인권 실사 이행 여부', value: '이행 완료', userName: '남영준', status: 'approved', attachmentFile: 'hr_audit.pdf' },
+  { id: 118, issueGroup: 'Diversity', questionName: '여성 관리자 비율', value: '28.5%', userName: '남영준', status: 'pending', attachmentFile: null },
+
+  { id: 119, issueGroup: 'Labor', questionName: '산업재해율 (LTIFR)', value: '0.02', userName: '이나라', status: 'approved', attachmentFile: 'safety_stat.xlsx' },
+  { id: 120, issueGroup: 'Safety', questionName: '안전보건 경영시스템 인증', value: 'ISO 45001 유지', userName: '이나라', status: 'pending', attachmentFile: 'iso_cert.jpg' },
+
+  { id: 121, issueGroup: 'Supply Chain', questionName: '협력사 ESG 평가 비율', value: '82%', userName: '이현서', status: 'pending', attachmentFile: 'partner_eval.pdf' },
+  { id: 122, issueGroup: 'Data Privacy', questionName: '개인정보 보호 위반 건수', value: '0건', userName: '이현서', status: 'approved', attachmentFile: null },
 ];
 const PAGE_SIZE = 10;
 
+
 const Manager = () => {
-  /**
-   * 1. AUTH
-   */
+  const ROLE = {ADMIN: "관리자", ESG: "ESG 담당자", DEPT: "부서 담당자", CONSULTANT: "컨설턴트"};
   const [authInfo] = useState({
     uuid: localStorage.getItem('uuid') || 'guest-uuid',
-    companyId: localStorage.getItem('companyId') || 'guest-company'
+    companyId: localStorage.getItem('companyId') || 'guest-company',
+    role: localStorage.getItem('role') || ''
   });
+  const isESG = authInfo.role === ROLE.ESG;
+  const canAccess = UseMock || isESG;
+if (!canAccess) {
+  return (
+    <div style={{ padding: 40 }}>
+      <h2>접근 권한이 없습니다</h2>
+      <p>ESG 담당자만 접근 가능한 페이지입니다.</p>
+    </div>
+  );
+}
 
-  /**
-   * 2. STATE
-   */
   const [users, setUsers] = useState([]);
   const [inputs, setInputs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('user');
+
   const [rejectReason, setRejectReason] = useState("");
   const [rejectTargetId, setRejectTargetId] = useState(null);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
-  /**
-   * 3. FILTER & PAGINATION
-   */
+
   const [totalCount, setTotalCount] = useState(0);
   const [activeDataCategory, setActiveDataCategory] = useState('all'); 
   const [activeSubCategory, setActiveSubCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [dataPage, setDataPage] = useState(1);
-  const [dataSearch, setDataSearch] = useState("");
 
-  /**
-   * 4. MODAL
-   */
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   /**
-   * [FETCH DATA]
+   * =========================
+   * API FETCH (SAFE)
+   * =========================
    */
   const fetchData = useCallback(async () => {
     setIsLoading(true);
-    try {
-      if (USE_MOCK) {
-        await new Promise(r => setTimeout(r, 500));
 
+    try {
+      if (UseMock) {
+        await new Promise(r => setTimeout(r, 300));
         setInputs(mockInputs);
         setUsers(mockUsers);
         setTotalCount(mockInputs.length);
-
-      } else {
-        const res = await api.get('/board', {
-          params: {
-            ...authInfo,
-            limit: PAGE_SIZE,
-            offset: (dataPage - 1) * PAGE_SIZE,
-            category: activeDataCategory !== 'all' ? activeDataCategory : undefined,
-            subCategory: activeSubCategory !== 'all' ? activeSubCategory : undefined,
-            status: statusFilter !== 'all' ? statusFilter : undefined
-          }
-        });
-
-        if (!res.data.status) throw new Error();
-
-        setUsers(res.data.data.users);
-        setInputs(res.data.data.list);
-        setTotalCount(res.data.data.total);
+        return;
       }
 
+      const res = await api.get('/board', {
+        params: {
+          ...authInfo,
+          limit: PAGE_SIZE,
+          offset: (dataPage - 1) * PAGE_SIZE,
+          category: activeDataCategory !== 'all' ? activeDataCategory : undefined,
+          subCategory: activeSubCategory !== 'all' ? activeSubCategory : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined
+        }
+      });
+
+      const data = res?.data?.data;
+
+      setUsers(data?.users ?? []);
+      setInputs(data?.list ?? []);
+      setTotalCount(data?.total ?? 0);
+
     } catch (err) {
+      console.error({
+        message: err?.message,
+        status: err?.response?.status,
+        data: err?.response?.data
+      });
       showDefaultAlert("데이터 오류", "불러오기 실패", "error");
-      console.error("API ERROR FULL:", err);
-      console.error("MESSAGE:", err.message);
-      console.error("RESPONSE:", err.response);
+
+      setUsers([]);
+      setInputs([]);
+      setTotalCount(0);
+
     } finally {
       setIsLoading(false);
     }
-  }, [authInfo, dataPage, activeDataCategory, activeSubCategory, statusFilter,USE_MOCK]);
+  }, [authInfo, dataPage, activeDataCategory, activeSubCategory, statusFilter]);
 
   useEffect(() => {
     fetchData();
@@ -172,9 +189,10 @@ const Manager = () => {
   };
 
   /**
-   * ACTION
+   * ACTION (SAFE FIX ONLY)
    */
   const handleAction = async (id, newStatus) => {
+
     if (newStatus === 'rejected') {
       setRejectTargetId(id);
       setRejectReason("");
@@ -192,63 +210,71 @@ const Manager = () => {
 
     if (!isConfirmed) return;
 
-    if (!isConfirmed) return;
-
     setIsLoading(true);
-    try {
 
-      if (!USE_MOCK) {
+    try {
+      if (!UseMock) {
         await api.patch('/board', {
           id,
           status: newStatus,
           ...authInfo
         });
-      } else {
-        await new Promise(resolve => setTimeout(resolve, 500));
       }
 
-      setInputs(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
+      setInputs(prev =>
+        prev.map(i => i.id === id ? { ...i, status: newStatus } : i)
+      );
 
       showDefaultAlert("처리 완료", `정상적으로 ${actionName}되었습니다.`, "success");
 
     } catch (e) {
-      showDefaultAlert("처리 실패", "통신 중 오류가 발생했습니다.", "error");
+      console.error(e);
+      showDefaultAlert("처리 실패", "통신 중 오류", "error");
     } finally {
       setIsLoading(false);
     }
   };
 
   /**
-   * GROUP TOGGLE
+   * GROUP TOGGLE (NULL SAFE ONLY)
    */
   const toggleGroup = (groupName) => {
-    setUsers(prev => prev.map(u => {
-      if (u.id === currentUser.id) {
-        const has = u.groups.includes(groupName);
-        let newGroups = has ? u.groups.filter(g => g !== groupName) : [...u.groups, groupName];
+    if (!currentUser) return;
 
-        if (newGroups.length === 0) {
-          showDefaultAlert("알림", "최소 하나의 그룹은 소속되어야 합니다.", "info");
-          return u;
+    setUsers(prev =>
+      prev.map(u => {
+        if (u.id === currentUser.id) {
+
+          const groups = u.groups || [];
+          const has = groups.includes(groupName);
+
+          let newGroups = has
+            ? groups.filter(g => g !== groupName)
+            : [...groups, groupName];
+
+          if (newGroups.length === 0) {
+            showDefaultAlert("알림", "최소 하나의 그룹은 필요합니다.", "info");
+            return u;
+          }
+
+          const updated = { ...u, groups: newGroups };
+          setCurrentUser(updated);
+          return updated;
         }
-
-        const updatedUser = { ...u, groups: newGroups };
-        setCurrentUser(updatedUser);
-        return updatedUser;
-      }
-      return u;
-    }));
+        return u;
+      })
+    );
   };
 
   /**
    * FILTER
    */
   const getFilteredInputs = () => {
-    let list = inputs;
+    let list = inputs || [];
 
     if (activeDataCategory !== 'all') {
       list = list.filter(item =>
-        CATEGORY_MAP[activeDataCategory].includes(item.group)
+        CATEGORY_MAP[activeDataCategory]?.includes(item.group)
       );
     }
 
@@ -262,14 +288,14 @@ const Manager = () => {
 
     return list;
   };
-  const filteredUsers = users.filter(u => {
+
+  const filteredUsers = (users || []).filter(u => {
     const keyword = userSearch.toLowerCase();
 
     return (
-      u.name.toLowerCase().includes(keyword) ||
-      u.company.toLowerCase().includes(keyword) ||
-      u.groups.some(g => g.toLowerCase().includes(keyword)) ||
-      u.groups.join(' ').toLowerCase().includes(keyword)
+      (u.name || "").toLowerCase().includes(keyword) ||
+      (u.company || "").toLowerCase().includes(keyword) ||
+      (u.groups || []).some(g => g.toLowerCase().includes(keyword))
     );
   });
 
@@ -277,7 +303,9 @@ const Manager = () => {
     (userPage - 1) * PAGE_SIZE,
     userPage * PAGE_SIZE
   );
+
   const filteredInputs = getFilteredInputs();
+
   const totalDataPages = Math.ceil(filteredInputs.length / PAGE_SIZE);
 
   const pagedInputs = filteredInputs.slice(
@@ -290,9 +318,11 @@ const Manager = () => {
     setActiveSubCategory('all');
     setDataPage(1);
   };
+
   
 
   return (
+    
     <div id="manager_page">
       <div className="manager-content-container">
 
@@ -354,6 +384,7 @@ const Manager = () => {
             </div>
 
             <div className="table-wrapper">
+              
               {isLoading ? (
                 <div className="loading-container">
                   <div className="spinner"></div>
@@ -381,7 +412,7 @@ const Manager = () => {
                           <strong>{u.name}</strong><br />
                           <small>{u.email}</small>
                         </td>
-                        <td>{u.company} <span className="depth-tag">{u.tier}</span></td>
+                        <td>{u.company} <span className="depth-tag">{u.role}</span></td>
                         <td>
                           <div className="tag-container">
                             {u.groups.slice(0, 3).map(g => <span key={g} className="tag-item"> {g} </span>)}
@@ -489,13 +520,13 @@ const Manager = () => {
                       <tr key={item.id}>
                         <td>{item.id}</td>
                         <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.group}</span></td>
-                        <td>{item.q_name}</td>
-                        <td className="value-cell"><strong>{item.val}</strong></td>
+                        <td>{item.questionName}</td>
+                        <td className="value-cell"><strong>{item.value}</strong></td>
                         <td>
                           {/* 파일 업로드 위치에 맞게 수정 해야 함 */}
                           {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
                         </td>
-                        <td>{item.u_name}</td>
+                        <td>{item.userName}</td>
                         <td><span className={`role-badge ${item.status === 'approved' ? 'green' : item.status === 'pending' ? 'purple' : 'depth-tag'}`}>{item.status}</span></td>
                         <td>
                           <div className="action-btns" style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
@@ -554,7 +585,7 @@ const Manager = () => {
                 <div className="modal-section" style={{ marginTop: '20px' }}>
                   <p className="section-label" style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>추가 가능한 그룹 (클릭 시 추가)</p>
                   <div className="modal-tag-group">
-                    {ALL_ISSUE_GROUPS
+                    {AllIssueGroups
                       .filter(g => !currentUser.groups.includes(g))
                       .map(g => (
                         <button key={g} className="modal-tag unassigned" onClick={() => toggleGroup(g)}>
@@ -570,7 +601,7 @@ const Manager = () => {
                   className="btn-confirm"
                   onClick={async () => {
                     try {
-                      if (!USE_MOCK) {
+                      if (!UseMock) {
                         const res = await api.patch('/user', {
                           userId: currentUser.id,
                           groups: currentUser.groups,
@@ -640,7 +671,7 @@ const Manager = () => {
                     }
 
                     try {
-                      if (!USE_MOCK) {
+                      if (!UseMock) {
                         await api.patch('/board', {
                           id: rejectTargetId,
                           status: 'rejected',
