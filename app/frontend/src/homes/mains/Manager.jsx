@@ -8,7 +8,7 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
  *  true: mock 데이터
  *  false: 실제 API
  */
-const USE_MOCK = true;
+const USE_MOCK = false;
 
 /**
  * [CONSTANTS]
@@ -95,7 +95,9 @@ const Manager = () => {
   const [inputs, setInputs] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('user');
-
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectTargetId, setRejectTargetId] = useState(null);
+  const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
   /**
    * 3. FILTER & PAGINATION
    */
@@ -106,6 +108,7 @@ const Manager = () => {
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [dataPage, setDataPage] = useState(1);
+  const [dataSearch, setDataSearch] = useState("");
 
   /**
    * 4. MODAL
@@ -147,6 +150,9 @@ const Manager = () => {
 
     } catch (err) {
       showDefaultAlert("데이터 오류", "불러오기 실패", "error");
+      console.error("API ERROR FULL:", err);
+      console.error("MESSAGE:", err.message);
+      console.error("RESPONSE:", err.response);
     } finally {
       setIsLoading(false);
     }
@@ -169,13 +175,22 @@ const Manager = () => {
    * ACTION
    */
   const handleAction = async (id, newStatus) => {
-    const actionName = newStatus === 'approved' ? '승인' : newStatus === 'rejected' ? '반려' : '취소';
+    if (newStatus === 'rejected') {
+      setRejectTargetId(id);
+      setRejectReason("");
+      setIsRejectModalOpen(true);
+      return;
+    }
+
+    const actionName = newStatus === 'approved' ? '승인' : '취소';
 
     const isConfirmed = await showConfirmAlert(
       `${actionName} 확인`,
       `해당 항목을 정말로 ${actionName}하시겠습니까?`,
-      newStatus === 'rejected' ? 'warning' : 'question'
+      'question'
     );
+
+    if (!isConfirmed) return;
 
     if (!isConfirmed) return;
 
@@ -247,7 +262,16 @@ const Manager = () => {
 
     return list;
   };
-  const filteredUsers = users.filter(u => u.name.includes(userSearch) || u.company.includes(userSearch));
+  const filteredUsers = users.filter(u => {
+    const keyword = userSearch.toLowerCase();
+
+    return (
+      u.name.toLowerCase().includes(keyword) ||
+      u.company.toLowerCase().includes(keyword) ||
+      u.groups.some(g => g.toLowerCase().includes(keyword)) ||
+      u.groups.join(' ').toLowerCase().includes(keyword)
+    );
+  });
 
   const pagedUsers = filteredUsers.slice(
     (userPage - 1) * PAGE_SIZE,
@@ -318,9 +342,10 @@ const Manager = () => {
         {activeTab === 'user' && (
           <section className="fade-in">
             <div className="filter-bar">
+              
               <input
                 className="search-input"
-                placeholder="사용자명 또는 회사명 검색"
+                placeholder="사용자명 또는 회사명 / 이슈그룹 검색"
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
                 disabled={isLoading}
@@ -336,7 +361,7 @@ const Manager = () => {
                 </div>
               ) : pagedUsers.length === 0 ? (
                 <div className="empty-container">
-                  <div className="empty-icon">👥</div>
+                  <div className="empty-icon">이미지 추가 예정</div>
                   <p>조회된 사용자가 없습니다.</p>
                 </div>
               ) : (
@@ -565,6 +590,83 @@ const Manager = () => {
                     }
                   }}
                 >설정 완료</button>
+              </div>
+            </div>
+          </div>
+        )}
+        {isRejectModalOpen && (
+          <div className="modal-overlay">
+            <div className="modal-window">
+              <div className="modal-header">
+                <h3>반려 사유 입력</h3>
+
+                <button
+                  className="close-x"
+                  onClick={() => setIsRejectModalOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="modal-body">
+                {/* 기존 반려 사유 (있을 경우만) */}
+                {inputs.find(i => i.id === rejectTargetId)?.reason && (
+                  <div style={{ marginBottom: '10px', fontSize: '13px', color: '#888' }}>
+                    기존 사유: {inputs.find(i => i.id === rejectTargetId)?.reason}
+                  </div>
+                )}
+                <textarea
+                  className="reject-textarea"
+                  placeholder="반려 사유를 입력해주세요"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                  style={{
+                    width: '100%',
+                    height: '120px',
+                    padding: '10px',
+                    border: '1px solid #ddd',
+                    borderRadius: '6px'
+                  }}
+                />
+              </div>
+
+              <div className="modal-footer">
+                <button
+                  className="btn-confirm"
+                  onClick={async () => {
+                    if (!rejectReason.trim()) {
+                      showDefaultAlert("알림", "반려 사유를 입력해주세요.", "info");
+                      return;
+                    }
+
+                    try {
+                      if (!USE_MOCK) {
+                        await api.patch('/board', {
+                          id: rejectTargetId,
+                          status: 'rejected',
+                          reason: rejectReason,
+                          ...authInfo
+                        });
+                      }
+
+                      setInputs(prev =>
+                        prev.map(i =>
+                          i.id === rejectTargetId
+                            ? { ...i, status: 'rejected', reason: rejectReason }
+                            : i
+                        )
+                      );
+
+                      showDefaultAlert("완료", "반려 처리되었습니다.", "success");
+                      setIsRejectModalOpen(false);
+
+                    } catch (e) {
+                      showDefaultAlert("실패", "처리 중 오류 발생", "error");
+                    }
+                  }}
+                >
+                  반려 확정
+                </button>
               </div>
             </div>
           </div>
