@@ -26,7 +26,57 @@ const ALL_ISSUE_GROUPS = [
   "Supply Chain", "Diversity", "Data Privacy", "Anti-Corruption", "Safety",
   "Circular Economy", "Greenhouse Gas", "Air Quality", "ESG Strategy"
 ];
+const mockUsers = [
+  // SKM 팀
+  { id: 1, name: '이채훈', email: 'chaehoon@skm.com', company: 'SKM', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+  { id: 2, name: '김하영', email: 'hayoung@skm.com', company: 'SKM', tier: 'Staff', groups: ['Water', 'Waste'] },
+  { id: 3, name: '이정빈', email: 'jungbin@skm.com', company: 'SKM', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+  { id: 4, name: '최수아', email: 'sua@skm.com', company: 'SKM', tier: 'Staff', groups: ['Governance', 'Tax'] },
 
+  // HG 팀
+  { id: 5, name: '김지환', email: 'jihwan@hg.com', company: 'HG', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+  { id: 6, name: '조윤주', email: 'yunju@hg.com', company: 'HG', tier: 'Staff', groups: ['Social', 'Community'] },
+  { id: 7, name: '최가영', email: 'gayoung@hg.com', company: 'HG', tier: 'Staff', groups: ['Biodiversity', 'Circular Economy'] },
+  { id: 8, name: '최윤우', email: 'yunu@hg.com', company: 'HG', tier: 'Staff', groups: ['Waste', 'Greenhouse Gas'] },
+
+  // TV 팀
+  { id: 9, name: '남영준', email: 'youngjun@tv.com', company: 'TV', tier: 'Staff', groups: ['Human Rights', 'Diversity'] },
+  { id: 10, name: '이나라', email: 'nara@tv.com', company: 'TV', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+  { id: 11, name: '이현서', email: 'hyunseo@tv.com', company: 'TV', tier: 'Staff', groups: ['Supply Chain', 'Data Privacy'] },
+
+  // MT (강사님)
+  { id: 12, name: '강사님', email: 'mentor@mt.com', company: 'MT', tier: 'Admin', groups: ALL_ISSUE_GROUPS },
+];
+
+const mockInputs = [
+  // SKM 팀: 환경(E) 및 윤리(G) 중심
+  { id: 101, group: 'Climate', q_name: '온실가스 배출량 (Scope 1&2)', val: '450 tCO2eq', u_name: '이채훈', status: 'pending', file: 'skm_env_01.pdf' },
+  { id: 102, group: 'Energy', q_name: '전력 사용 효율성 지수', val: '0.85', u_name: '이채훈', status: 'approved', file: null },
+  { id: 103, group: 'Water', q_name: '용수 취수량 및 재이용률', val: '1,200톤 / 15%', u_name: '김하영', status: 'pending', file: 'water_usage.xlsx' },
+  { id: 104, group: 'Waste', q_name: '지정폐기물 처리 현황', val: '25.4톤', u_name: '김하영', status: 'rejected', file: 'waste_error.png' },
+  { id: 105, group: 'Ethics', q_name: '임직원 윤리강령 서약률', val: '100%', u_name: '이정빈', status: 'approved', file: null },
+  { id: 106, group: 'Anti-Corruption', q_name: '부패방지 교육 이수 현황', val: '95%', u_name: '이정빈', status: 'pending', file: 'edu_report.pdf' },
+  { id: 107, group: 'Governance', q_name: '사외이사 이사회 참석률', val: '92%', u_name: '최수아', status: 'approved', file: 'board_min.pdf' },
+  { id: 108, group: 'Tax', q_name: '국가별 조세 납부 내역', val: '공시 완료', u_name: '최수아', status: 'pending', file: null },
+
+  // HG 팀: 환경(E) 및 사회(S) 중심
+  { id: 109, group: 'Energy', q_name: '재생에너지 사용 전환율', val: '22%', u_name: '김지환', status: 'pending', file: 're100_plan.pdf' },
+  { id: 110, group: 'Air Quality', q_name: '대기오염물질 배출 농도', val: '기준치 대비 40%', u_name: '김지환', status: 'approved', file: 'air_sensor.log' },
+  { id: 111, group: 'Social', q_name: '지역사회 기부금 총액', val: '1.2억원', u_name: '조윤주', status: 'approved', file: 'donation_receipt.zip' },
+  { id: 112, group: 'Community', q_name: '봉사활동 참여 인원', val: '340명', u_name: '조윤주', status: 'pending', file: null },
+  { id: 113, group: 'Biodiversity', q_name: '사업장 인근 생태계 영향 평가', val: '영향 낮음', u_name: '최가영', status: 'pending', file: 'bio_eval.pdf' },
+  { id: 114, group: 'Circular Economy', q_name: '제품 재활용 설계 비율', val: '60%', u_name: '최가영', status: 'approved', file: null },
+  { id: 115, group: 'Waste', q_name: '일반 폐기물 배출량', val: '150톤', u_name: '최윤우', status: 'pending', file: null },
+  { id: 116, group: 'Greenhouse Gas', q_name: '공급망 탄소 배출 데이터', val: '수집 중', u_name: '최윤우', status: 'pending', file: 'supply_ghg.csv' },
+
+  // TV 팀: 노동(S) 및 공급망 중심
+  { id: 117, group: 'Human Rights', q_name: '인권 실사 이행 여부', val: '이행 완료', u_name: '남영준', status: 'approved', file: 'hr_audit.pdf' },
+  { id: 118, group: 'Diversity', q_name: '여성 관리자 비율', val: '28.5%', u_name: '남영준', status: 'pending', file: null },
+  { id: 119, group: 'Labor', q_name: '산업재해율 (LTIFR)', val: '0.02', u_name: '이나라', status: 'approved', file: 'safety_stat.xlsx' },
+  { id: 120, group: 'Safety', q_name: '안전보건 경영시스템 인증', val: 'ISO 45001 유지', u_name: '이나라', status: 'pending', file: 'iso_cert.jpg' },
+  { id: 121, group: 'Supply Chain', q_name: '협력사 ESG 평가 비율', val: '82%', u_name: '이현서', status: 'pending', file: 'partner_eval.pdf' },
+  { id: 122, group: 'Data Privacy', q_name: '개인정보 보호 위반 건수', val: '0건', u_name: '이현서', status: 'approved', file: null },
+];
 const PAGE_SIZE = 10;
 
 const Manager = () => {
@@ -49,6 +99,7 @@ const Manager = () => {
   /**
    * 3. FILTER & PAGINATION
    */
+  const [totalCount, setTotalCount] = useState(0);
   const [activeDataCategory, setActiveDataCategory] = useState('all'); 
   const [activeSubCategory, setActiveSubCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -68,47 +119,38 @@ const Manager = () => {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      let usersData = [];
-      let inputsData = [];
-
       if (USE_MOCK) {
-        // ---------------- MOCK ----------------
-        await new Promise(resolve => setTimeout(resolve, 700));
+        await new Promise(r => setTimeout(r, 500));
 
-        inputsData = [
-          { id: "INP-001", group: "Climate", q_name: "에너지 사용량", val: "450kWh", file: "bill_01.pdf", u_name: "이채훈", u_id: "U001", status: "pending" },
-          { id: "INP-002", group: "Social", q_name: "임직원 봉사시간", val: "120h", file: null, u_name: "이정빈", u_id: "U002", status: "rejected" },
-          { id: "INP-003", group: "Tax", q_name: "법인세 납부액", val: "1.2억", file: "tax_report.zip", u_name: "이나라", u_id: "U003", status: "approved" },
-          { id: "INP-004", group: "Governance", q_name: "이사회 출석률", val: "95%", file: "meeting_minutes.pdf", u_name: "이채훈", u_id: "U001", status: "rejected" },
-          { id: "INP-005", group: "Waste", q_name: "폐기물 재활용량", val: "30t", file: "waste_log.xlsx", u_name: "이나라", u_id: "U003", status: "pending" },
-        ];
-
-        usersData = [
-          { id: "U001", name: "이채훈", email: "chaehoon@skm.com", company: "SKM", tier: "1 Tier", groups: ["기업개요", "Climate", "Social"] },
-          { id: "U002", name: "이정빈", email: "lee@gmail.com", company: "SKM", tier: "1 Tier", groups: ["Social"] },
-          { id: "U003", name: "이나라", email: "nara@gmail.com", company: "TV", tier: "2 Tier", groups: ["Social", "Waste"] },
-        ];
+        setInputs(mockInputs);
+        setUsers(mockUsers);
+        setTotalCount(mockInputs.length);
 
       } else {
-        // ---------------- REAL API ----------------
-        const res = await api.get('/', {
-          params: authInfo
+        const res = await api.get('/board', {
+          params: {
+            ...authInfo,
+            limit: PAGE_SIZE,
+            offset: (dataPage - 1) * PAGE_SIZE,
+            category: activeDataCategory !== 'all' ? activeDataCategory : undefined,
+            subCategory: activeSubCategory !== 'all' ? activeSubCategory : undefined,
+            status: statusFilter !== 'all' ? statusFilter : undefined
+          }
         });
 
-        usersData = res.data.users;
-        inputsData = res.data.inputs;
+        if (!res.data.status) throw new Error();
+
+        setUsers(res.data.data.users);
+        setInputs(res.data.data.list);
+        setTotalCount(res.data.data.total);
       }
 
-      setUsers(usersData);
-      setInputs(inputsData);
-
     } catch (err) {
-      console.error(err);
-      showDefaultAlert("데이터 오류", "데이터를 불러오는 중 문제가 발생했습니다.", "error");
+      showDefaultAlert("데이터 오류", "불러오기 실패", "error");
     } finally {
       setIsLoading(false);
     }
-  }, [authInfo]);
+  }, [authInfo, dataPage, activeDataCategory, activeSubCategory, statusFilter,USE_MOCK]);
 
   useEffect(() => {
     fetchData();
@@ -141,7 +183,7 @@ const Manager = () => {
     try {
 
       if (!USE_MOCK) {
-        await api.post('/', {
+        await api.patch('/board', {
           id,
           status: newStatus,
           ...authInfo
@@ -186,34 +228,45 @@ const Manager = () => {
   /**
    * FILTER
    */
-  const filteredUsers = users.filter(u => u.name.includes(userSearch) || u.company.includes(userSearch));
-  const pagedUsers = filteredUsers.slice((userPage - 1) * PAGE_SIZE, userPage * PAGE_SIZE);
-
   const getFilteredInputs = () => {
     let list = inputs;
 
     if (activeDataCategory !== 'all') {
-      list = list.filter(item => CATEGORY_MAP[activeDataCategory].includes(item.group));
+      list = list.filter(item =>
+        CATEGORY_MAP[activeDataCategory].includes(item.group)
+      );
     }
+
     if (activeSubCategory !== 'all') {
       list = list.filter(item => item.group === activeSubCategory);
     }
+
     if (statusFilter !== 'all') {
       list = list.filter(item => item.status === statusFilter);
     }
 
     return list;
   };
+  const filteredUsers = users.filter(u => u.name.includes(userSearch) || u.company.includes(userSearch));
 
+  const pagedUsers = filteredUsers.slice(
+    (userPage - 1) * PAGE_SIZE,
+    userPage * PAGE_SIZE
+  );
   const filteredInputs = getFilteredInputs();
-  const pagedInputs = filteredInputs.slice((dataPage - 1) * PAGE_SIZE, dataPage * PAGE_SIZE);
   const totalDataPages = Math.ceil(filteredInputs.length / PAGE_SIZE);
+
+  const pagedInputs = filteredInputs.slice(
+    (dataPage - 1) * PAGE_SIZE,
+    dataPage * PAGE_SIZE
+  );
 
   const handleMainCategoryChange = (category) => {
     setActiveDataCategory(category);
     setActiveSubCategory('all');
     setDataPage(1);
   };
+  
 
   return (
     <div id="manager_page">
@@ -320,6 +373,24 @@ const Manager = () => {
                   </tbody>
                 </table>
               )}
+              {!isLoading && Math.ceil(filteredUsers.length / PAGE_SIZE) > 1 && (
+                <div className='pagination'>
+                  {Array.from({ length: Math.ceil(filteredUsers.length / PAGE_SIZE) }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setUserPage(i + 1)}
+                      className={`page-btn ${userPage === i + 1 ? 'active' : ''}`}
+                      style={
+                        userPage === i + 1
+                          ? { backgroundColor: '#03a94d', color: '#fff', border: 'none' }
+                          : {}
+                      }
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
           </section>
         )}
@@ -396,6 +467,7 @@ const Manager = () => {
                         <td>{item.q_name}</td>
                         <td className="value-cell"><strong>{item.val}</strong></td>
                         <td>
+                          {/* 파일 업로드 위치에 맞게 수정 해야 함 */}
                           {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
                         </td>
                         <td>{item.u_name}</td>
@@ -469,10 +541,30 @@ const Manager = () => {
               </div>
 
               <div className="modal-footer">
-                <button className="btn-confirm" onClick={() => {
-                  showDefaultAlert("성공", "권한 설정이 저장되었습니다.", "success");
-                  setIsModalOpen(false);
-                }}>설정 완료</button>
+                <button
+                  className="btn-confirm"
+                  onClick={async () => {
+                    try {
+                      if (!USE_MOCK) {
+                        const res = await api.patch('/user', {
+                          userId: currentUser.id,
+                          groups: currentUser.groups,
+                          ...authInfo
+                        });
+
+                        if (!res.data.status) {
+                          throw new Error('저장 실패');
+                        }
+                      }
+
+                      showDefaultAlert("성공", "권한 설정이 저장되었습니다.", "success");
+                      setIsModalOpen(false);
+
+                    } catch (e) {
+                      showDefaultAlert("실패", "권한 저장 중 오류 발생", "error");
+                    }
+                  }}
+                >설정 완료</button>
               </div>
             </div>
           </div>
