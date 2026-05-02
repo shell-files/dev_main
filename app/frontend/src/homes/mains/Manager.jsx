@@ -5,8 +5,8 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
 
 /**
  * [CONFIG]
- * 👉 true: mock 데이터
- * 👉 false: 실제 API
+ *  true: mock 데이터
+ *  false: 실제 API
  */
 const USE_MOCK = true;
 
@@ -91,7 +91,7 @@ const Manager = () => {
 
       } else {
         // ---------------- REAL API ----------------
-        const res = await api.get('/api/manager/all-data', {
+        const res = await api.get('/', {
           params: authInfo
         });
 
@@ -141,7 +141,7 @@ const Manager = () => {
     try {
 
       if (!USE_MOCK) {
-        await api.post('/api/manager/action', {
+        await api.post('/', {
           id,
           status: newStatus,
           ...authInfo
