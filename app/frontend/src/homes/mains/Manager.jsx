@@ -1,9 +1,17 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { api } from '@utils/network'; 
 import '@styles/Manager.css';
+import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert';
+
+/**
+ * [CONFIG]
+ * 👉 true: mock 데이터
+ * 👉 false: 실제 API
+ */
+const USE_MOCK = true;
 
 /**
  * [CONSTANTS]
- * 이슈 그룹 카테고리 매핑 및 전체 리스트
  */
 const CATEGORY_MAP = {
   general: ["기업개요", "ESG Strategy", "Tax", "Anti-Corruption"],
@@ -22,53 +30,84 @@ const ALL_ISSUE_GROUPS = [
 const PAGE_SIZE = 10;
 
 const Manager = () => {
-  // 1. [AUTH] 로컬 스토리지 정보 (페이지 진입 시 확인)
+  /**
+   * 1. AUTH
+   */
   const [authInfo] = useState({
     uuid: localStorage.getItem('uuid') || 'guest-uuid',
     companyId: localStorage.getItem('companyId') || 'guest-company'
   });
 
-  // 2. [STATE] 데이터 및 유저 관리
+  /**
+   * 2. STATE
+   */
   const [users, setUsers] = useState([]);
   const [inputs, setInputs] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [activeTab, setActiveTab] = useState('user'); // 'user' 또는 'data'
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('user');
 
-  // 3. [FILTER & PAGINATION]
-  const [activeDataCategory, setActiveDataCategory] = useState('all'); // 전체, 경영일반, E, S, G
-  const [statusFilter, setStatusFilter] = useState('all'); // KPI용 상태 필터
+  /**
+   * 3. FILTER & PAGINATION
+   */
+  const [activeDataCategory, setActiveDataCategory] = useState('all'); 
+  const [activeSubCategory, setActiveSubCategory] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
   const [dataPage, setDataPage] = useState(1);
 
-  // 4. [MODAL] 유저 이슈 그룹 관리
+  /**
+   * 4. MODAL
+   */
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState(null);
 
   /**
-   * [API SIMULATION] 데이터 로드 로직
-   * 로컬 스토리지의 uuid와 companyId를 포함하여 백엔드에 요청한다고 가정합니다.
+   * [FETCH DATA]
    */
   const fetchData = useCallback(async () => {
-    console.log("DB 호출 중... 인증 정보:", authInfo);
-    
-    // 실제 환경: const res = await axios.post('/api/data', { ...authInfo });
-    // Mock 데이터 세팅 (상태값: pending, approved, rejected, writing)
-    const mockInputs = [
-      { id: "INP-001", group: "Climate", q_name: "에너지 사용량", val: "450kWh", file: "bill_01.pdf", u_name: "이채훈", u_id: "U001", status: "pending" },
-      { id: "INP-002", group: "Social", q_name: "임직원 봉사시간", val: "120h", file: null, u_name: "이정빈", u_id: "U002", status: "writing" },
-      { id: "INP-003", group: "Tax", q_name: "법인세 납부액", val: "1.2억", file: "tax_report.zip", u_name: "이나라", u_id: "U003", status: "approved" },
-      { id: "INP-004", group: "Governance", q_name: "이사회 출석률", val: "95%", file: "meeting_minutes.pdf", u_name: "이채훈", u_id: "U001", status: "rejected" },
-      { id: "INP-005", group: "Waste", q_name: "폐기물 재활용량", val: "30t", file: "waste_log.xlsx", u_name: "이나라", u_id: "U003", status: "pending" },
-    ];
-    setInputs(mockInputs);
+    setIsLoading(true);
+    try {
+      let usersData = [];
+      let inputsData = [];
 
-    const mockUsers = [
-      { id: "U001", name: "이채훈", email: "chaehoon@skm.com", company: "SKM", tier: "1 Tier", groups: ["기업개요", "Climate", "Social"] },
-      { id: "U002", name: "이정빈", email: "lee@gmail.com", company: "SKM", tier: "1 Tier", groups: ["Social"] },
-      { id: "U003", name: "이나라", email: "nara@gmail.com", company: "TV", tier: "2 Tier", groups: ["Social", "Waste"] },
-    ];
-    setUsers(mockUsers);
+      if (USE_MOCK) {
+        // ---------------- MOCK ----------------
+        await new Promise(resolve => setTimeout(resolve, 700));
+
+        inputsData = [
+          { id: "INP-001", group: "Climate", q_name: "에너지 사용량", val: "450kWh", file: "bill_01.pdf", u_name: "이채훈", u_id: "U001", status: "pending" },
+          { id: "INP-002", group: "Social", q_name: "임직원 봉사시간", val: "120h", file: null, u_name: "이정빈", u_id: "U002", status: "rejected" },
+          { id: "INP-003", group: "Tax", q_name: "법인세 납부액", val: "1.2억", file: "tax_report.zip", u_name: "이나라", u_id: "U003", status: "approved" },
+          { id: "INP-004", group: "Governance", q_name: "이사회 출석률", val: "95%", file: "meeting_minutes.pdf", u_name: "이채훈", u_id: "U001", status: "rejected" },
+          { id: "INP-005", group: "Waste", q_name: "폐기물 재활용량", val: "30t", file: "waste_log.xlsx", u_name: "이나라", u_id: "U003", status: "pending" },
+        ];
+
+        usersData = [
+          { id: "U001", name: "이채훈", email: "chaehoon@skm.com", company: "SKM", tier: "1 Tier", groups: ["기업개요", "Climate", "Social"] },
+          { id: "U002", name: "이정빈", email: "lee@gmail.com", company: "SKM", tier: "1 Tier", groups: ["Social"] },
+          { id: "U003", name: "이나라", email: "nara@gmail.com", company: "TV", tier: "2 Tier", groups: ["Social", "Waste"] },
+        ];
+
+      } else {
+        // ---------------- REAL API ----------------
+        const res = await api.get('/api/manager/all-data', {
+          params: authInfo
+        });
+
+        usersData = res.data.users;
+        inputsData = res.data.inputs;
+      }
+
+      setUsers(usersData);
+      setInputs(inputsData);
+
+    } catch (err) {
+      console.error(err);
+      showDefaultAlert("데이터 오류", "데이터를 불러오는 중 문제가 발생했습니다.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   }, [authInfo]);
 
   useEffect(() => {
@@ -76,7 +115,7 @@ const Manager = () => {
   }, [fetchData]);
 
   /**
-   * [LOGIC] KPI 계산
+   * KPI
    */
   const kpi = {
     approved: inputs.filter(i => i.status === 'approved').length,
@@ -85,32 +124,57 @@ const Manager = () => {
   };
 
   /**
-   * [LOGIC] 액션 처리 (승인/반려/취소)
-   * 백엔드로 JSON 형식의 데이터를 전송합니다.
+   * ACTION
    */
-  const handleAction = (id, newStatus) => {
-    const payload = {
-      ...authInfo,
-      targetId: id,
-      updatedStatus: newStatus
-    };
-    console.log("백엔드 전송 JSON:", JSON.stringify(payload));
-    
-    setInputs(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
+  const handleAction = async (id, newStatus) => {
+    const actionName = newStatus === 'approved' ? '승인' : newStatus === 'rejected' ? '반려' : '취소';
+
+    const isConfirmed = await showConfirmAlert(
+      `${actionName} 확인`,
+      `해당 항목을 정말로 ${actionName}하시겠습니까?`,
+      newStatus === 'rejected' ? 'warning' : 'question'
+    );
+
+    if (!isConfirmed) return;
+
+    setIsLoading(true);
+    try {
+
+      if (!USE_MOCK) {
+        await api.post('/api/manager/action', {
+          id,
+          status: newStatus,
+          ...authInfo
+        });
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 500));
+      }
+
+      setInputs(prev => prev.map(i => i.id === id ? { ...i, status: newStatus } : i));
+
+      showDefaultAlert("처리 완료", `정상적으로 ${actionName}되었습니다.`, "success");
+
+    } catch (e) {
+      showDefaultAlert("처리 실패", "통신 중 오류가 발생했습니다.", "error");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   /**
-   * [LOGIC] 유저 이슈 그룹 토글
+   * GROUP TOGGLE
    */
   const toggleGroup = (groupName) => {
     setUsers(prev => prev.map(u => {
       if (u.id === currentUser.id) {
         const has = u.groups.includes(groupName);
         let newGroups = has ? u.groups.filter(g => g !== groupName) : [...u.groups, groupName];
+
         if (newGroups.length === 0) {
-          alert("최소 하나의 그룹은 소속되어야 합니다.");
+          showDefaultAlert("알림", "최소 하나의 그룹은 소속되어야 합니다.", "info");
           return u;
         }
+
         const updatedUser = { ...u, groups: newGroups };
         setCurrentUser(updatedUser);
         return updatedUser;
@@ -120,28 +184,36 @@ const Manager = () => {
   };
 
   /**
-   * [LOGIC] 필터링 및 페이징 처리
+   * FILTER
    */
-  // 유저 필터
   const filteredUsers = users.filter(u => u.name.includes(userSearch) || u.company.includes(userSearch));
   const pagedUsers = filteredUsers.slice((userPage - 1) * PAGE_SIZE, userPage * PAGE_SIZE);
 
-  // 데이터 필터 (카테고리 + KPI 상태)
   const getFilteredInputs = () => {
     let list = inputs;
+
     if (activeDataCategory !== 'all') {
-      const targetGroups = CATEGORY_MAP[activeDataCategory];
-      list = list.filter(item => targetGroups.includes(item.group));
+      list = list.filter(item => CATEGORY_MAP[activeDataCategory].includes(item.group));
+    }
+    if (activeSubCategory !== 'all') {
+      list = list.filter(item => item.group === activeSubCategory);
     }
     if (statusFilter !== 'all') {
       list = list.filter(item => item.status === statusFilter);
     }
+
     return list;
   };
 
   const filteredInputs = getFilteredInputs();
   const pagedInputs = filteredInputs.slice((dataPage - 1) * PAGE_SIZE, dataPage * PAGE_SIZE);
   const totalDataPages = Math.ceil(filteredInputs.length / PAGE_SIZE);
+
+  const handleMainCategoryChange = (category) => {
+    setActiveDataCategory(category);
+    setActiveSubCategory('all');
+    setDataPage(1);
+  };
 
   return (
     <div id="manager_page">
@@ -156,8 +228,8 @@ const Manager = () => {
           ].map(item => (
             <div 
               key={item.key} 
-              onClick={() => setStatusFilter(item.key === statusFilter ? 'all' : item.key)}
-              className={`kpi-card ${statusFilter === item.key ? 'active' : ''}`}
+              onClick={() => !isLoading && setStatusFilter(item.key === statusFilter ? 'all' : item.key)}
+              className={`kpi-card ${statusFilter === item.key ? 'active' : ''} ${isLoading ? 'disabled' : ''}`}
               style={statusFilter === item.key ? { borderBottom: `4px solid ${item.color}` } : {}}
             >
               <div className='kpi-label'>{item.label}</div>
@@ -170,8 +242,20 @@ const Manager = () => {
         <div className="page-header">
           <h2 className="page-title">ESG 통합 관리 시스템</h2>
           <div className="tab-group">
-            <button className={`tab-item ${activeTab === 'user' ? 'active' : ''}`} onClick={() => setActiveTab('user')}>유저 관리</button>
-            <button className={`tab-item ${activeTab === 'data' ? 'active' : ''}`} onClick={() => setActiveTab('data')}>데이터 승인</button>
+            <button 
+              className={`tab-item ${activeTab === 'user' ? 'active' : ''}`} 
+              onClick={() => !isLoading && setActiveTab('user')}
+              disabled={isLoading}
+            >
+              유저 관리
+            </button>
+            <button 
+              className={`tab-item ${activeTab === 'data' ? 'active' : ''}`} 
+              onClick={() => !isLoading && setActiveTab('data')}
+              disabled={isLoading}
+            >
+              데이터 승인
+            </button>
           </div>
         </div>
 
@@ -186,45 +270,56 @@ const Manager = () => {
                 placeholder="사용자명 또는 회사명 검색"
                 value={userSearch}
                 onChange={(e) => setUserSearch(e.target.value)}
+                disabled={isLoading}
               />
-              <button className="btn-primary" onClick={fetchData}>조회</button>
+              <button className="btn-primary" onClick={fetchData} disabled={isLoading}>조회</button>
             </div>
 
             <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>사용자 정보</th>
-                    <th>소속 회사</th>
-                    <th>할당 이슈 그룹</th>
-                    <th>관리</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagedUsers.map(u => (
-                    <tr key={u.id}>
-                      <td>
-                        <strong>{u.name}</strong><br />
-                        <small>{u.email}</small>
-                      </td>
-                      <td>
-                        {u.company} <span className="depth-tag">{u.tier}</span>
-                      </td>
-                      <td>
-                        <div className="tag-container">
-                          {u.groups.slice(0, 3).map(g => <span key={g} className="tag-item">{g}</span>)}
-                          {u.groups.length > 3 && <span className="tag-item">+{u.groups.length - 3}</span>}
-                        </div>
-                      </td>
-                      <td>
-                        <button className="btn-outline" onClick={() => { setCurrentUser(u); setIsModalOpen(true); }}>
-                          이슈 그룹 수정
-                        </button>
-                      </td>
+              {isLoading ? (
+                <div className="loading-container">
+                  <div className="spinner"></div>
+                  <p>사용자 데이터를 불러오는 중...</p>
+                </div>
+              ) : pagedUsers.length === 0 ? (
+                <div className="empty-container">
+                  <div className="empty-icon">👥</div>
+                  <p>조회된 사용자가 없습니다.</p>
+                </div>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>사용자 정보</th>
+                      <th>소속 회사</th>
+                      <th>할당 이슈 그룹</th>
+                      <th>관리</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pagedUsers.map(u => (
+                      <tr key={u.id}>
+                        <td>
+                          <strong>{u.name}</strong><br />
+                          <small>{u.email}</small>
+                        </td>
+                        <td>{u.company} <span className="depth-tag">{u.tier}</span></td>
+                        <td>
+                          <div className="tag-container">
+                            {u.groups.slice(0, 3).map(g => <span key={g} className="tag-item"> {g} </span>)}
+                            {u.groups.length > 3 && <span className="tag-item">+{u.groups.length - 3}</span>}
+                          </div>
+                        </td>
+                        <td>
+                          <button className="btn-outline" onClick={() => { setCurrentUser(u); setIsModalOpen(true); }} disabled={isLoading}>
+                            이슈 그룹 수정
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
           </section>
         )}
@@ -234,77 +329,105 @@ const Manager = () => {
         {/* ============================================================ */}
         {activeTab === 'data' && (
           <section className="fade-in">
-            <div className="data-control-row">
+            <div className="data-control-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <div className="category-tabs">
-                <button className={activeDataCategory === 'all' ? 'active' : ''} onClick={() => setActiveDataCategory('all')}>전체</button>
-                <button className={activeDataCategory === 'general' ? 'active' : ''} onClick={() => setActiveDataCategory('general')}>경영일반</button>
-                <button className={activeDataCategory === 'environmental' ? 'active' : ''} onClick={() => setActiveDataCategory('environmental')}>E</button>
-                <button className={activeDataCategory === 'social' ? 'active' : ''} onClick={() => setActiveDataCategory('social')}>S</button>
-                <button className={activeDataCategory === 'governance' ? 'active' : ''} onClick={() => setActiveDataCategory('governance')}>G</button>
+                {['all', 'general', 'environmental', 'social', 'governance'].map(cat => (
+                  <button 
+                    key={cat}
+                    className={activeDataCategory === cat ? 'active' : ''} 
+                    onClick={() => handleMainCategoryChange(cat)}
+                    disabled={isLoading}
+                  >
+                    {cat === 'all' ? '전체' : cat === 'general' ? '경영일반' : cat.charAt(0).toUpperCase()}
+                  </button>
+                ))}
               </div>
-              <button className="btn-refresh" onClick={fetchData}>데이터 새로고침 🔄</button>
+              <button className="btn-primary" onClick={fetchData} disabled={isLoading}>
+                {isLoading ? "로딩 중..." : "데이터 새로고침"}
+              </button>
             </div>
+
+            {/* 이슈 그룹 서브 탭 */}
+            {activeDataCategory !== 'all' && (
+              <div className="sub-category-tabs" style={{ display: 'flex', gap: '8px', margin: '0 0 15px 0', flexWrap: 'wrap' }}>
+                <button 
+                  className={`tag-item ${activeSubCategory === 'all' ? 'active' : ''}`} 
+                  onClick={() => setActiveSubCategory('all')}
+                  style={activeSubCategory === 'all' ? { backgroundColor: '#03a94d', color: '#fff' } : { cursor: 'pointer' }}
+                >
+                  전체 그룹
+                </button>
+                {CATEGORY_MAP[activeDataCategory].map(group => (
+                  <button 
+                    key={group} 
+                    className={`tag-item ${activeSubCategory === group ? 'active' : ''}`} 
+                    onClick={() => setActiveSubCategory(group)}
+                    style={activeSubCategory === group ? { backgroundColor: '#03a94d', color: '#fff' } : { cursor: 'pointer' }}
+                  >
+                    {group}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="table-wrapper">
-              <table>
-                <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th>이슈 그룹</th>
-                    <th>지표 항목</th>
-                    <th>값</th>
-                    <th>첨부파일</th>
-                    <th>작성자</th>
-                    <th>상태</th>
-                    <th>액션</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {pagedInputs.map(item => (
-                    <tr key={item.id}>
-                      <td>{item.id}</td>
-                      <td><span className="group-badge">{item.group}</span></td>
-                      <td>{item.q_name}</td>
-                      <td className="value-cell">{item.val}</td>
-                      <td>
-                        {item.file ? <a href={`#${item.file}`} className="file-link">📎 파일</a> : <span className="no-file">-</span>}
-                      </td>
-                      <td>{item.u_name}</td>
-                      <td>
-                        <span className={`status-badge ${item.status}`}>
-                          {item.status === 'writing' && '작성 중'}
-                          {item.status === 'pending' && '승인 대기'}
-                          {item.status === 'approved' && '승인 완료'}
-                          {item.status === 'rejected' && '반려됨'}
-                        </span>
-                      </td>
-                      <td>
-                        <div className="action-btns">
-                          {item.status === 'pending' ? (
-                            <>
-                              <button className="btn-s btn-approve" onClick={() => handleAction(item.id, 'approved')}>승인</button>
-                              <button className="btn-s btn-reject" onClick={() => handleAction(item.id, 'rejected')}>반려</button>
-                            </>
-                          ) : item.status !== 'writing' ? (
-                            <button className="btn-s btn-undo" onClick={() => handleAction(item.id, 'pending')}>취소</button>
-                          ) : (
-                            <span className="text-muted">-</span>
-                          )}
-                        </div>
-                      </td>
+              {isLoading ? (
+                <div className="loading-container">
+                  <div className="spinner"></div>
+                  <p>데이터를 처리하고 있습니다...</p>
+                </div>
+              ) : pagedInputs.length === 0 ? (
+                <div className="empty-container">
+                  <div className="empty-icon">이미지 추가 예정</div>
+                  <p>해당 조건에 맞는 데이터가 없습니다.</p>
+                </div>
+              ) : (
+                <table>
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>이슈 그룹</th><th>지표 항목</th><th>값</th><th>첨부파일</th><th>작성자</th><th>상태</th><th>액션</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {pagedInputs.map(item => (
+                      <tr key={item.id}>
+                        <td>{item.id}</td>
+                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.group}</span></td>
+                        <td>{item.q_name}</td>
+                        <td className="value-cell"><strong>{item.val}</strong></td>
+                        <td>
+                          {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
+                        </td>
+                        <td>{item.u_name}</td>
+                        <td><span className={`role-badge ${item.status === 'approved' ? 'green' : item.status === 'pending' ? 'purple' : 'depth-tag'}`}>{item.status}</span></td>
+                        <td>
+                          <div className="action-btns" style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
+                            {item.status === 'pending' ? (
+                              <>
+                                <button className="btn-outline" onClick={() => handleAction(item.id, 'approved')} disabled={isLoading}>승인</button>
+                                <button className="btn-outline" onClick={() => handleAction(item.id, 'rejected')} disabled={isLoading} style={{ color: '#dc3545' }}>반려</button>
+                              </>
+                            ) : item.status !== 'writing' ? (
+                              <button className="btn-outline" onClick={() => handleAction(item.id, 'pending')} disabled={isLoading}>취소</button>
+                            ) : "-"}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
             </div>
 
-            <div className='pagination'>
-              {Array.from({ length: totalDataPages }).map((_, i) => (
-                <button key={i} onClick={() => setDataPage(i + 1)} className={`page-btn ${dataPage === i + 1 ? 'active' : ''}`}>
-                  {i + 1}
-                </button>
-              ))}
-            </div>
+            {!isLoading && totalDataPages > 1 && (
+              <div className='pagination'>
+                {Array.from({ length: totalDataPages }).map((_, i) => (
+                  <button key={i} onClick={() => setDataPage(i + 1)} className={`page-btn ${dataPage === i + 1 ? 'active' : ''}`} style={dataPage === i + 1 ? { backgroundColor: '#03a94d', color: '#fff', border: 'none' } : {}}>
+                    {i + 1}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
         )}
 
@@ -316,23 +439,23 @@ const Manager = () => {
             <div className="modal-window">
               <div className="modal-header">
                 <h3>{currentUser.name} 권한 설정</h3>
-                <button className="close-x" onClick={() => setIsModalOpen(false)}>×</button>
+                <button className="close-x" onClick={() => setIsModalOpen(false)} style={{ border: 'none', background: 'none', fontSize: '20px', cursor: 'pointer' }}>×</button>
               </div>
 
               <div className="modal-body">
                 <div className="modal-section">
-                  <p className="section-label">현재 할당된 그룹 (클릭 시 제거)</p>
+                  <p className="section-label" style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>현재 할당된 그룹 (클릭 시 제거)</p>
                   <div className="modal-tag-group">
                     {currentUser.groups.map(g => (
                       <button key={g} className="modal-tag assigned" onClick={() => toggleGroup(g)}>
-                        {g} <span className="remove-icon">×</span>
+                        {g} ×
                       </button>
                     ))}
                   </div>
                 </div>
 
-                <div className="modal-section">
-                  <p className="section-label">추가 가능한 그룹 (클릭 시 추가)</p>
+                <div className="modal-section" style={{ marginTop: '20px' }}>
+                  <p className="section-label" style={{ fontSize: '13px', color: '#666', marginBottom: '8px' }}>추가 가능한 그룹 (클릭 시 추가)</p>
                   <div className="modal-tag-group">
                     {ALL_ISSUE_GROUPS
                       .filter(g => !currentUser.groups.includes(g))
@@ -346,7 +469,10 @@ const Manager = () => {
               </div>
 
               <div className="modal-footer">
-                <button className="btn-confirm" onClick={() => setIsModalOpen(false)}>설정 완료</button>
+                <button className="btn-confirm" onClick={() => {
+                  showDefaultAlert("성공", "권한 설정이 저장되었습니다.", "success");
+                  setIsModalOpen(false);
+                }}>설정 완료</button>
               </div>
             </div>
           </div>
