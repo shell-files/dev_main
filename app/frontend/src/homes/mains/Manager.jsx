@@ -155,8 +155,8 @@ if (!canAccess) {
       const data = res?.data?.data;
 
       setUsers(data?.users ?? []);
-      setInputs(data?.list ?? []);
-      setTotalCount(data?.total ?? 0);
+      setInputs(data?.items ?? []);
+      setTotalCount(data?.totalCount ?? 0);
 
     } catch (err) {
       console.error({
@@ -274,12 +274,12 @@ if (!canAccess) {
 
     if (activeDataCategory !== 'all') {
       list = list.filter(item =>
-        CATEGORY_MAP[activeDataCategory]?.includes(item.group)
+        CATEGORY_MAP[activeDataCategory]?.includes(item.issueGroup)
       );
     }
 
     if (activeSubCategory !== 'all') {
-      list = list.filter(item => item.group === activeSubCategory);
+      list = list.filter(item => item.issueGroup === activeSubCategory);
     }
 
     if (statusFilter !== 'all') {
@@ -519,12 +519,12 @@ if (!canAccess) {
                     {pagedInputs.map(item => (
                       <tr key={item.id}>
                         <td>{item.id}</td>
-                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.group}</span></td>
+                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.issueGroup}</span></td>
                         <td>{item.questionName}</td>
                         <td className="value-cell"><strong>{item.value}</strong></td>
                         <td>
                           {/* 파일 업로드 위치에 맞게 수정 해야 함 */}
-                          {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
+                          {item.attachmentFile ? <a href={`#${item.attachmentFile}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
                         </td>
                         <td>{item.userName}</td>
                         <td><span className={`role-badge ${item.status === 'approved' ? 'green' : item.status === 'pending' ? 'purple' : 'depth-tag'}`}>{item.status}</span></td>
@@ -604,7 +604,7 @@ if (!canAccess) {
                       if (!UseMock) {
                         const res = await api.patch('/user', {
                           userId: currentUser.id,
-                          groups: currentUser.groups,
+                          issueGroups: currentUser.groups,
                           ...authInfo
                         });
 
@@ -675,7 +675,7 @@ if (!canAccess) {
                         await api.patch('/board', {
                           id: rejectTargetId,
                           status: 'rejected',
-                          reason: rejectReason,
+                          rejectReason: rejectReason,
                           ...authInfo
                         });
                       }
