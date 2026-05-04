@@ -155,8 +155,8 @@ if (!canAccess) {
       const data = res?.data?.data;
 
       setUsers(data?.users ?? []);
-      setInputs(data?.items ?? []);
-      setTotalCount(data?.totalCount ?? 0);
+      setInputs(data?.list ?? []);
+      setTotalCount(data?.total ?? 0);
 
     } catch (err) {
       console.error({
@@ -274,12 +274,12 @@ if (!canAccess) {
 
     if (activeDataCategory !== 'all') {
       list = list.filter(item =>
-        CATEGORY_MAP[activeDataCategory]?.includes(item.issueGroup)
+        CATEGORY_MAP[activeDataCategory]?.includes(item.group)
       );
     }
 
     if (activeSubCategory !== 'all') {
-      list = list.filter(item => item.issueGroup === activeSubCategory);
+      list = list.filter(item => item.group === activeSubCategory);
     }
 
     if (statusFilter !== 'all') {
@@ -329,15 +329,14 @@ if (!canAccess) {
         {/* 1. KPI 영역 */}
         <div className='kpi-container'>
           {[
-            { key: 'approved', label: '승인 완료', count: kpi.approved, color: '#03a94d' },
-            { key: 'pending', label: '승인 대기', count: kpi.pending, color: '#673AB7' },
-            { key: 'rejected', label: '반려됨', count: kpi.rejected, color: '#dc3545' }
+            { key: 'approved', label: '승인 완료', count: kpi.approved},
+            { key: 'pending', label: '승인 대기', count: kpi.pending },
+            { key: 'rejected', label: '반려됨', count: kpi.rejected }
           ].map(item => (
             <div 
               key={item.key} 
               onClick={() => !isLoading && setStatusFilter(item.key === statusFilter ? 'all' : item.key)}
               className={`kpi-card ${statusFilter === item.key ? 'active' : ''} ${isLoading ? 'disabled' : ''}`}
-              style={statusFilter === item.key ? { borderBottom: `4px solid ${item.color}` } : {}}
             >
               <div className='kpi-label'>{item.label}</div>
               <div className='kpi-value'>{item.count}</div>
@@ -519,12 +518,12 @@ if (!canAccess) {
                     {pagedInputs.map(item => (
                       <tr key={item.id}>
                         <td>{item.id}</td>
-                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.issueGroup}</span></td>
+                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.group}</span></td>
                         <td>{item.questionName}</td>
                         <td className="value-cell"><strong>{item.value}</strong></td>
                         <td>
                           {/* 파일 업로드 위치에 맞게 수정 해야 함 */}
-                          {item.attachmentFile ? <a href={`#${item.attachmentFile}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
+                          {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
                         </td>
                         <td>{item.userName}</td>
                         <td><span className={`role-badge ${item.status === 'approved' ? 'green' : item.status === 'pending' ? 'purple' : 'depth-tag'}`}>{item.status}</span></td>
@@ -604,7 +603,7 @@ if (!canAccess) {
                       if (!UseMock) {
                         const res = await api.patch('/user', {
                           userId: currentUser.id,
-                          issueGroups: currentUser.groups,
+                          groups: currentUser.groups,
                           ...authInfo
                         });
 
@@ -675,7 +674,7 @@ if (!canAccess) {
                         await api.patch('/board', {
                           id: rejectTargetId,
                           status: 'rejected',
-                          rejectReason: rejectReason,
+                          reason: rejectReason,
                           ...authInfo
                         });
                       }

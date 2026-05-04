@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Routes, Route, useLocation } from "react-router";
 import { AlarmProvider } from '@hooks/AlarmContext.jsx';
 import '@styles/App.css'
+
 import NotFound from '@errors/NotFound.jsx'
 import Gate from '@gates/Gate.jsx'
 import Login from '@logins/Login.jsx'
@@ -15,6 +16,7 @@ import Sidebarnav from "@components/SidebarNav.jsx"
 import Alarm from "@components/Alarm.jsx"
 import CompanySelect from "@logins/CompanySelect.jsx"
 import Invite from "@mains/Invite.jsx"
+import InviteSignUp from "@logins/InviteSignup.jsx";
 import "@styles/mains.css";
 
 
@@ -23,6 +25,7 @@ function App() {
       { path: "/", element: <Gate /> },
       { path: "/login", element: <Login /> },
       { path: "/signup", element: <Signup /> },
+      { path: "/signup/invite", element: <InviteSignUp /> },
       { path: "/company", element: <CompanySelect /> },
       { path: "*", element: <NotFound /> },
   ]

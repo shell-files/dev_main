@@ -8,11 +8,29 @@ body {
     padding: 0;
 }
 
+
 /* 메인 레이아웃 전용 스타일 확장 */
 #main_page {
     height: 100%;
     overflow: hidden;
 }
+
+#main_page .content_box {
+    height: calc(100vh - 70px);
+    display: flex;
+}
+/* 좌측 사이드바 */
+#main_page .sidebar {
+    width: 260px;
+    background-color: #fff;
+    border-right: 1px solid #e0e0e0;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    z-index: 10;
+    height: 100%;
+}
+
 
 #main_page .main-layout {
     width: 100%;
