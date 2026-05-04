@@ -66,7 +66,8 @@ services:
       - REFRESH_TOKEN_EXPIRE_DAYS=${REFRESH_TOKEN_EXPIRE_DAYS}
       - REDIS_HOST=${REDIS_HOST}
       - REDIS_PORT=${REDIS_PORT}
-      - REDIS_DB=${REDIS_DB}
+      - REDIS_DB1=${REDIS_DB1}
+      - REDIS_DB2=${REDIS_DB2}
       - SERVICE_KEY=${SERVICE_KEY}
     command: ["uv", "run", "fastapi", "run"]
 
