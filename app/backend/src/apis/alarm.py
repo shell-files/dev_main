@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, WebSocket
 
 router = APIRouter()
 
@@ -20,8 +20,7 @@ def patchAlarm():
 def alarmDel():
    pass
 
-@router.websocket("/ws",
-        description="웹소켓을 통해 실시간으로 알람을 수신")
+@router.websocket("/ws")
 def alarmWebSocket():
     pass
 
