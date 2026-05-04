@@ -6,6 +6,7 @@ import importlib
 import pkgutil
 from contextlib import asynccontextmanager
 from src.utils.kafkasv import startConsumer
+from prometheus_fastapi_instrumentator import Instrumentator
 
 # [STARTUP] 앱이 켜질 때 Kafka 실행
 @asynccontextmanager
@@ -38,5 +39,6 @@ def run():
     allow_headers=["*"],
     )
 
+    Instrumentator().instrument(app).expose(app)
     return app
 
