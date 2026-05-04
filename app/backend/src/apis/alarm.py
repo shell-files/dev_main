@@ -23,3 +23,4 @@ def alarmDel():
 @router.websocket("/ws")
 def alarmWebSocket():
     pass
+
