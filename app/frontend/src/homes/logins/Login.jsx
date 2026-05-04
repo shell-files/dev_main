@@ -216,7 +216,7 @@ const Login = () => {
 
       const companies = authData.companies || authData.companys || [];
 
-      // 다중 회사인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
+      // 다중 회사(컨설턴트 등)인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
       if (companies.length > 1) {
         navigate("/companyselect");
       } else {

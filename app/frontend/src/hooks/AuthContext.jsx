@@ -74,6 +74,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.setItem("user", JSON.stringify(user));
     localStorage.setItem("name", user.name || "");
     localStorage.setItem("companies", JSON.stringify(companies));
+    localStorage.setItem("loginResponse", JSON.stringify(data));
 
     if (initialCompany) {
       localStorage.setItem("selectedCompany", JSON.stringify(initialCompany));
@@ -113,9 +114,9 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("name");
     localStorage.removeItem("companies");
     localStorage.removeItem("selectedCompany");
-
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("loginResponse");
   };
 
   const hasRole = (...roles) => {

@@ -10,6 +10,16 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 80,
     allowedHosts: ['localhost','weareithero.cloud'],
+    proxy: {
+      '/api': {
+        target: 'http://main.weareithero.cloud',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api/, ''),
+        headers: {
+          'Origin': 'http://main.weareithero.cloud'
+        }
+      }
+    }
   },
   resolve: {
     alias: {
