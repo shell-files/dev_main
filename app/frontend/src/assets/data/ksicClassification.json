@@ -8330,20 +8330,6 @@
         "isMain": ""
     },
     {
-        "standardIndustryClassification": "",
-        "largeCategoryCode": "",
-        "largeCategoryName": "해당사항 없음",
-        "mediumCategoryCode": "",
-        "mediumCategoryName": "해당사항 없음",
-        "smallCategoryCode": "",
-        "smallCategoryName": "해당사항 없음",
-        "fineCategoryCode": "",
-        "fineCategoryName": "해당사항 없음",
-        "detailCategoryName": "해당사항 없음",
-        "link": "1",
-        "isMain": ""
-    },
-    {
         "standardIndustryClassification": "35111",
         "largeCategoryCode": "D",
         "largeCategoryName": "전기, 가스, 증기 및 공기 조절 공급업",

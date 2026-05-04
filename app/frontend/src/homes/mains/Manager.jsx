@@ -8,7 +8,7 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
  *  true: mock 데이터
  *  false: 실제 API
  */
-const UseMock = true;
+const UseMock = false;
 
 /**
  * [CONSTANTS]
@@ -94,14 +94,7 @@ const Manager = () => {
   });
   const isESG = authInfo.role === ROLE.ESG;
   const canAccess = UseMock || isESG;
-if (!canAccess) {
-  return (
-    <div style={{ padding: 40 }}>
-      <h2>접근 권한이 없습니다</h2>
-      <p>ESG 담당자만 접근 가능한 페이지입니다.</p>
-    </div>
-  );
-}
+
 
   const [users, setUsers] = useState([]);
   const [inputs, setInputs] = useState([]);
@@ -457,7 +450,6 @@ if (!canAccess) {
                 </div>
               ) : pagedUsers.length === 0 ? (
                 <div className="empty-container">
-                  <div className="empty-icon">이미지 추가 예정</div>
                   <p>조회된 사용자가 없습니다.</p>
                 </div>
               ) : (
@@ -589,7 +581,6 @@ if (!canAccess) {
                 </div>
               ) : pagedInputs.length === 0 ? (
                 <div className="empty-container">
-                  <div className="empty-icon">이미지 추가 예정</div>
                   <p>해당 조건에 맞는 데이터가 없습니다.</p>
                 </div>
               ) : (

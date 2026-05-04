@@ -255,11 +255,27 @@ const Signup = () => {
             formDataToSend.append("fileName", file.name);
             formDataToSend.append("fileExt", ext);
 
-            const res = await api.post("/user", formDataToSend);
-
+            const res = await api.post("/user", formDataToSend,
+                {
+                headers: {
+                    "Content-Type": "multipart/form-data"
+                    }
+                })
+            ;
+                console.log(res.data)
             if (res.data.status === true) {
-                setFormData(prev => ({ ...prev, ...res.data.data }));
-
+                const data = res.data.licenseData;
+                setFormData(prev => ({
+                    ...prev,
+                    businessNumber: data["사업자등록번호"] || "",
+                    companyName: data["상호"] || "",
+                    ceoName: data["성명"] || "",
+                    openingDate: data["개업연월일"] || "",
+                    headOffice: data["사업장소재지"] || "",
+                    issueDate: data["발급날짜"] || "",
+                    texName: data["발급세무서"] || ""
+                }));
+                
                 // ✅ 안전 처리
                 if (res.data.fileId) {
                     setFileId(res.data.fileId);
@@ -298,13 +314,16 @@ const Signup = () => {
         if (!formData.email || errors.email) return;
 
         try {
+            console.log(formData.email)
             // 명세서: GET /user?email=값
-            const res = await api.get('/user', { 
-                params: { email: formData.email } 
+            const res = await api.post('/user2/', { 
+                 email: formData.email
+                
             });
             setEmailValid(res.data.status); // true면 사용 가능, false면 중복
         } catch (err) {
             console.error("이메일 중복 검사 에러:", err);
+            
         }
     };
 // 2-1. checkBusiness
@@ -318,8 +337,8 @@ const Signup = () => {
 
         try {
             // 명세서: GET /user?businessNumber=값
-            const res = await api.get('/user', { 
-                params: { businessNumber: formData.businessNumber } 
+            const res = await api.post('/user2/', { 
+                businessNumber: formData.businessNumber
             });
             setBusinessValid(res.data.status);
         } catch (err) {
@@ -348,16 +367,16 @@ const Signup = () => {
         if (!isAgreed) {
             return showDefaultAlert("약관 동의 필요", "서비스 이용을 위해 약관에 동의해주세요.", "warning");
         }
-        if (!isOcrDone || !fileId) {
-            return showDefaultAlert("OCR 필요", "사업자 인증을 완료해주세요.", "warning");
-        }
+        // if (!isOcrDone || !fileId) {
+        //     return showDefaultAlert("OCR 필요", "사업자 인증을 완료해주세요.", "warning");
+        // }
         if (emailValid === false) {
             return showDefaultAlert("이메일 중복", "이미 사용중인 이메일입니다.", "error");
         }
         if (businessValid === false) {
             return showDefaultAlert("사업자번호 확인", "이미 사용중인 사업자번호입니다.", "error");
         }
-
+        setSignupLoading(true);
         // 2️⃣ 폼 에러 표시용 검증
         const newErrors = {};
         Object.keys(requiredFields).forEach(key => {
@@ -371,7 +390,6 @@ const Signup = () => {
             return;
         }
         // 3️⃣ API 요청
-        setSignupLoading(true);
         try {
             const payload = {
                 ...formData,
@@ -395,7 +413,7 @@ const Signup = () => {
                 }, 500);
                 return;
             }
-            const res = await api.put("/user", {
+            const res = await api.post("/user", {
                 ...formData,
                 licensefileId: fileId,
                 industryCodes: industryCodes,

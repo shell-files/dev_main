@@ -68,7 +68,7 @@ import { useAuth } from '@hooks/AuthContext.jsx';
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
 // false: 실제 API 호출
-const USE_DUMMY_API = true;
+const USE_DUMMY_API = false;
 
 const Login = () => {
   const { login } = useAuth();
