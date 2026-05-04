@@ -18,6 +18,7 @@ from datetime import date
 from typing import Optional, Union, List
 from src.utils.db import signUpTransaction, saveMany
 from src.models.model import responseModel
+from src.models.auth import loginProcess
 
 
 # ============================================================
@@ -147,6 +148,10 @@ def signUpProcess(signUpModel: SignUpModel) -> dict:
       userRoleParams=userRoleParams,
     )
     
+    # 트랜잭션 결과 검증용
+    # success = True
+    # ids = {"user_id": 1, "company_id": 1}
+
     if not success:
       return responseModel(False, "회원가입 트랜잭션 처리 중 오류가 발생했습니다.")
     
@@ -164,10 +169,18 @@ def signUpProcess(signUpModel: SignUpModel) -> dict:
     ]
     saveMany(industryDetailSql, industryDetailParams)
     
-    return responseModel(True, "회원가입이 완료되었습니다.", data={
-      "user_id": ids["user_id"],
-      "company_id": ids["company_id"],
-    })
+    ## 로그인으로 가야하므로 회원가입 완료 메시지 대신 loginProcess() 호출하여 로그인 처리 후 반환
+    
+    # return responseModel(True, "회원가입이 완료되었습니다.", data={
+    #   "user_id": ids["user_id"],
+    #   "company_id": ids["company_id"],
+    # })
+    
+    # 로그인 처리 후 반환 (회원가입과 로그인 통합 처리)
+    # ── 테스트용: loginProcess에 signUpModel 직접 전달
+    # loginProcess는 loginModel.email / loginModel.password 속성을 사용하므로
+    # SignUpModel이 두 필드를 모두 가지고 있어 그대로 전달
+    return loginProcess(signUpModel)
   
   except Exception as e:
     err_msg = str(e)    # ✅ Python 3 스코프 이슈 방지: e를 먼저 str로 저장
