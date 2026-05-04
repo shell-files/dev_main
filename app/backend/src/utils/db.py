@@ -147,3 +147,49 @@ def getPageList(sql:str, parmas=None):
         print(f"MariaDB Error : {e}")
     return result
 # limit = 보여줄 개수, offset = 건너뛸 개수
+
+# db.py 하단에 추가
+# --------------------------
+# 회원가입 전용 트랜잭션
+# --------------------------
+def signUpTransaction(userSql, userParams, companySql, companyParams, userRoleSql, userRoleParams):
+    """
+    [역할] USER → COMPANY → USER_ROLE 3개 테이블을 단일 트랜잭션으로 원자적 저장.
+           하나라도 실패 시 전체 ROLLBACK 보장.
+
+    [ERD FK 흐름]
+      USER.id ──────→ COMPANY.user_id        (Step1 → Step2에 주입)
+      USER.id ──────→ USER_ROLE.user_id      (Step1 → Step3에 주입)
+      COMPANY.id ───→ USER_ROLE.company_id   (Step2 → Step3에 주입)
+      ROLE.id ──────→ USER_ROLE.role_id      (호출 시 외부에서 주입)
+
+    반환값: [성공여부(bool), {"user_id": int, "company_id": int}]
+    """
+    result = [False, {}]
+    try:
+        with getConn() as conn:
+            conn.autocommit = False  # 트랜잭션 수동 제어 시작
+            with conn.cursor(dictionary=True) as cur:
+
+                # ── Step 1. USER INSERT → user_id 획득
+                cur.execute(userSql, userParams)
+                cur.execute("SELECT LAST_INSERT_ID() as id")
+                userId = cur.fetchone()["id"]  # USER.id (AUTO_INCREMENT)
+
+                # ── Step 2. COMPANY INSERT (user_id FK 주입) → company_id 획득
+                # companyParams 튜플 내 user_id 자리에 userId 삽입 후 실행
+                cur.execute(companySql, (*companyParams, userId))
+                cur.execute("SELECT LAST_INSERT_ID() as id")
+                companyId = cur.fetchone()["id"]  # COMPANY.id (AUTO_INCREMENT)
+
+                # ── Step 3. USER_ROLE INSERT (user_id + company_id FK 주입)
+                cur.execute(userRoleSql, (userId, companyId, *userRoleParams))
+
+                conn.commit()  # ── 전체 성공 시 커밋
+                result[0] = True
+                result[1] = {"user_id": userId, "company_id": companyId}
+
+    except mariadb.Error as e:
+        print(f"[signUpTransaction ROLLBACK] MariaDB Error: {e}")
+        # conn.rollback()은 with 블록 종료 시 autocommit=False 상태에서 자동 처리
+    return result
