@@ -44,8 +44,7 @@ body {
     /* 내부 스크롤을 활성화하기 위한 필수 설정 */
 }
 
-#main_page .sidebar .logo-placeholder {
-    margin-bottom: 30px;
+#main_page .header .logo-placeholder {
     height: 50px;
     background: #eee;
     display: flex;
@@ -54,6 +53,7 @@ body {
     font-weight: bold;
     border-radius: 8px;
     flex-shrink: 0;
+    width: 200px;
 }
 
 /* 메뉴 스크롤 영역 래퍼 (인디케이터 세로 중앙 정렬용) */
@@ -372,4 +372,318 @@ body {
     transform: translateY(-50%) translateX(100%);
     opacity: 0;
     pointer-events: none;
+}
+
+
+
+
+/* ==========================================================================
+   데스크탑 & 모바일 상시 사이드바 토글 및 반응형 스타일
+   ========================================================================== */
+
+/* 1. 사이드바가 접힐 때 부드러운 전환 효과 추가 */
+#main_page .sidebar {
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                padding 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                opacity 0.2s ease,
+                transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 2. 헤더 내부 구조 개선: 토글 버튼과 기존 요소 정렬용 */
+#main_page .header {
+    justify-content: space-between; /* 기존 flex-end에서 변경하여 토글 버튼을 왼쪽에 배치 */
+    padding: 0 20px 0 20px;
+}
+
+#main_page .header-right-group {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    margin-left: auto; /* 우측으로 밀착 정렬 */
+}
+
+/* 3. 데스크탑 토글 버튼 스타일 */
+#main_page .sidebar-toggle-btn {
+    background: none;
+    border: 1px solid #cbd5e1;
+    font-size: 14px;
+    cursor: pointer;
+    color: #64748b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-radius: 6px;
+    padding: 10px;
+}
+
+#main_page .sidebar-toggle-btn:hover {
+    background-color: #f1f5f9;
+    color: #03a94d;
+    border-color: #94a3b8;
+}
+
+/* 4. 모바일 화면(800px 이하) 햄버거 및 닫기 버튼 */
+.mobile-hamburger {
+    display: none;
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 100;
+    width: 40px;
+    height: 40px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #334155;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.sidebar-close-btn {
+    display: none; /* 기본적으로 숨김 (모바일에서만 노출) */
+}
+
+
+/* ==========================================================================
+   화면 크기별 스타일 제어
+   ========================================================================== */
+
+/* [데스크탑 환경] 801px 이상일 때 */
+@media (min-width: 801px) {
+    /* 닫힘 상태 */
+    #main_page .sidebar.closed {
+        width: 0 !important;
+        padding-left: 0 !important;
+        padding-right: 0 !important;
+        opacity: 0;
+        visibility: hidden;
+        border-right: none;
+        pointer-events: none;
+    }
+
+    /* 사이드바가 닫혔을 때 내부 콘텐츠가 삐져나오는 것 방지 */
+    #main_page .sidebar.closed * {
+        display: none !important;
+    }
+}
+
+/* [모바일 환경] 800px 이하일 때 */
+@media (max-width: 800px) {
+    /* 상단 화살표 토글 버튼을 숨기고 햄버거 메뉴를 노출 */
+    #main_page .sidebar-toggle-btn {
+        display: none;
+    }
+
+    .mobile-hamburger {
+        display: flex;
+    }
+
+    #main_page .header {
+        padding-left: 75px; /* 햄버거 버튼 공간 확보 */
+    }
+
+    /* 사이드바 모바일 기본 스타일 (기본적으로 화면 왼쪽 밖으로 숨김) */
+    #main_page .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        height: 100vh;
+        z-index: 1000;
+        width: 280px !important;
+        transform: translateX(-100%); /* 화면 밖으로 완전히 밀어내기 */
+        opacity: 0;
+        visibility: hidden;
+        box-shadow: none;
+        border-right: 1px solid #eee;
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                    opacity 0.2s ease,
+                    visibility 0.3s;
+    }
+
+    /* [중요] 모바일에서 'open' 클래스가 붙었을 때만 화면에 나타남 */
+    #main_page .sidebar.open {
+        transform: translateX(0);
+        opacity: 1 !important;
+        visibility: visible !important;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.1);
+    }
+
+    /* 모바일에서 'closed'일 때의 스타일을 명확히 정의 (확실히 숨김) */
+    #main_page .sidebar.closed {
+        transform: translateX(-100%) !important;
+        opacity: 0 !important;
+        visibility: hidden !important;
+    }
+
+    /* 모바일 사이드바 내부 닫기(X) 버튼 스타일 */
+    #main_page .sidebar-close-btn {
+        display: flex;
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        font-size: 18px;
+        color: #94a3b8;
+        cursor: pointer;
+        z-index: 11;
+        width: 30px;
+        height: 30px;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        font-weight: 700;
+    }
+
+    /* 3. 모바일 화면용 오버레이 (배경 어둡게 처리) */
+    #main_page .sidebar-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.4);
+        backdrop-filter: blur(2px);
+        z-index: 999;
+    }
+}
+
+
+/* ==========================================================================
+   좌측 사이드바 엣지 토글 버튼 (사이드바 우측 경계선에 밀착)
+   ========================================================================== */
+#main_page .sidebar-edge-toggle {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 50px;
+    background-color: #ffffff;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.06);
+    z-index: 100;
+    color: #64748b;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                width 0.2s ease, 
+                background-color 0.2s ease, 
+                color 0.2s ease;
+}
+
+/* 사이드바가 열려 있을 때: 사이드바 너비(270px) 바로 오른쪽에 위치 */
+#main_page .sidebar-edge-toggle.open {
+    left: 260px;
+    border-left: none;
+    border-radius: 0 25px 25px 0; /* 오른쪽만 둥글게 */
+}
+
+/* 사이드바가 닫혀 있을 때: 화면 왼쪽 끝에 위치 */
+#main_page .sidebar-edge-toggle.closed {
+    left: 0;
+    border-left: none;
+    border-radius: 0 25px 25px 0; /* 오른쪽만 둥글게 */
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.08);
+}
+
+/* 호버 시 효과 */
+#main_page .sidebar-edge-toggle:hover {
+    background-color: #f0fdf4;
+    color: #03a94d;
+    width: 30px; /* 살짝 튀어나오는 효과 */
+    border-color: rgba(3, 169, 77, 0.3);
+}
+
+#main_page .sidebar-edge-toggle svg {
+    transition: transform 0.2s ease;
+}
+
+/* 모바일 환경(800px 이하)에서는 햄버거 메뉴를 사용하므로 숨김 */
+@media (max-width: 800px) {
+    #main_page .sidebar-edge-toggle {
+        display: none !important;
+    }
+
+    #main_page .header .logo-placeholder {
+    width: 100px;
+    }
+}
+
+
+/* ==========================================================================
+   헤더 레이아웃 스타일 (데스크탑 기본)
+   ========================================================================== */
+#main_page .header {
+    height: 70px;
+    background: #ffffff;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 40px;
+    gap: 25px;
+    flex-shrink: 0;
+}
+
+#main_page .header-left-group {
+    display: flex;
+    align-items: center;
+    gap: 12px; /* 로고와 햄버거 메뉴 사이 간격 */
+}
+
+/* 데스크탑에서는 모바일 햄버거 버튼 숨김 */
+#main_page .mobile-hamburger {
+    display: none;
+}
+
+
+/* ==========================================================================
+   [모바일 환경] 800px 이하일 때
+   ========================================================================== */
+@media (max-width: 800px) {
+    #main_page .header {
+        padding: 0 20px; /* 좌우 여백을 모바일에 맞게 축소 */
+    }
+
+    #main_page .header-left-group {
+        display: flex;
+        align-items: center;
+        gap: 12px; /* 로고 오른쪽에 햄버거가 딱 붙도록 설정 */
+    }
+
+    /* 햄버거 메뉴 활성화 및 디자인 수정 */
+    #main_page .mobile-hamburger {
+        display: flex;
+        position: static; /* fixed 해제하여 로고 오른쪽에 자연스럽게 배치 */
+        width: 36px;
+        height: 36px;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 6px;
+        font-size: 16px;
+        cursor: pointer;
+        color: #334155;
+        align-items: center;
+        justify-content: center;
+        box-shadow: none;
+        transition: all 0.2s ease;
+    }
+
+    #main_page .mobile-hamburger:hover {
+        background-color: #f0fdf4;
+        color: #03a94d;
+        border-color: rgba(3, 169, 77, 0.3);
+    }
+    
+    /* 모바일에서 우측 사용자 영역 간격 조정 */
+    #main_page .header-right-group {
+        gap: 14px;
+    }
 }

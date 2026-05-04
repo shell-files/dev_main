@@ -116,7 +116,7 @@ const Alarm = () => {
                 }}
             />
 
-            {/* 우측 엣지 플로팅 알림 열기 버튼 */}
+            {/* 우측 엣지 플로팅 알림 열기 버튼
             <div 
                 className={`alarm-floating-toggle ${isAlarmOpen ? 'hidden' : ''}`}
                 onClick={toggleAlarm}
@@ -124,7 +124,7 @@ const Alarm = () => {
                 <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
                     <polyline points="15 18 9 12 15 6"></polyline>
                 </svg>
-            </div>
+            </div> */}
 
             {/* 알림 컨테이너 */}
             <div 
