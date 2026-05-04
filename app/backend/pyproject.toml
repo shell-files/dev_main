@@ -17,4 +17,5 @@ dependencies = [
     "uuid>=1.30",
     "pydantic>=2.13.3",
     "google-cloud-vision>=3.13.0",
+    "prometheus-fastapi-instrumentator>=7.1.0",
 ]
