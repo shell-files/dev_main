@@ -21,7 +21,7 @@ def alarmDel():
    pass
 
 @router.websocket("/ws",
-        summary="실시간 알람",
         description="웹소켓을 통해 실시간으로 알람을 수신")
 def alarmWebSocket():
     pass
+
