@@ -30,7 +30,7 @@ def run():
             )
 
     # CORS 설정
-    origins = ["http://localhost", settings.host_ip, "192.168.0.106", "192.168.0.105" ]
+    origins = ["http://localhost", settings.host_ip, "http://192.168.0.106", "http://192.168.0.105" ]
     app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
