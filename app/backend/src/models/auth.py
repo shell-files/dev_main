@@ -1,8 +1,10 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
 from src.utils.rediscl import setRedis, delRedis
-from src.models.model import responseModel,emailModel
-
+from src.utils.kafkasv import sendToKafka
+from src.models.model import responseModel
+import random
+import string
 
 def loginProcess(loginModel):
     """ 
@@ -33,7 +35,6 @@ def loginProcess(loginModel):
         
         loginParams = (loginModel.email, loginModel.password)
         result = findAll(loginSql, loginParams)
-        print(result,len(result))
         if len(result) == 0:
             return {"status": False}
         
@@ -68,7 +69,7 @@ def logoutProcess(logoutModel):
         logoutSql="""
                 UPDATE TOKEN
                     SET `delete_yn` = 1
-                    WHERE uuid = ? AND `delete_yn` = 0;
+                    WHERE uuid = ?;
                 """
         logoutParams = (uuidKey,)
         save(logoutSql, logoutParams)
@@ -80,3 +81,43 @@ def logoutProcess(logoutModel):
     except Exception as e:
         return responseModel(False, f"오류 발생 : {e}")
     
+def findPwdProcess(emailModel):
+    """ 
+    - 비밀번호 찾기
+    1. db에서 이메일 체크 (id, email 조회)
+    2. 임시 비밀번호 생성(12자리) / db 저장
+    3. 임시 비밀번호 포함된 메일(kafka이용) 발송
+    """
+    try:
+        # 1. db에서 이메일 확인
+        emailCheckSql="""
+                    SELECT id, email
+                    FROM `USER`
+                    WHERE email = ? AND delete_yn = 0;
+                    """
+        emailCheckParams = (emailModel.email,)
+        user = findOne(emailCheckSql, emailCheckParams)
+        if not user:
+            return responseModel(False, "등록되지 않은 이메일이거나 탈퇴한 회원입니다.")
+        
+        # 2. 임시 비밀번호 생성(12자리) / db 저장
+        characters = string.ascii_letters + string.digits
+        tempPwd = ''.join(random.choice(characters) for i in range(12))
+        updatePwdSql = """
+            UPDATE edu.USER 
+            SET password = ?
+            WHERE id = ?
+        """
+        updatePwdParams = (tempPwd, user["id"])
+        save(updatePwdSql, updatePwdParams)
+
+        # 3. 임시 비밀번호 포함된 메일(kafka이용) 발송 
+        kafkaData = {"type":3, "email": user["email"], "tempPwd": tempPwd}
+        sendToKafka(kafkaData)      
+
+        return responseModel(True, "임시 비밀번호가 메일로 발송 됐습니다.")
+    except Exception as e:
+        return responseModel(False, f"오류 발생 : {e}")
+    
+
+
