@@ -48,7 +48,7 @@ class SignUpModel(BaseModel):
   # ── INDUSTRY_DETAIL 테이블 필드
   # [FK] industry_id → INDUSTRY_CODE.id (배열 수신 → saveMany 일괄 INSERT)
   # [FK] company_id  → COMPANY.id       (signUpProcess 내부 주입)
-  industryCodes: List[int]                 = Field(...,  description="INDUSTRY_DETAIL.industry_id 배열")
+  industryList: List[int]                 = Field(...,  description="INDUSTRY_DETAIL.industry_id 배열")
   
   # ── USER_ROLE 테이블 필드
   # [FK] role_id → ROLE.id
@@ -151,16 +151,16 @@ def signUpProcess(signUpModel: SignUpModel) -> dict:
       return responseModel(False, "회원가입 트랜잭션 처리 중 오류가 발생했습니다.")
     
     # ── Step 2. INDUSTRY_DETAIL 배열 일괄 INSERT
-    # [FK] industry_id → INDUSTRY_CODE.id (industryCodes 각 원소)
+    # [FK] industry_id → INDUSTRY_CODE.id (industryList 각 원소)
     # [FK] company_id  → COMPANY.id       (Step 1-4 ids["company_id"] 주입)
-    # industryCodes → [(industry_id, company_id), ...] 튜플 배열로 변환 후 saveMany() 실행
+    # industryList → [(industry_id, company_id), ...] 튜플 배열로 변환 후 saveMany() 실행
     industryDetailSql = """
       INSERT INTO `INDUSTRY_DETAIL` (industry_id, company_id)
       VALUES (?, ?)
     """
     industryDetailParams = [
       (industryId, ids["company_id"])
-      for industryId in signUpModel.industryCodes
+      for industryId in signUpModel.industryList
     ]
     saveMany(industryDetailSql, industryDetailParams)
     
