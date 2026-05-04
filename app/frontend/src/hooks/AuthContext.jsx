@@ -39,21 +39,28 @@ export const AuthProvider = ({ children }) => {
 
   const login = (data) => {
     const uuid = data.uuid;
-    const user = data.user;
     const companies = data.companies || data.companys || [];
+
+    const firstCompany = companies[0] || null;
+
+    const user = data.user || {
+      id: firstCompany?.id,
+      name: firstCompany?.name,
+      email: firstCompany?.email,
+      role_id: firstCompany?.role_id,
+      role: firstCompany?.role,
+      company_id: firstCompany?.company_id,
+    };
 
     if (!uuid) {
       throw new Error("로그인 응답에 uuid가 없습니다.");
     }
 
-    if (!user) {
-      throw new Error("로그인 응답에 user가 없습니다.");
+    if (!user?.name) {
+      throw new Error("로그인 응답에 사용자 이름이 없습니다.");
     }
 
-    const initialCompany =
-      data.selectedCompany ||
-      data.selected_company ||
-      (companies.length === 1 ? companies[0] : null);
+    const initialCompany = companies.length === 1 ? companies[0] : null;
 
     setUser({
       ...user,
@@ -73,15 +80,23 @@ export const AuthProvider = ({ children }) => {
     } else {
       localStorage.removeItem("selectedCompany");
     }
+
+    // 예전 더미 로그인 잔여값 제거
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("userId");
   };
 
   const selectCompany = (companyId) => {
-    const company = companies.find((c) => c.company_id === companyId);
+    const normalizedCompanyId = Number(companyId);
+
+    const company = companies.find(
+      (c) => Number(c.company_id) === normalizedCompanyId
+    );
 
     if (!company) {
       return null;
     }
-    // 정보 조회 (권한 - 컨설턴트 계정은 본인 회사 id 선택 시 부서 담당자 권한으로 localstoragy 변경)
+
     setSelectedCompany(company);
     localStorage.setItem("selectedCompany", JSON.stringify(company));
 
@@ -104,7 +119,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   const hasRole = (...roles) => {
-    const role = selectedCompany?.role_code || selectedCompany?.role || user?.role_code;
+    const role = selectedCompany?.role || user?.role;
     return roles.includes(role);
   };
 
