@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WITH ESG - 데이터 입력 대시보드</title>
+    <style>
+        /* [기존 스타일 유지] */
+        :root {
+            --naver-green: #03a94d;
+            --bg-light: #f4f7f6;
+            --border-color: #e0e0e0;
+            --text-main: #333;
+            --text-sub: #888;
+        }
+
+        body { display: flex; height: 100vh; overflow: hidden; padding: 0; background-color: #f4f7f6; margin: 0; font-family: 'Pretendard', sans-serif; }
+        .sidebar { width: 260px; background-color: #fff; border-right: 1px solid #e0e0e0; display: flex; flex-direction: column; padding: 20px; z-index: 10; }
+        .sidebar .logo-placeholder { margin-bottom: 30px; height: 50px; background: #eee; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 8px; }
+        .nav-group { margin-bottom: 25px; }
+        .nav-title { font-size: 12px; color: #999; margin-bottom: 10px; font-weight: bold; text-transform: uppercase; }
+        .nav-item { padding: 12px 15px; cursor: pointer; border-radius: 8px; margin-bottom: 4px; font-size: 14px; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; text-decoration: none; color: inherit; }
+        .nav-item:hover { background-color: #f0fdf4; color: #03a94d; }
+        .sub-item { padding-left: 30px; font-size: 13px; color: #666; }
+        .noti-dot { width: 8px; height: 8px; background-color: #ff4d4d; border-radius: 50%; border: 1.5px solid #fff; }
+        .sidebar-footer { margin-top: auto; padding-top: 20px; border-top: 1px solid #eee; }
+        .company-select, .company-search { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ddd; margin-bottom: 10px; font-size: 13px; outline: none; box-sizing: border-box; }
+
+        .main-container { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        .header { height: 70px; background: #fff; border-bottom: 1px solid #eee; display: flex; align-items: center; justify-content: flex-end; padding: 0 40px; gap: 25px; }
+        .user-link { cursor: pointer; font-size: 15px; font-weight: 600; display: flex; align-items: center; }
+        .user-link span { color: var(--naver-green); font-size: 12px; font-weight: normal; margin-left: 6px; }
+        .header-action { cursor: pointer; font-size: 14px; color: #555; position: relative; }
+
+        #noti-layer { position: absolute; top: 0; right: -380px; width: 380px; height: 100%; background: #fff; box-shadow: -5px 0 15px rgba(0,0,0,0.05); transition: right 0.3s ease-in-out; z-index: 100; display: flex; flex-direction: column; }
+        #noti-layer.open { right: 0; }
+        .noti-top { padding: 25px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center; }
+        .noti-list { flex: 1; overflow-y: auto; padding: 10px 0; }
+        .noti-card { padding: 20px 25px; border-bottom: 1px solid #f9f9f9; position: relative; font-size: 14px; line-height: 1.4; }
+        .noti-close-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; color: #ccc; cursor: pointer; font-size: 16px; }
+
+        .content-body { padding: 40px; flex: 1; overflow-y: auto; padding-bottom: 120px; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .search-input { width: 250px; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+        .tab-group { display: flex; gap: 10px; }
+        .tab { padding: 8px 16px; border-radius: 20px; background: #f1f3f5; cursor: pointer; font-size: 13px; border:none; }
+        .tab.active { background: var(--naver-green); color: #fff; }
+
+        .data-section { background: #fff; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.02); }
+        .data-table { width: 100%; border-collapse: collapse; }
+        .data-table th { padding: 12px 25px; text-align: left; font-size: 12px; color: #999; border-bottom: 1px solid #eee; background: #fff; }
+        .data-table td { padding: 18px 25px; border-bottom: 1px solid #f9f9f9; vertical-align: middle; font-size: 14px; }
+        
+        .issue-group { background: #eef2ff; color: #4338ca; padding: 4px 10px; border-radius: 10px; font-size: 12px; }
+        .input-group { display: flex; align-items: center; gap: 10px; }
+        .input-field { padding: 8px 12px; border: 1px solid #ddd; border-radius: 6px; width: 120px; font-size: 14px; outline: none; }
+        .unit { font-size: 13px; color: #999; }
+
+        .status-badge { padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; }
+        .status-working { background: #fff4e5; color: #ef6c00; }
+        .status-complete { background: #e6f7ef; color: #03a94d; }
+        .status-reject { background: #fdecea; color: #e53935; }
+        .status-none { background: #f1f3f5; color: #999; }
+
+        .file-btn { background: none; border: 1px solid #ddd; padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; }
+        .file-attached { background: #f0fdf4; border-color: var(--naver-green); color: var(--naver-green); }
+
+        .admin-actions { display: flex; gap: 6px; }
+        .btn-approve { background: #e6f7ef; color: #03a94d; border:none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+        .btn-reject { background: #fdecea; color: #e53935; border:none; padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+
+        .pagination { margin-top: 20px; display: flex; justify-content: center; gap: 6px; }
+        .page-btn { padding: 6px 12px; border: 1px solid #ddd; background: #fff; cursor: pointer; border-radius: 6px; }
+        .page-btn.active { background: var(--naver-green); color: #fff; }
+
+        .action-bar { position: absolute; bottom: 0; width: 100%; background: #fff; border-top: 1px solid #eee; padding: 15px 40px; display: flex; justify-content: center; gap: 10px; box-sizing: border-box; z-index: 10; }
+        .btn { padding: 10px 30px; border-radius: 6px; font-weight: bold; cursor: pointer; border: none; font-size: 14px; }
+        .btn-save { background: #eee; color: #666; }
+        .btn-submit { background: var(--text-main); color: #fff; }
+    </style>
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="logo-placeholder" onclick="location.href='main.html'">로고</div>
+
+        <nav class="nav-group">
+            <div class="nav-item" onclick="location.href='onboarding.html'">데이터 입력</div>
+            <div class="nav-item">1팀 (SKM)</div>
+            <div class="nav-item">2팀 (HG)</div>
+            <div class="nav-item">3팀 (TV)</div>
+        </nav>
+
+        <nav class="nav-group">
+            <div class="nav-item" onclick="location.href='log.html'">로그 확인</div>
+            <div class="nav-item">ESG 담당자 페이지</div>
+            <div class="nav-item sub-item" onclick="location.href='manager.html'">└ 관리페이지</div>
+            <div class="nav-item sub-item" onclick="location.href='invite.html'">└ 초대페이지</div>
+        </nav>
+
+                <div class="sidebar-footer">
+            <select class="company-select">
+                <option>SKM</option>
+                <option>HG</option>
+                <option>TV</option>
+            </select>
+            <input type="text" class="company-search" placeholder="회사 검색...">
+        </div>
+    </aside>
+
+    <div class="main-container">
+        <header class="header">
+            <div class="user-link" onclick="location.href='my_page.html'">
+                이채훈 <span>(SKM)</span>
+            </div>
+            <div class="header-action" onclick="location.href='index.html'">로그아웃</div>
+            <div class="header-action" onclick="toggleNoti()">
+                알림
+                <div class="noti-dot" style="position:absolute;"></div>
+            </div>
+        </header>
+
+        <main class="content-body">
+            <div class="top-bar">
+                <input type="text" class="search-input" id="searchInput" placeholder="지표명 검색..." oninput="handleSearch()">
+                <div class="tab-group" id="tabGroup">
+                    <button class="tab active" onclick="handleTabFilter('ALL')">전체</button>
+                    <button class="tab" onclick="handleTabFilter('경영일반')">경영일반</button>
+                    <button class="tab" onclick="handleTabFilter('E')">E</button>
+                    <button class="tab" onclick="handleTabFilter('S')">S</button>
+                    <button class="tab" onclick="handleTabFilter('G')">G</button>
+                </div>
+            </div>
+
+            <section class="data-section">
+                <table class="data-table" id="dataTable">
+                    <thead>
+                        <tr>
+                            <th width="12%">ID</th>
+                            <th width="13%">이슈그룹</th>
+                            <th width="25%">체크리스트 내용</th>
+                            <th width="15%">데이터 입력</th>
+                            <th width="10%">증빙</th>
+                            <th width="12%">상태</th>
+                            <th width="13%">액션</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        </tbody>
+                </table>
+            </section>
+
+            <div class="pagination" id="pagination">
+                </div>
+        </main>
+
+        <footer class="action-bar">
+            <button class="btn btn-save">임시 저장</button>
+            <button class="btn btn-submit">최종 승인 요청</button>
+        </footer>
+
+        <div id="noti-layer">
+            <div class="noti-top"><h3>알림 목록</h3><span style="cursor:pointer;" onclick="toggleNoti()">×</span></div>
+            <div class="noti-list">
+                <div class="noti-card">260개의 지표 로드가 완료되었습니다.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 1. 마스터 정의서 기반 환경설정
+        const ISSUE_GROUPS = {
+            '경영일반': ['기업개요', '사업구조', '거버넌스개요'],
+            'E': ['기후변화', '에너지', '수자원', '폐기물'],
+            'S': ['노동·고용', '산업안전', '인권'],
+            'G': ['윤리경영', '이사회', '공시통제']
+        };
+
+        const QUESTIONS = [
+            "Scope 1 직접 온실가스 배출량", "Scope 2 간접 온실가스 배출량", "총 에너지 소비량", 
+            "신재생에너지 사용 비중", "용수 재활용률", "폐기물 재활용량", "산업재해 사망자 수", 
+            "임직원 교육 시간", "이사회 내 여성 비율", "부패 방지 정책 수립 여부"
+        ];
+
+        const UNITS = ["tCO2e", "TJ", "m³", "ton", "명", "%", "시간", "건"];
+
+        // 2. 260개 더미 데이터 생성 (마스터 파일 구조 반영)
+        let masterData = [];
+        function generateMasterDummy(count = 260) {
+            const domains = Object.keys(ISSUE_GROUPS);
+            for (let i = 1; i <= count; i++) {
+                const domain = domains[i % domains.length];
+                const group = ISSUE_GROUPS[domain][i % ISSUE_GROUPS[domain].length];
+                const statusRand = Math.random();
+                
+                masterData.push({
+                    id: `${domain.charAt(0)}${String(i).padStart(3, '0')}`,
+                    domain: domain,
+                    issue_group: group,
+                    question: QUESTIONS[i % QUESTIONS.length] + ` (지표 #${i})`,
+                    unit: UNITS[i % UNITS.length],
+                    value: statusRand > 0.4 ? Math.floor(Math.random() * 5000) : "",
+                    status: statusRand > 0.7 ? "완료" : (statusRand > 0.4 ? "작성 중" : "미입력"),
+                    evidence: statusRand > 0.6,
+                    approved: null
+                });
+            }
+        }
+
+        // 3. 상태 관리 변수
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        let filteredData = [];
+        let currentTab = 'ALL';
+
+        // 4. 기능 함수들
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            const start = (currentPage - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            pageData.forEach(item => {
+                const row = `
+                    <tr>
+                        <td style="color:#999; font-size:12px;">${item.id}</td>
+                        <td><span class="issue-group">${item.issue_group}</span></td>
+                        <td class="indicator-name">${item.question}</td>
+                        <td>
+                            <div class="input-group">
+                                <input type="text" class="input-field" value="${item.value}" placeholder="입력">
+                                <span class="unit">${item.unit}</span>
+                            </div>
+                        </td>
+                        <td><button class="file-btn ${item.evidence ? 'file-attached' : ''}">📎 ${item.evidence ? '첨부됨' : '첨부'}</button></td>
+                        <td><span class="status-badge ${getStatusClass(item.status)}">${item.status}</span></td>
+                        <td>
+                            <div class="admin-actions">
+                                <button class="btn-approve" onclick="handleApproval(this, '완료')">승인</button>
+                                <button class="btn-reject" onclick="handleApproval(this, '반려')">반려</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+            renderPagination();
+        }
+
+        function getStatusClass(status) {
+            if (status === '완료') return 'status-complete';
+            if (status === '작성 중') return 'status-working';
+            if (status === '반려') return 'status-reject';
+            return 'status-none';
+        }
+
+        function renderPagination() {
+            const pagination = document.getElementById('pagination');
+            const pageCount = Math.ceil(filteredData.length / rowsPerPage);
+            pagination.innerHTML = '';
+
+            for (let i = 1; i <= Math.min(pageCount, 10); i++) { // 최대 10페이지만 표시
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.innerText = i;
+                btn.onclick = () => { currentPage = i; renderTable(); };
+                pagination.appendChild(btn);
+            }
+        }
+
+        function handleTabFilter(tab) {
+            currentTab = tab;
+            currentPage = 1;
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            applyFilters();
+        }
+
+        function handleSearch() {
+            currentPage = 1;
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            filteredData = masterData.filter(item => {
+                const matchesTab = currentTab === 'ALL' || item.domain === currentTab;
+                const matchesSearch = item.question.toLowerCase().includes(searchTerm);
+                return matchesTab && matchesSearch;
+            });
+            renderTable();
+        }
+
+        function handleApproval(btn, nextStatus) {
+            const row = btn.closest('tr');
+            const badge = row.querySelector('.status-badge');
+            badge.innerText = nextStatus;
+            badge.className = `status-badge ${getStatusClass(nextStatus)}`;
+        }
+
+        function toggleNoti() {
+            document.getElementById('noti-layer').classList.toggle('open');
+        }
+
+        // 초기 실행
+        generateMasterDummy(260);
+        filteredData = [...masterData];
+        renderTable();
+    </script>
+</body>
+</html>

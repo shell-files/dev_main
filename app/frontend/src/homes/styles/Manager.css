@@ -1,0 +1,607 @@
+/* ============================================================
+   1. 기본 레이아웃 & 애니메이션 (Scoped to #manager_page)
+   ============================================================ */
+#manager_page {
+  padding: 40px 20px;
+  min-height: 100vh;
+  font-family: 'Pretendard', sans-serif;
+  color: #333;
+}
+
+#manager_page .manager-content-container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* 페이드인 애니메이션 */
+#manager_page .fade-in {
+  animation: managerFadeIn 0.5s ease-in-out;
+}
+
+@keyframes managerFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   2. KPI 카드 섹션
+   ============================================================ */
+#manager_page .kpi-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  margin-bottom: 40px;
+}
+
+#manager_page .kpi-card {
+  padding: 24px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: center;
+  border-bottom: 4px solid transparent;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, #ffffff, #f8fafc);
+  border: 2px solid #03a94d;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+}
+
+#manager_page .kpi-card:hover:not(.disabled) {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+
+}
+
+#manager_page .kpi-card.active {
+  background-color: #fff;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+  transform: translateY(-4px);
+  border-bottom: 4px solid #03a94d;
+  
+}
+
+#manager_page .kpi-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#manager_page .kpi-label {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+#manager_page .kpi-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: #222;
+}
+#manager_page .kpi-card::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: transparent;
+  transition: all 0.3s;
+}
+#manager_page .kpi-card.active::after {
+  height: 4px;
+}
+#manager_page .kpi-card:hover:not(.disabled) {
+  transform: translateY(-6px) scale(1.01);
+}
+#manager_page .kpi-value {
+  letter-spacing: -0.5px;
+}
+
+/* ============================================================
+   3. 헤더 및 탭 메뉴
+   ============================================================ */
+#manager_page .page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #eee;
+}
+
+#manager_page .page-title {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 10px 0;
+}
+
+#manager_page .tab-group {
+  display: flex;
+  gap: 8px;
+  padding: 0;
+  border-radius: 10px;
+}
+
+#manager_page .tab-item {
+  padding: 12px 24px;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-weight: 600;
+  color: #999;
+  border-radius: 8px 8px 0 0;
+  transition: 0.2s;
+}
+
+#manager_page .tab-item.active {
+  background: #fff;
+  background-color: #03a94d;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+
+}
+#manager_page .tab-item.active::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 3px;
+}
+/* ============================================================
+   4. 테이블 및 상태 표시
+   ============================================================ */
+#manager_page .table-wrapper {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
+
+#manager_page table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+#manager_page th {
+  background: #f1f3f5;
+  padding: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #495057;
+  border-bottom: 1px solid #eee;
+  font-weight: 600;
+  letter-spacing: -0.3px;
+}
+
+#manager_page td {
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+  vertical-align: middle;
+  font-size: 14px;
+  text-align: center;
+}
+#manager_page tbody tr {
+  transition: all 0.15s ease;
+}
+#manager_page tbody tr:hover {
+  background-color: #f8f9fa;
+}
+#manager_page td strong {
+  font-weight: 700;
+}
+
+#manager_page .role-badge {
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: bold;
+  color: #fff;
+}
+
+#manager_page .role-badge.green { background: #03a94d; }
+#manager_page .role-badge.purple { background: #673AB7; }
+#manager_page .depth-tag { background: #f1f3f5; color: #666; font-size: 11px; padding: 2px 6px; border-radius: 4px; }
+
+/* ============================================================
+   5. 버튼, 검색창, 카테고리 탭
+   ============================================================ */
+#manager_page .btn-primary {
+  padding: 10px 24px;
+  background: #03a94d;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.2s;
+  box-shadow: 0 2px 6px rgba(3,169,77,0.25);
+}
+
+#manager_page .btn-primary:hover:not(:disabled) {
+  background-color: #028a3e;
+  transform: translateY(-1px);
+}
+
+#manager_page .btn-outline {
+  padding: 6px 12px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: 0.2s;
+  font-weight: 500;
+}
+
+#manager_page .btn-outline:hover:not(:disabled) {
+  border-color: #03a94d;
+  color: #03a94d;
+  background-color: rgba(3,169,77,0.05);
+}
+
+#manager_page button:disabled {
+  background-color: #ccc !important;
+  border-color: #ccc !important;
+  cursor: not-allowed !important;
+  opacity: 0.7;
+}
+
+#manager_page .filter-bar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  align-items: center;
+  background: #fff;
+  padding: 15px;
+  border-radius: 10px;
+  border: 1px solid #eee;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+}
+
+#manager_page .search-input {
+  flex: 1;
+  padding: 12px 16px;
+  border: 1.5px solid #eee;
+  border-radius: 8px;
+  font-size: 14px;
+  outline: none;
+  transition: all 0.2s ease;
+  background-color: #fcfcfc;
+}
+
+#manager_page .search-input:focus {
+  border-color: #03a94d;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(3, 169, 77, 0.1);
+}
+
+#manager_page .category-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+#manager_page .category-tabs button {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid #dee2e6;
+  background: #fff;
+  color: #666;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#manager_page .category-tabs button.active {
+  background: #03a94d;
+  border-color: #03a94d;
+  color: #fff;
+}
+
+#manager_page .sub-category-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+#manager_page .sub-category-tabs .tag-item {
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid #eee;
+  background: #f8f9fa;
+  font-size: 12px;
+}
+
+#manager_page .sub-category-tabs .tag-item.active {
+  background: #03a94d !important;
+  color: #fff !important;
+  border-color: #03a94d;
+}
+
+#manager_page .btn-confirm {
+  padding: 10px 30px;
+  background-color: #03a94d;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 6px rgba(3, 169, 77, 0.2);
+}
+
+#manager_page .btn-confirm:hover {
+  background-color: #028a3e;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 12px rgba(3, 169, 77, 0.3);
+}
+
+#manager_page .btn-confirm:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(3, 169, 77, 0.2);
+}
+
+#manager_page .pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 30px;
+}
+
+#manager_page .page-btn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+  color: #495057;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#manager_page .page-btn:hover:not(.active) {
+  background-color: #f1f3f5;
+  border-color: #ced4da;
+}
+
+#manager_page .page-btn.active {
+  background-color: #03a94d;
+  color: #fff;
+  border-color: #03a94d;
+  box-shadow: 0 2px 6px rgba(3,169,77,0.3);
+}
+/* ============================================================
+   6. 팝업 모달 (이슈 그룹 수정용)
+   ============================================================ */
+#manager_page .modal-overlay {
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+#manager_page .modal-window {
+  background: #fff;
+  border: 1px solid #eee;
+  width: 500px;
+  border-radius: 16px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  overflow: hidden;
+  animation: managerModalPop 0.3s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+}
+
+/* ============================================================
+   X 버튼 (모달 닫기)
+   ============================================================ */
+#manager_page .close-x {
+  border: none;
+  background: #f1f3f5;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transition: all 0.2s ease;
+}
+
+#manager_page .close-x:hover {
+  background: #e03131;
+  color: #fff;
+  transform: rotate(90deg);
+}
+
+
+@keyframes managerModalPop {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+#manager_page .modal-header {
+  padding: 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+#manager_page .modal-header h3 {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+#manager_page .modal-body {
+  padding: 20px;
+  max-height: 400px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+#manager_page .modal-tag-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+#manager_page .modal-tag {
+  padding: 8px 12px;
+  border-radius: 20px;
+  border: 1px solid #ddd;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#manager_page .modal-tag.assigned {
+  background: #e8f5e9;
+  color: #2e7d32;
+  border-color: #a5d6a7;
+}
+
+#manager_page .modal-tag.unassigned {
+  background: #fff;
+  color: #666;
+}
+
+#manager_page .modal-tag:hover {
+  border-color: #03a94d;
+  color: #03a94d;
+}
+
+#manager_page .modal-footer {
+  padding: 15px 20px;
+  border-top: 1px solid #eee;
+  text-align: right;
+  background: #f8f9fa;
+}
+
+/* ============================================================
+   7. 로딩 및 Empty UI
+   ============================================================ */
+#manager_page .loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px;
+}
+
+#manager_page .spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #03a94d;
+  border-radius: 50%;
+  animation: managerSpin 1s linear infinite;
+  margin-bottom: 15px;
+}
+
+@keyframes managerSpin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+#manager_page .empty-container {
+  padding: 80px;
+  text-align: center;
+  color: #999;
+}
+
+#manager_page .empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+
+#manager_page .tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+#manager_page .tag-item {
+  display: inline-block;
+  padding: 4px 8px;
+  background-color: #e9ecef;
+  color: #495057;
+  border-radius: 4px;
+  font-size: 12px;
+  border: none;
+}
+
+#manager_page .file-link {
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+
+#manager_page .file-link:hover {
+  opacity: 0.7;
+  text-decoration: underline;
+}
+
+#manager_page .value-cell {
+  color: #222;
+}
+
+/* ============================================================
+   8. 반응형 미디어 쿼리
+   ============================================================ */
+
+/* [Tablet & Small Desktop] 1420px 이하 */
+@media screen and (max-width: 1420px) {
+  #manager_page .manager-content-container {
+    max-width: 95%;
+  }
+  #manager_page .kpi-card { padding: 20px; }
+  #manager_page .kpi-value { font-size: 24px; }
+}
+
+/* [Mobile] 768px 이하 */
+@media screen and (max-width: 768px) {
+  #manager_page { padding: 20px 10px; }
+  #manager_page .kpi-container { grid-template-columns: 1fr; gap: 12px; }
+  #manager_page .page-header { flex-direction: column; align-items: flex-start; gap: 15px; }
+  #manager_page .tab-group { width: 100%; }
+  #manager_page .tab-item { flex: 1; text-align: center;  position: relative; }
+  #manager_page .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  #manager_page table { min-width: 850px; }
+
+  #manager_page .category-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 10px;
+    width: 100%;
+    gap: 5px;
+    -webkit-overflow-scrolling: touch;
+  }
+  #manager_page .category-tabs button { flex: 0 0 auto; }
+
+  #manager_page .sub-category-tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+  #manager_page .sub-category-tabs .tag-item { flex: 0 0 auto; }
+
+  #manager_page .filter-bar { flex-direction: column; align-items: stretch; gap: 10px; }
+  #manager_page .search-input { width: 100%; box-sizing: border-box; }
+  #manager_page .modal-window { width: 95% !important; margin: 10px; }
+}
