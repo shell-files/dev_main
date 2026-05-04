@@ -22,17 +22,22 @@ export const AuthProvider = ({ children }) => {
 
   const login = (data) => {
     // 1. 상태 업데이트
-    setUser({ uuid: data.uuid, name: data.user.name });
-    setCompanies(data.companys);
+    const userName = data.companys && data.companys.length > 0 ? data.companys[0].name : "";
+    setUser({ uuid: data.uuid, name: userName });
+    setCompanies(data.companys || []);
     
     // 2. 회사 설정 (회사가 1개면 자동 선택, 여러 개면 null 유지하여 선택 유도)
-    const initialCompany = data.companys.length === 1 ? data.companys[0] : null;
+    const initialCompany = data.companys && data.companys.length === 1 ? data.companys[0] : null;
     setSelectedCompany(initialCompany);
 
     // 3. LocalStorage 저장 (새로고침유지용)
     localStorage.setItem("uuid", data.uuid); // TOKEN.uuid
-    localStorage.setItem("name", data.user.name); // USER.name
-    localStorage.setItem("companies", JSON.stringify(data.companys));
+    localStorage.setItem("name", userName); // USER.name
+    localStorage.setItem("companies", JSON.stringify(data.companys || []));
+    
+    // 로그인 응답값 전체 저장 (요청사항 반영)
+    localStorage.setItem("loginResponse", JSON.stringify(data));
+
     if (initialCompany) {
       localStorage.setItem("selectedCompany", JSON.stringify(initialCompany));
     }
@@ -55,6 +60,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("name");
     localStorage.removeItem("companies");
     localStorage.removeItem("selectedCompany");
+    localStorage.removeItem("loginResponse");
   };
 
   return (
