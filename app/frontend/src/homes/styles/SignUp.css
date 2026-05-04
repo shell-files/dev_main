@@ -208,8 +208,7 @@ a {text-decoration: none; color: #333; display: inline-block;}
 #signup_page .select-step-group select:disabled {
     background-color: #f2f2f2;
     color: #ccc;
-}
-
+}/* 기업 규모 select 스타일 (input과 동일하게 맞춤) */
 #signup_page .input-group select {
     flex: 1;
     padding: 12px 15px;
