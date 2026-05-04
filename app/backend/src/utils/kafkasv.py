@@ -46,14 +46,37 @@ html2 = f"""
     <p>아래 링크를 통해 가입 후 로그인하세요.</p>
     <p>link</p>
   """
+# html3 = 임시 비밀번호 발송 이메일
+html3 = """
+    <h1>임시 비밀번호 안내</h1>
+    <p>요청하신 임시 비밀번호는 <strong>{tempPwd}</strong> 입니다.</p>
+    <p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>
+"""
 
 # Consumer 이메일 발송 함수
 async def handleEmailJob(data):
-    """consumer1: 사내 직원 초대 이메일 발송"""
+    """ 이메일 발송 핸들러 """
+
+    type = data.get("type")
+    email = data.get("email")
+
+    # 1. 타입에 따른 제목 및 본문 설정
+    if type == 1:
+        subject = "사내 직원 초대"
+        body = html1
+    elif type == 2:
+        subject = "컨설턴트 초대"
+        body = html2
+    elif type == 3:
+        subject = "임시 비밀번호 발송"
+        # tempPwd가 없는 경우를 대비해 기본값 설정
+        temp_pwd = data.get("tempPwd", "비밀번호 오류")
+        body = html3.format(tempPwd=temp_pwd)
+
     message = MessageSchema(
-        subject="사내 직원 초대",
-        recipients=[data.get("email")],
-        body=html1,
+        subject=subject,
+        recipients=[email],
+        body=body,
         subtype=MessageType.html
     )
     await fastMail.send_message(message)

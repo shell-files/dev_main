@@ -49,20 +49,15 @@
 // → api.post("/auth/password-reset", { email })
 // =====================================================================================
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
 import { showDefaultAlert } from "@components/ServiceAlert/ServiceAlert";
 import LoginBackground from "@logins/LoginBackground";
+import LoginVisualPanel from "@logins/LoginVisualPanel";
 import "@styles/logins.css";
 import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
-import gateBg1 from '@assets/backgrounds/GateBg1.png'
-import gateBg2 from '@assets/backgrounds/GateBg2.png'
-import gateBg3 from '@assets/backgrounds/GateBg3.png'
 
-import blobMain from '@assets/backgrounds/login-blob-main.png';
-import softCube from '@assets/backgrounds/login-soft-cube.png';
-import floatingOrb from '@assets/backgrounds/login-floating-orb.png';
 import { useAuth } from '@hooks/AuthContext.jsx';
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
@@ -208,29 +203,37 @@ const Login = () => {
 
       const result = await requestLoginApi();
 
-      if (result.status !== true) {
+      const isSuccess = result.status === true || result.status === "success";
+
+      if (!isSuccess) {
         throw new Error(result.message || "로그인 실패");
       }
 
+      const authData = result.data;
+
       // AuthContext를 통해 전역 상태 및 LocalStorage에 유저 정보 저장
-      login(result.data);
+      login(authData);
+
+      const companies = authData.companies || authData.companys || [];
 
       // 다중 회사(컨설턴트 등)인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
-      if (result.data.companys && result.data.companys.length > 1) {
+      if (companies.length > 1) {
         navigate("/companyselect");
       } else {
         navigate("/main");
       }
     } catch (error) {
-      setErrors(prev => ({ ...prev, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
-      // ----------- 커스텀 알럿 추가 ----------
+      setErrors((prev) => ({
+        ...prev,
+        loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다.",
+      }));
+
       showDefaultAlert(
         "로그인 실패",
-        "이메일 또는 비밀번호가 일치하지 않습니다.\n"+
-        "다시 시도해주세요.",
+        "이메일 또는 비밀번호가 일치하지 않습니다.\n" +
+          "다시 시도해주세요.",
         "error"
-      )
-      // alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+      );
     } finally {
       setLoginLoading(false);
     }
@@ -372,237 +375,246 @@ const Login = () => {
     );
   }
 
-  return (
-    <div id="login">
-      <div className={`login-page-shell ${isReady ? "is-ready" : "is-initializing"}`}>
-        {/* 배경 장식 레이어 */}
-        <div className="login-page-decor" aria-hidden="true">
-          {/* Glow Effects */}
-          <div className="login-page-glow login-glow-1" />
-          <div className="login-page-glow login-glow-2" />
+return (
+  <div id="login">
+    <LoginBackground>
+      <div className="login-combined-card">
+        <LoginVisualPanel />
 
-          {/* 3D Objects with explicit dimensions */}
-          <img className="login-page-decor-object decor-object-1" src={gateBg1} width="100" height="100" alt="" />
-          <img className="login-page-decor-object decor-object-2" src={gateBg2} width="160" height="160" alt="" />
-          <img className="login-page-decor-object decor-object-3" src={gateBg3} width="70" height="70" alt="" />
-          
-          <img className="login-page-decor-object generated-bg-1" src={blobMain} width="600" height="600" alt="" />
-          <img className="login-page-decor-object generated-bg-3" src={floatingOrb} width="200" height="200" alt="" />
-
-          {/* Decorative Nodes for Background */}
-          <div className="login-page-node node-bg-1" style={{ top: '15%', left: '10%' }} />
-          <div className="login-page-node node-bg-2" style={{ top: '45%', right: '15%' }} />
-          <div className="login-page-node node-bg-3" style={{ bottom: '25%', left: '20%' }} />
-          <div className="login-page-node node-bg-4" style={{ bottom: '15%', right: '10%', opacity: 0.2 }} />
-          <div className="login-page-node node-bg-5" style={{ bottom: '30%', right: '5%', opacity: 0.15 }} />
-
-          {/* Decorative Shapes & Lines */}
-          <div className="login-page-shape shape-circle-1" />
-          <div className="login-page-shape shape-square-1" />
-          <img className="login-page-decor-object generated-bg-4" src={floatingOrb} width="200" height="200" style={{ bottom: '5%', right: '5%', opacity: 0.5, filter: 'blur(40px)' }} alt="" />
-          <div className="login-page-node node-bg-4" style={{ bottom: '15%', right: '12%', width: '12px', height: '12px', background: 'rgba(3, 169, 77, 0.4)' }} />
-          <div className="login-page-node node-bg-5" style={{ bottom: '25%', right: '8%', width: '8px', height: '8px', background: 'rgba(3, 169, 77, 0.3)' }} />
-          <div className="login-page-line login-page-line-1" />
-          <div className="login-page-line login-page-line-2" />
-          <div className="login-page-line login-page-line-3" />
-        </div>
-
-        <div className="login-combined-card">
-          <LoginBackground />
-
-          <section className="login-form-panel">
-            <div className="login-card-viewport">
-              {/* ========================= */}
-              {/* 1. login: 로그인 화면 */}
-              {/* ========================= */}
-              <div
-                className={`login-card ${view === "login" ? "active" : ""}`}
-                id="login-section"
-                style={{ display: view === "login" ? "flex" : "none" }}
-              >
-                <div className="header-nav">
-                  <span className="back-btn" onClick={goToGatePage}>←</span>
-                </div>
-
-                <div className="login-logo-mark">ESG DATA PLATFORM</div>
-
-                <h1>Login</h1>
-
-                <form className="input-group" onSubmit={handleLogin}>
-                  <div className="input-wrapper">
-                    <input
-                      type="email"
-                      autoComplete="off"
-                      name="loginEmail"
-                      className={errors.loginEmail ? "input-error" : ""}
-                      placeholder="이메일을 입력해주세요"
-                      value={loginEmail}
-                      onChange={(e) => {
-                        setLoginEmail(e.target.value);
-                        setErrors((prev) => ({ ...prev, loginEmail: "" }));
-                      }}
-                      onBlur={(e) => validateRequiredField("loginEmail", e.target.value)}
-                    />
-                    {errors.loginEmail && <p className="error-text">{errors.loginEmail}</p>}
-                  </div>
-
-                  <div className="input-wrapper">
-                    <input
-                      type="password"
-                      autoComplete="new-password"
-                      name="loginPassword"
-                      className={errors.loginPassword ? "input-error" : ""}
-                      placeholder="비밀번호를 입력해주세요"
-                      value={loginPassword}
-                      onChange={(e) => {
-                        setLoginPassword(e.target.value);
-                        setErrors((prev) => ({ ...prev, loginPassword: "" }));
-                      }}
-                      onBlur={(e) => validateRequiredField("loginPassword", e.target.value)}
-                    />
-                    {errors.loginPassword && <p className="error-text">{errors.loginPassword}</p>}
-                  </div>
-
-                  <div className="links">
-                    <span onClick={goToSignupPage}>회원 가입</span> |{" "}
-                    <span onClick={handleAccountInquiry}>이메일 찾기</span> |{" "}
-                    <span className="active-link" onClick={goToForgotView}>
-                      비밀번호 찾기
-                    </span>
-                  </div>
-
-                  <button
-                    className="login-action-button"
-                    type="submit"
-                    disabled={loginLoading}
-                  >
-                    {loginLoading ? <span className="button-spinner" /> : "로그인"}
-                  </button>
-                  {errors.loginSubmit && <p className="error-text submit-error">{errors.loginSubmit}</p>}
-                </form>
+        <section className="login-form-panel">
+          <div className="login-card-viewport">
+            {/* ========================= */}
+            {/* 1. login: 로그인 화면 */}
+            {/* ========================= */}
+            <div
+              className={`login-card ${view === "login" ? "active" : ""}`}
+              id="login-section"
+              style={{ display: view === "login" ? "flex" : "none" }}
+            >
+              <div className="header-nav">
+                <span className="back-btn" onClick={goToGatePage}>
+                  ←
+                </span>
               </div>
 
-              {/* ========================= */}
-              {/* 2. forgot: 비밀번호 찾기 화면 */}
-              {/* ========================= */}
-              <div
-                className={`login-card ${view === "forgot" ? "active" : ""}`}
-                id="forgot-section"
-                style={{ display: view === "forgot" ? "flex" : "none" }}
-              >
-                <div className="header-nav">
-                  <span className="back-btn" onClick={goToLoginView}>
-                    ←
+              <div className="login-logo-mark">ESG DATA PLATFORM</div>
+
+              <h1>Login</h1>
+
+              <form className="input-group" onSubmit={handleLogin}>
+                <div className="input-wrapper">
+                  <input
+                    type="email"
+                    autoComplete="off"
+                    name="loginEmail"
+                    className={errors.loginEmail ? "input-error" : ""}
+                    placeholder="이메일을 입력해주세요"
+                    value={loginEmail}
+                    onChange={(e) => {
+                      setLoginEmail(e.target.value);
+                      setErrors((prev) => ({ ...prev, loginEmail: "" }));
+                    }}
+                    onBlur={(e) =>
+                      validateRequiredField("loginEmail", e.target.value)
+                    }
+                  />
+                  {errors.loginEmail && (
+                    <p className="error-text">{errors.loginEmail}</p>
+                  )}
+                </div>
+
+                <div className="input-wrapper">
+                  <input
+                    type="password"
+                    autoComplete="new-password"
+                    name="loginPassword"
+                    className={errors.loginPassword ? "input-error" : ""}
+                    placeholder="비밀번호를 입력해주세요"
+                    value={loginPassword}
+                    onChange={(e) => {
+                      setLoginPassword(e.target.value);
+                      setErrors((prev) => ({
+                        ...prev,
+                        loginPassword: "",
+                      }));
+                    }}
+                    onBlur={(e) =>
+                      validateRequiredField("loginPassword", e.target.value)
+                    }
+                  />
+                  {errors.loginPassword && (
+                    <p className="error-text">{errors.loginPassword}</p>
+                  )}
+                </div>
+
+                <div className="links">
+                  <span onClick={goToSignupPage}>회원 가입</span> |{" "}
+                  <span onClick={handleAccountInquiry}>이메일 찾기</span> |{" "}
+                  <span className="active-link" onClick={goToForgotView}>
+                    비밀번호 찾기
                   </span>
                 </div>
 
-                <div className="login-logo-mark">ESG DATA PLATFORM</div>
+                <button
+                  className="login-action-button"
+                  type="submit"
+                  disabled={loginLoading}
+                >
+                  {loginLoading ? <span className="button-spinner" /> : "로그인"}
+                </button>
 
-                <div className="forgot-view-header">
-                  <h1>비밀번호 찾기</h1>
-                  <div className="forgot-visual-wrap">
-                    <img 
-                      src={emailIcon} 
-                      alt="" 
-                      className="forgot-visual-image"
-                    />
-                  </div>
-                </div>
+                {errors.loginSubmit && (
+                  <p className="error-text submit-error">
+                    {errors.loginSubmit}
+                  </p>
+                )}
+              </form>
+            </div>
 
-                <form className="input-group" onSubmit={handleSendPasswordEmail}>
-                  <div className="input-wrapper">
-                    <input
-                      type="email"
-                      autoComplete="off"
-                      name="passwordResetEmail"
-                      className={errors.passwordResetEmail ? "input-error" : ""}
-                      placeholder="이메일을 입력해주세요"
-                      value={passwordResetEmail}
-                      onChange={(e) => {
-                        setPasswordResetEmail(e.target.value);
-                        setErrors((prev) => ({ ...prev, passwordResetEmail: "" }));
-                      }}
-                      onBlur={(e) => validateRequiredField("passwordResetEmail", e.target.value)}
-                    />
-                    {errors.passwordResetEmail && <p className="error-text">{errors.passwordResetEmail}</p>}
-                  </div>
-
-                  <div className="info-box">
-                    <strong>임시 비밀번호 발송 안내</strong> <br/>
-                    입력하신 이메일로 임시 비밀번호가 발송됩니다.
-                  </div>
-
-                  <button
-                    className="login-action-button"
-                    type="submit"
-                    disabled={passwordResetLoading}
-                  >
-                    {passwordResetLoading ? (
-                      <span className="button-spinner" />
-                    ) : (
-                      "이메일 전송"
-                    )}
-                  </button>
-                  {errors.passwordResetSubmit && <p className="error-text submit-error">{errors.passwordResetSubmit}</p>}
-
-                  <div className="links">
-                    <span onClick={handleAccountInquiry}>
-                      아이디가 기억나지 않나요?
-                    </span>
-                  </div>
-                </form>
+            {/* ========================= */}
+            {/* 2. forgot: 비밀번호 찾기 화면 */}
+            {/* ========================= */}
+            <div
+              className={`login-card ${view === "forgot" ? "active" : ""}`}
+              id="forgot-section"
+              style={{ display: view === "forgot" ? "flex" : "none" }}
+            >
+              <div className="header-nav">
+                <span className="back-btn" onClick={goToLoginView}>
+                  ←
+                </span>
               </div>
 
-              {/* ========================= */}
-              {/* 3. success: 이메일 발송 완료 화면 */}
-              {/* ========================= */}
-              <div
-                className={`login-card ${view === "success" ? "active" : ""}`}
-                id="success-section"
-                style={{ display: view === "success" ? "flex" : "none" }}
-              >
-                <div className="login-logo-mark">ESG DATA PLATFORM</div>
+              <div className="login-logo-mark">ESG DATA PLATFORM</div>
 
-                <h1>이메일 발송 완료</h1>
+              <div className="forgot-view-header">
+                <h1>비밀번호 찾기</h1>
 
-                <div className="success-check-wrap">
-                  <div className="success-check-icon">✓</div>
+                <div className="forgot-visual-wrap">
+                  <img
+                    src={emailIcon}
+                    alt=""
+                    className="forgot-visual-image"
+                  />
+                </div>
+              </div>
+
+              <form className="input-group" onSubmit={handleSendPasswordEmail}>
+                <div className="input-wrapper">
+                  <input
+                    type="email"
+                    autoComplete="off"
+                    name="passwordResetEmail"
+                    className={errors.passwordResetEmail ? "input-error" : ""}
+                    placeholder="이메일을 입력해주세요"
+                    value={passwordResetEmail}
+                    onChange={(e) => {
+                      setPasswordResetEmail(e.target.value);
+                      setErrors((prev) => ({
+                        ...prev,
+                        passwordResetEmail: "",
+                      }));
+                    }}
+                    onBlur={(e) =>
+                      validateRequiredField(
+                        "passwordResetEmail",
+                        e.target.value
+                      )
+                    }
+                  />
+
+                  {errors.passwordResetEmail && (
+                    <p className="error-text">
+                      {errors.passwordResetEmail}
+                    </p>
+                  )}
                 </div>
 
-                <div className="success-message-box">
-                  <div className="success-message-id">
-                    {maskEmail(passwordResetEmail || "user@naver.com")}
-                  </div>
-                  <div className="success-message-main">
-                    임시 비밀번호를 발송했습니다.
-                  </div>
-
-                  <div className="success-message-sub">
-                    메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
-                    <br />
-                    로그인 확인 후 비밀번호를 변경해 주세요.
-                  </div>
+                <div className="info-box">
+                  <strong>임시 비밀번호 발송 안내</strong>
+                  <br />
+                  입력하신 이메일로 임시 비밀번호가 발송됩니다.
                 </div>
 
                 <button
-                  className="login-action-button success-button"
-                  onClick={goToLoginView}
+                  className="login-action-button"
+                  type="submit"
+                  disabled={passwordResetLoading}
                 >
-                  로그인으로 돌아가기
+                  {passwordResetLoading ? (
+                    <span className="button-spinner" />
+                  ) : (
+                    "이메일 전송"
+                  )}
                 </button>
 
-                <div className="success-help-links">
-                  <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
-                  <span className="divider">|</span>
-                  <span onClick={handleAccountInquiry}>고객센터 문의</span>
+                {errors.passwordResetSubmit && (
+                  <p className="error-text submit-error">
+                    {errors.passwordResetSubmit}
+                  </p>
+                )}
+
+                <div className="links">
+                  <span onClick={handleAccountInquiry}>
+                    아이디가 기억나지 않나요?
+                  </span>
+                </div>
+              </form>
+            </div>
+
+            {/* ========================= */}
+            {/* 3. success: 이메일 발송 완료 화면 */}
+            {/* ========================= */}
+            <div
+              className={`login-card ${view === "success" ? "active" : ""}`}
+              id="success-section"
+              style={{ display: view === "success" ? "flex" : "none" }}
+            >
+              <div className="login-logo-mark">ESG DATA PLATFORM</div>
+
+              <h1>이메일 발송 완료</h1>
+
+              <div className="success-check-wrap">
+                <div className="success-check-icon">✓</div>
+              </div>
+
+              <div className="success-message-box">
+                <div className="success-message-id">
+                  {maskEmail(passwordResetEmail || "user@naver.com")}
+                </div>
+
+                <div className="success-message-main">
+                  임시 비밀번호를 발송했습니다.
+                </div>
+
+                <div className="success-message-sub">
+                  메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
+                  <br />
+                  로그인 확인 후 비밀번호를 변경해 주세요.
                 </div>
               </div>
+
+              <button
+                className="login-action-button success-button"
+                onClick={goToLoginView}
+              >
+                로그인으로 돌아가기
+              </button>
+
+              <div className="success-help-links">
+                <span onClick={goToPasswordResetViewAgain}>
+                  이메일 다시 받기
+                </span>
+                <span className="divider">|</span>
+                <span onClick={handleAccountInquiry}>고객센터 문의</span>
+              </div>
             </div>
-          </section>
-        </div>
+          </div>
+        </section>
       </div>
-    </div>
-  );
+    </LoginBackground>
+  </div>
+);
 };
 
 export default Login;

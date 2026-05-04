@@ -37,6 +37,11 @@ export const tvApi = axios.create({
 // =========================================================
 const applyAuthInterceptor = (instance) => {
   instance.interceptors.request.use((config) => {
+    // 로그인, 비밀번호 찾기 등 인증 관련 API는 헤더 추가에서 제외
+    if (config.url && config.url.includes('/auth')) {
+      return config;
+    }
+
     const uuid = localStorage.getItem("uuid");
     const selectedCompanyRaw = localStorage.getItem("selectedCompany");
     const selectedCompany = selectedCompanyRaw ? JSON.parse(selectedCompanyRaw) : null;

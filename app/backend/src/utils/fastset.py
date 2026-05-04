@@ -4,11 +4,21 @@ from src.utils.settings import settings
 from src import apis 
 import importlib
 import pkgutil
+from contextlib import asynccontextmanager
+from src.utils.kafkasv import startConsumer
+from prometheus_fastapi_instrumentator import Instrumentator
 
+# [STARTUP] 앱이 켜질 때 Kafka 실행
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    startConsumer() 
+    print("🚀 Kafka Email Consumer Started...")
+    yield
+    
 def run():
     app = FastAPI(servers=[
         {"url": "/", "description": "API 기본 서버"}
-    ])
+    ], lifespan=lifespan)
     # 라우터 등록
     for _, module_name, _ in pkgutil.iter_modules(apis.__path__):
         module = importlib.import_module(f"src.apis.{module_name}")
@@ -20,7 +30,7 @@ def run():
             )
 
     # CORS 설정
-    origins = ["http://localhost", settings.host_ip]
+    origins = ["http://localhost", settings.host_ip, "192.168.0.106", "192.168.0.105" ]
     app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
@@ -29,4 +39,6 @@ def run():
     allow_headers=["*"],
     )
 
+    Instrumentator().instrument(app).expose(app)
     return app
+

@@ -1,45 +1,138 @@
+import { useEffect, useState } from "react";
 import "@styles/loginBackground.css";
-import gateBg1 from '@assets/backgrounds/GateBg1.png'
-import gateBg2 from '@assets/backgrounds/GateBg2.png'
-import gateBg3 from '@assets/backgrounds/GateBg3.png'
 
-const LoginBackground = () => {
+import gateBg1 from "@assets/backgrounds/GateBg1.png";
+import gateBg2 from "@assets/backgrounds/GateBg2.png";
+import gateBg3 from "@assets/backgrounds/GateBg3.png";
+
+import blobMain from "@assets/backgrounds/login-blob-main.png";
+import floatingOrb from "@assets/backgrounds/login-floating-orb.png";
+
+/**
+ * LoginBackground
+ *
+ * 역할:
+ * - 로그인 페이지 및 다른 페이지에서 재사용 가능한 전체 배경 wrapper
+ * - glow, 3D object, node, line 등 장식 요소를 한 컴포넌트로 분리
+ * - children을 받아 실제 페이지 콘텐츠를 배경 위에 렌더링
+ */
+const LoginBackground = ({ children, className = "" }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  // 초기 렌더링 시 레이아웃 시프트 방지 및 등장 애니메이션 제어
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setIsReady(true);
+      });
+    });
+
+    return () => cancelAnimationFrame(frame);
+  }, []);
+
   return (
-    <aside className="login-background" aria-hidden="true">
-      <div className="login-visual-content">
-          <p className="login-visual-kicker">Unified ESG Platform</p>
+    <div
+      className={`login-page-shell ${
+        isReady ? "is-ready" : "is-initializing"
+      } ${className}`}
+    >
+      {/* 배경 장식 레이어 */}
+      <div className="login-page-decor" aria-hidden="true">
+        {/* Glow Effects */}
+        <div className="login-page-glow login-glow-1" />
+        <div className="login-page-glow login-glow-2" />
 
-          <h2 className="login-visual-title">
-            지속가능경영 데이터를
-            <br />
-            하나의 플랫폼에서.
-          </h2>
+        {/* 3D Objects */}
+        <img
+          className="login-page-decor-object decor-object-1"
+          src={gateBg1}
+          width="100"
+          height="100"
+          alt=""
+        />
+        <img
+          className="login-page-decor-object decor-object-2"
+          src={gateBg2}
+          width="160"
+          height="160"
+          alt=""
+        />
+        <img
+          className="login-page-decor-object decor-object-3"
+          src={gateBg3}
+          width="70"
+          height="70"
+          alt=""
+        />
 
-          <p className="login-visual-description">
-            지표 입력부터 증빙 수집, 승인 워크플로우까지
-            <br />
-            ESG 보고 과정을 체계적으로 관리하세요.
-          </p>
+        <img
+          className="login-page-decor-object generated-bg-1"
+          src={blobMain}
+          width="600"
+          height="600"
+          alt=""
+        />
+        <img
+          className="login-page-decor-object generated-bg-3"
+          src={floatingOrb}
+          width="200"
+          height="200"
+          alt=""
+        />
 
-          <div className="login-visual-chip-list">
-            <div className="login-visual-chip">보고서 AI 자동 발간</div>
-            <div className="login-visual-chip">탄소관리 자동화 AI</div>
-            <div className="login-visual-chip">공급망 데이터 AI 통합 관리</div>
-          </div>
-        </div>
+        {/* Decorative Nodes */}
+        <div className="login-page-node node-bg-1" style={{ top: "15%", left: "10%" }} />
+        <div className="login-page-node node-bg-2" style={{ top: "45%", right: "15%" }} />
+        <div className="login-page-node node-bg-3" style={{ bottom: "25%", left: "20%" }} />
+        <div className="login-page-node node-bg-4" style={{ bottom: "15%", right: "10%", opacity: 0.2 }} />
+        <div className="login-page-node node-bg-5" style={{ bottom: "30%", right: "5%", opacity: 0.15 }} />
 
-        {/* 데이터 흐름 시각화 요소 */}
-        <div className="login-visual-assets">
-          <div className="data-flow-node node-1" />
-          <div className="data-flow-node node-2" />
-          <div className="data-flow-node node-3" />
-          <div className="data-flow-node node-4" />
-          <div className="data-flow-line line-1" />
-          <img className="login-visual-object login-visual-object-main" src={gateBg1} alt="" />
-          <img className="login-visual-object login-visual-object-sub-1" src={gateBg2} alt="" />
-          <img className="login-visual-object login-visual-object-sub-2" src={gateBg3} alt="" />
-        </div>
-    </aside>
+        {/* Decorative Shapes & Lines */}
+        <div className="login-page-shape shape-circle-1" />
+        <div className="login-page-shape shape-square-1" />
+
+        <img
+          className="login-page-decor-object generated-bg-4"
+          src={floatingOrb}
+          width="200"
+          height="200"
+          style={{
+            bottom: "5%",
+            right: "5%",
+            opacity: 0.5,
+            filter: "blur(40px)",
+          }}
+          alt=""
+        />
+
+        <div
+          className="login-page-node node-bg-6"
+          style={{
+            bottom: "15%",
+            right: "12%",
+            width: "12px",
+            height: "12px",
+            background: "rgba(3, 169, 77, 0.4)",
+          }}
+        />
+        <div
+          className="login-page-node node-bg-7"
+          style={{
+            bottom: "25%",
+            right: "8%",
+            width: "8px",
+            height: "8px",
+            background: "rgba(3, 169, 77, 0.3)",
+          }}
+        />
+
+        <div className="login-page-line login-page-line-1" />
+        <div className="login-page-line login-page-line-2" />
+        <div className="login-page-line login-page-line-3" />
+      </div>
+
+      {children}
+    </div>
   );
 };
 
