@@ -49,7 +49,7 @@
 // → api.post("/auth/password-reset", { email })
 // =====================================================================================
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
 import { showDefaultAlert } from "@components/ServiceAlert/ServiceAlert";
@@ -63,7 +63,7 @@ import { useAuth } from '@hooks/AuthContext.jsx';
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
 // false: 실제 API 호출
-const USE_DUMMY_API = true;
+const USE_DUMMY_API = false;
 
 const Login = () => {
   const { login } = useAuth();
@@ -203,29 +203,37 @@ const Login = () => {
 
       const result = await requestLoginApi();
 
-      if (result.status !== true) {
+      const isSuccess = result.status === true || result.status === "success";
+
+      if (!isSuccess) {
         throw new Error(result.message || "로그인 실패");
       }
 
-      // AuthContext를 통해 전역 상태 및 LocalStorage에 유저 정보 저장
-      login(result.data);
+      const authData = result.data;
 
-      // 다중 회사(컨설턴트 등)인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
-      if (result.data.companys && result.data.companys.length > 1) {
+      // AuthContext를 통해 전역 상태 및 LocalStorage에 유저 정보 저장
+      login(authData);
+
+      const companies = authData.companies || authData.companys || [];
+
+      // 다중 회사인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
+      if (companies.length > 1) {
         navigate("/companyselect");
       } else {
         navigate("/main");
       }
     } catch (error) {
-      setErrors(prev => ({ ...prev, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
-      // ----------- 커스텀 알럿 추가 ----------
+      setErrors((prev) => ({
+        ...prev,
+        loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다.",
+      }));
+
       showDefaultAlert(
         "로그인 실패",
-        "이메일 또는 비밀번호가 일치하지 않습니다.\n"+
-        "다시 시도해주세요.",
+        "이메일 또는 비밀번호가 일치하지 않습니다.\n" +
+          "다시 시도해주세요.",
         "error"
-      )
-      // alert("로그인에 실패했습니다. 이메일과 비밀번호를 확인해 주세요.");
+      );
     } finally {
       setLoginLoading(false);
     }
