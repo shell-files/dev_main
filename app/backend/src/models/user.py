@@ -48,7 +48,7 @@ class SignUpModel(BaseModel):
   # ── INDUSTRY_DETAIL 테이블 필드
   # [FK] industry_id → INDUSTRY_CODE.id (배열 수신 → saveMany 일괄 INSERT)
   # [FK] company_id  → COMPANY.id       (signUpProcess 내부 주입)
-  industryList: List[int]                 = Field(...,  description="INDUSTRY_DETAIL.industry_id 배열")
+  industryList: List[str]                 = Field(...,  description="INDUSTRY_DETAIL.industry_id 배열")
   
   # ── USER_ROLE 테이블 필드
   # [FK] role_id → ROLE.id
