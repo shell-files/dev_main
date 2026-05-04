@@ -8,7 +8,7 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
  *  true: mock 데이터
  *  false: 실제 API
  */
-const UseMock = false;
+const UseMock = true;
 
 /**
  * [CONSTANTS]
@@ -116,6 +116,7 @@ if (!canAccess) {
   const [activeDataCategory, setActiveDataCategory] = useState('all'); 
   const [activeSubCategory, setActiveSubCategory] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [userSearch, setUserSearch] = useState("");
   const [userPage, setUserPage] = useState(1);
@@ -274,12 +275,12 @@ if (!canAccess) {
 
     if (activeDataCategory !== 'all') {
       list = list.filter(item =>
-        CATEGORY_MAP[activeDataCategory]?.includes(item.group)
+        CATEGORY_MAP[activeDataCategory]?.includes(item.issueGroup)
       );
     }
 
     if (activeSubCategory !== 'all') {
-      list = list.filter(item => item.group === activeSubCategory);
+      list = list.filter(item => item.issueGroup === activeSubCategory);
     }
 
     if (statusFilter !== 'all') {
@@ -319,6 +320,70 @@ if (!canAccess) {
     setDataPage(1);
   };
 
+  const toggleSelect = (id) => {
+    setSelectedIds(prev =>
+      prev.includes(id)
+        ? prev.filter(v => v !== id)
+        : [...prev, id]
+    );
+  };
+  const toggleSelectAll = () => {
+    const currentIds = pagedInputs.map(i => i.id);
+
+    const isAllSelected = currentIds.every(id => selectedIds.includes(id));
+
+    if (isAllSelected) {
+      setSelectedIds(prev => prev.filter(id => !currentIds.includes(id)));
+    } else {
+      setSelectedIds(prev => [...new Set([...prev, ...currentIds])]);
+    }
+  };
+
+  const handleBulkAction = async (newStatus) => {
+    if (selectedIds.length === 0) return;
+
+    const actionName = newStatus === 'approved' ? '승인' : '반려';
+
+    const isConfirmed = await showConfirmAlert(
+      `일괄 ${actionName}`,
+      `선택된 ${selectedIds.length}개 항목을 ${actionName}하시겠습니까?`,
+      'question'
+    );
+
+    if (!isConfirmed) return;
+
+    setIsLoading(true);
+
+    try {
+      if (!UseMock) {
+        await api.patch('/board/bulk', {
+          ids: selectedIds,
+          status: newStatus,
+          ...authInfo
+        });
+      }
+
+      // 프론트 상태 반영
+      setInputs(prev =>
+        prev.map(i =>
+          selectedIds.includes(i.id)
+            ? { ...i, status: newStatus }
+            : i
+        )
+      );
+
+      setSelectedIds([]); // 선택 초기화
+
+      showDefaultAlert("완료", `일괄 ${actionName} 처리되었습니다.`, "success");
+
+    } catch (e) {
+      console.error(e);
+      showDefaultAlert("실패", "일괄 처리 중 오류", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   
 
   return (
@@ -330,13 +395,14 @@ if (!canAccess) {
         <div className='kpi-container'>
           {[
             { key: 'approved', label: '승인 완료', count: kpi.approved},
-            { key: 'pending', label: '승인 대기', count: kpi.pending },
+            { key: 'pending', label: '승인 대기', count: kpi.pending},
             { key: 'rejected', label: '반려됨', count: kpi.rejected }
           ].map(item => (
             <div 
               key={item.key} 
               onClick={() => !isLoading && setStatusFilter(item.key === statusFilter ? 'all' : item.key)}
               className={`kpi-card ${statusFilter === item.key ? 'active' : ''} ${isLoading ? 'disabled' : ''}`}
+              
             >
               <div className='kpi-label'>{item.label}</div>
               <div className='kpi-value'>{item.count}</div>
@@ -456,6 +522,7 @@ if (!canAccess) {
         {activeTab === 'data' && (
           <section className="fade-in">
             <div className="data-control-row" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+              
               <div className="category-tabs">
                 {['all', 'general', 'environmental', 'social', 'governance'].map(cat => (
                   <button 
@@ -468,9 +535,27 @@ if (!canAccess) {
                   </button>
                 ))}
               </div>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  className="btn-outline"
+                  disabled={selectedIds.length === 0 || isLoading}
+                  onClick={() => handleBulkAction('approved')}
+                >
+                  선택 승인
+                </button>
+
+                <button
+                  className="btn-outline"
+                  disabled={selectedIds.length === 0 || isLoading}
+                  onClick={() => handleBulkAction('rejected')}
+                  style={{ color: '#dc3545' }}
+                >
+                  선택 반려
+                </button>
               <button className="btn-primary" onClick={fetchData} disabled={isLoading}>
                 {isLoading ? "로딩 중..." : "데이터 새로고침"}
               </button>
+              </div>
             </div>
 
             {/* 이슈 그룹 서브 탭 */}
@@ -511,19 +596,36 @@ if (!canAccess) {
                 <table>
                   <thead>
                     <tr>
+                        <th>
+                          <input
+                            type="checkbox"
+                            checked={
+                              pagedInputs.length > 0 &&
+                              pagedInputs.every(i => selectedIds.includes(i.id))
+                            }
+                            onChange={toggleSelectAll}
+                          />
+                        </th>
                       <th>ID</th><th>이슈 그룹</th><th>지표 항목</th><th>값</th><th>첨부파일</th><th>작성자</th><th>상태</th><th>액션</th>
                     </tr>
                   </thead>
                   <tbody>
                     {pagedInputs.map(item => (
                       <tr key={item.id}>
+                        <td>
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.includes(item.id)}
+                            onChange={() => toggleSelect(item.id)}
+                          />
+                        </td>
                         <td>{item.id}</td>
-                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.group}</span></td>
+                        <td><span className="tag-item" style={{ backgroundColor: '#f1f3f5', color: '#333', border: 'none' }}>{item.issueGroup}</span></td>
                         <td>{item.questionName}</td>
                         <td className="value-cell"><strong>{item.value}</strong></td>
                         <td>
                           {/* 파일 업로드 위치에 맞게 수정 해야 함 */}
-                          {item.file ? <a href={`#${item.file}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
+                          {item.attachmentFile ? <a href={`#${item.attachmentFile}`} className="file-link" style={{ color: '#03a94d', textDecoration: 'none' }}>📎 파일</a> : "-"}
                         </td>
                         <td>{item.userName}</td>
                         <td><span className={`role-badge ${item.status === 'approved' ? 'green' : item.status === 'pending' ? 'purple' : 'depth-tag'}`}>{item.status}</span></td>
