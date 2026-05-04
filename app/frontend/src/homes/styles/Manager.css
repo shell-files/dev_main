@@ -3,7 +3,7 @@
    ============================================================ */
 #manager_page {
   padding: 40px 20px;
-  /* min-height: 100vh; */
+  background-color: #fff;
   font-family: 'Pretendard', sans-serif;
   color: #333;
   overflow-y: auto;
@@ -36,30 +36,26 @@
 
 #manager_page .kpi-card {
   padding: 24px;
+  background: #fff; /* 그라데이션 제거 */
+  border: 1px solid #e0e0e0; /* 보더 스타일 통일 */
   border-radius: 12px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.2s; /* 속도 통일 */
   text-align: center;
-  border-bottom: 4px solid transparent;
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, #ffffff, #f8fafc);
-  border: 2px solid #03a94d;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
 }
 
 #manager_page .kpi-card:hover:not(.disabled) {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-
+  border-color: #03a94d;
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
 #manager_page .kpi-card.active {
-  background-color: #fff;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+  border-color: #03a94d;
+  background: #f0fdf4; /* 연한 초록 배경으로 통일감 부여 */
   transform: translateY(-4px);
-  border-bottom: 4px solid #03a94d;
-  
 }
 
 #manager_page .kpi-card.disabled {
@@ -69,24 +65,19 @@
 
 #manager_page .kpi-label {
   font-size: 14px;
-  color: #666;
+  color: #777; /* role-card의 p 태그 컬러와 통일 */
   margin-bottom: 8px;
 }
 
 #manager_page .kpi-value {
   font-size: 28px;
-  font-weight: 800;
-  color: #222;
+  font-weight: 700;
+  color: #03a94d; /* 포인트 컬러를 kpi 값에 적용하여 강조 */
+  letter-spacing: -0.5px;
 }
+/* 불필요한 가상 요소 제거 (깔끔한 UI를 위해) */
 #manager_page .kpi-card::after {
-  content: "";
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  width: 100%;
-  height: 3px;
-  background: transparent;
-  transition: all 0.3s;
+  display: none;
 }
 #manager_page .kpi-card.active::after {
   height: 4px;
@@ -96,6 +87,12 @@
 }
 #manager_page .kpi-value {
   letter-spacing: -0.5px;
+}
+/* Disabled 상태 */
+#manager_page .kpi-card.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(1);
 }
 
 /* ============================================================
@@ -351,6 +348,7 @@
   justify-content: center;
   gap: 8px;
   margin-top: 30px;
+  margin-bottom: 30px;
 }
 
 #manager_page .page-btn {

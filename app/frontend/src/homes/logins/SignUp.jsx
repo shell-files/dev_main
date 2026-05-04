@@ -42,13 +42,14 @@ import '@styles/SignUp.css'
 import { api } from '@utils/network'
 import ksicData from '@assets/data/ksicClassification.json';
 import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
+import SignupInputField from '@components/SignupInputField'
 
 /**
  * [환경 설정]
  * USE_DUMMY: true일 경우 백엔드 API 통신 없이 가짜 데이터로 동작합니다.
  * 백엔드 서버가 준비되지 않았거나 403 에러 등의 이슈가 있을 때 프론트엔드 흐름 테스트용으로 사용합니다.
  */
-const USE_DUMMY = true;
+const USE_DUMMY = false;
 
 const Signup = () => {
     const navigate = useNavigate();
@@ -372,14 +373,16 @@ const Signup = () => {
         // 3️⃣ API 요청
         setSignupLoading(true);
         try {
-            // const payload = {
-            //     ...formData,
-            //     licensefileId: fileId,
-            //     industryCodes: industryCodes.map(code => Number(code)),
-            //     agreed: isAgreed,
-            //     businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
-            //     corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
-            // };
+            const payload = {
+                ...formData,
+                licensefileId: fileId,
+                industryCodes: industryCodes,
+                agreed: isAgreed,
+                businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
+                corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
+            };
+            console.log(payload);
+
             if (USE_DUMMY) {
                 setTimeout(async () => {
                     setSignupLoading(false);
@@ -395,11 +398,12 @@ const Signup = () => {
             const res = await api.put("/user", {
                 ...formData,
                 licensefileId: fileId,
-                industryCodes: industryCodes.map(code => Number(code)),
+                industryCodes: industryCodes,
                 agreed: isAgreed,
                 businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
                 corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
             });
+            // console.log(industryCodes[0]);
             if (res.data.status === true) {
                 showDefaultAlert(
                     "회원가입 완료",
@@ -457,44 +461,18 @@ const Signup = () => {
                         <section className="form-section">
                             <h2 className="section-title">가입 정보</h2>
                             {/* 이름 입력 */}
-                            <div className="input-group">
-                                <label>성명</label>
-                                <div className="input-wrap">
-                                    <input 
-                                        type="text" 
-                                        name="userName" 
-                                        value={formData.userName} 
-                                        onChange={handleChange} 
-                                        onBlur={(e) => validateField("userName", e.target.value)}
-                                        placeholder="이름을 입력해주세요" 
-                                    />
-                                    {errors.userName && <p className="error">{errors.userName}</p>}
-                                </div>
-                            </div>
+                            <SignupInputField label="성명" name="userName" value={formData.userName} onChange={handleChange}
+                                onBlur={(e) => validateField("userName", e.target.value)} placeholder="이름을 입력해주세요" error={errors.userName}/>
                             
                             {/* 이메일 입력 */}
-                            <div className="input-group">
-                                <label>이메일</label>
-                                <div className="input-wrap">
-                                    <input type="email" name="email" value={formData.email} onChange={handleChange} 
-                                        onBlur={(e) => { validateField("email", e.target.value); checkEmail(); }} 
-                                        placeholder="이메일을 입력해주세요" autoComplete="new-password" />
-                                    {!errors.email && emailValid === true && <p className="success">사용 가능한 이메일입니다.</p>}
-                                    {!errors.email && emailValid === false && <p className="error">이미 사용중입니다.</p>}
-                                    {errors.email && <p className="error">{errors.email}</p>}
-                                </div>
-                            </div>
+                            <SignupInputField label="이메일" type="email" name="email" value={formData.email}
+                                onChange={handleChange} onBlur={(e) => {validateField("email", e.target.value);checkEmail()}}
+                                placeholder="이메일을 입력해주세요" error={errors.email} success={emailValid === true ? "사용 가능한 이메일입니다." : ""}/>
 
                             {/* 비밀번호 입력 */}
-                            <div className="input-group">
-                                <label>비밀번호</label>
-                                <div className="input-wrap">
-                                    <input type="password" name="password" value={formData.password} onChange={handleChange}
-                                        onBlur={(e) => validateField("password", e.target.value)} 
-                                        placeholder="비밀번호를 입력해주세요" autoComplete="new-password" />
-                                    {errors.password && <p className="error">{errors.password}</p>}
-                                </div>
-                            </div>
+                            <SignupInputField label="비밀번호" type="password" name="password" value={formData.password}
+                                onChange={handleChange} onBlur={(e) => validateField("password", e.target.value)}
+                                placeholder="비밀번호를 입력해주세요" error={errors.password}/>
                         </section>
 
                         <hr className="divider" />
@@ -520,30 +498,16 @@ const Signup = () => {
                             {errors.ocr && <p className="error">{errors.ocr}</p>}
 
                             {/* 사업자 등록번호 (중복 검사 포함) */}
-                            <div className="input-group">
-                                <label>사업자 등록번호</label>
-                                <div className="input-wrap">
-                                    <input type="text" name="businessNumber" value={formData.businessNumber} onChange={handleChange}
-                                        onBlur={(e) => { validateField("businessNumber", e.target.value); checkBusiness(); }} 
-                                        placeholder="사업자 등록번호를 입력해주세요" autoComplete="one-time-code" />
-                                    {!errors.businessNumber && businessValid === true && <p className="success">사용 가능</p>}
-                                    {!errors.businessNumber && businessValid === false && <p className="error">이미 등록됨</p>}
-                                    {errors.businessNumber && <p className="error">{errors.businessNumber}</p>}
-                                </div>
-                            </div>
+                            <SignupInputField label="사업자 등록번호" name="businessNumber" value={formData.businessNumber}
+                                onChange={handleChange} onBlur={(e) => {validateField("businessNumber", e.target.value);checkBusiness()}}
+                                placeholder="사업자 등록번호를 입력해주세요" error={errors.businessNumber} success={businessValid === true ? "사용 가능" : ""}
+                            />
 
                             {/* 나머지 OCR 연동 필드들 (반복문 처리) */}
                             {bizFields.map((field) => (
-                                <div className="input-group" key={field.name}>
-                                    <label>{field.label}</label>
-                                    <div className="input-wrap">
-                                        <input type="text" name={field.name} value={formData[field.name]} onChange={handleChange}
-                                            onBlur={(e) => validateField(field.name, e.target.value)} 
-                                            placeholder={`${field.label}을(를) 입력해주세요`} autoComplete="one-time-code" />
-                                        {errors[field.name] && <p className="error">{errors[field.name]}</p>}
-                                    </div>
-                                </div>
-                                
+                                <SignupInputField key={field.name} label={field.label} name={field.name} value={formData[field.name]} onChange={handleChange} 
+                                onBlur={(e) => validateField(field.name, e.target.value)} placeholder={`${field.label}을(를) 입력해주세요`}
+                                    error={errors[field.name]}/>
                             ))}
                             {/* 기업규모 셀렉트 박스 */}
                             <div className="input-group">
