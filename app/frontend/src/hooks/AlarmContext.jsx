@@ -1,8 +1,10 @@
 import React, { createContext, useState, useContext, useEffect } from 'react';
+import { useAuth } from '@hooks/AuthContext.jsx';
 
 const AlarmContext = createContext();
 
 export const AlarmProvider = ({ children }) => {
+    const { user, selectedCompany } = useAuth();
     const [isAlarmOpen, setIsAlarmOpen] = useState(false);
     
     // 테스트용 초기 알림 데이터
@@ -21,10 +23,16 @@ export const AlarmProvider = ({ children }) => {
     // [향후 API 연계 지점 1] 초기 알림 내역 조회 (REST API)
     // =========================================================
     useEffect(() => {
-        // TODO: 로그인 후 백엔드에서 기존 알림 내역을 가져오는 API 호출
+        // 계정 정보나 회사 정보가 없으면 알림 초기화 및 중단
+        if (!user || !selectedCompany) {
+            // setNotifications([]);
+            return;
+        }
+
+        // TODO: 로그인 후 백엔드에서 해당 계정+회사의 기존 알림 내역을 가져오는 API 호출
         // const fetchNotifications = async () => {
         //     try {
-        //         const res = await fetch('/api/notifications');
+        //         const res = await fetch(`/api/notifications?uuid=${user.uuid}&company_id=${selectedCompany.company_id}`);
         //         const data = await res.json();
         //         setNotifications(data);
         //     } catch (error) {
@@ -32,7 +40,7 @@ export const AlarmProvider = ({ children }) => {
         //     }
         // };
         // fetchNotifications();
-    }, []);
+    }, [user, selectedCompany]); // 유저나 선택된 회사가 바뀔 때마다 재실행
 
     // 새로운 알림이 도착했을 때 호출할 함수 (STOMP 연동 시 사용)
     const addNotification = (text, type = 'USER', title = null, chip = null) => {
@@ -52,11 +60,13 @@ export const AlarmProvider = ({ children }) => {
     // [향후 API 연계 지점] 실시간 알림 웹소켓(STOMP) 연결 구독
     // =========================================================
     useEffect(() => {
-        // TODO: 백엔드 STOMP / SSE 연결 설정
+        if (!user || !selectedCompany) return;
+
+        // TODO: 백엔드 STOMP / SSE 연결 설정 (해당 회사의 알림만 구독하도록 쿼리 파라미터나 헤더 전달)
         // const client = new StompJs.Client({
-        //     brokerURL: 'ws://your-backend/ws',
+        //     brokerURL: `ws://your-backend/ws?uuid=${user.uuid}&company_id=${selectedCompany.company_id}`,
         //     onConnect: () => {
-        //         client.subscribe('/user/queue/notifications', (message) => {
+        //         client.subscribe(`/user/queue/notifications/${selectedCompany.company_id}`, (message) => {
         //             const payload = JSON.parse(message.body);
         //             addNotification(payload.text, payload.type);
         //         });
@@ -64,8 +74,8 @@ export const AlarmProvider = ({ children }) => {
         // });
         // client.activate();
         
-        // return () => client.deactivate();
-    }, []);
+        // return () => client.deactivate(); // 컴포넌트 언마운트나 회사 변경 시 기존 구독 해제
+    }, [user, selectedCompany]); // 유저나 선택된 회사가 바뀔 때마다 웹소켓 재연결
 
     // 알림 삭제 함수
     const removeNoti = (idToRemove) => {

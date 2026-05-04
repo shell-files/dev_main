@@ -23,8 +23,7 @@ export const showServiceIntro = (title, text, iconUrl) => {
     confirmButtonColor : "#03a94d",
     showCloseButton : true,
     backdrop : `rgba(0,0,0,0.5)`,
-    heightAuto : false,
-    scrollbarPadding: false
+    heightAuto : false
   })
 }
 
@@ -47,8 +46,7 @@ export const showDefaultAlert = (title, text, iconType = "success") => {
       popup : "custom-swal-popup",
       htmlContainer: 'custom-swal-text',
       confirmButton: "custom-swal-confirm-btn"
-    },
-    scrollbarPadding: false
+    }
   })
 }
 
@@ -75,8 +73,7 @@ export const showConfirmAlert = async(title, text, iconType = "warning") => {
       popup: 'custom-swal-popup',
       confirmButton: 'custom-swal-confirm-btn',
       cancelButton: 'custom-swal-cancel-btn'
-    },
-    scrollbarPadding: false
+    }
   })
   return result.isConfirmed;
 }

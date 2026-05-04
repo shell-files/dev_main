@@ -12,8 +12,9 @@ import Dashboard from '@mains/Dashboard.jsx'
 import Headernav from "@components/HeaderNav.jsx"
 import Sidebarnav from "@components/SidebarNav.jsx"
 import Alarm from "@components/Alarm.jsx"
-import "@styles/mains.css";
 import CompanySelect from "@logins/CompanySelect.jsx"
+import Invite from "@mains/Invite.jsx"
+import "@styles/mains.css";
 
 
 function App() {
@@ -28,6 +29,7 @@ function App() {
     { path: "/main", element: <Main /> },
     { path: "/main/dashboard", element: <Dashboard />},
     { path: "/main/onboarding", element: <Onboarding />},
+    { path: "/main/Invite", element: <Invite />},
     { path: "main/*", element: <NotFound /> },
   ]
   const location = useLocation();

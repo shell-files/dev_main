@@ -25,6 +25,7 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import { useAlarm } from '@hooks/AlarmContext.jsx'; 
+import { useAuth } from '@hooks/AuthContext.jsx';
 import "@styles/alarm.css";
 import userIcon from '@assets/alarm/user.png';
 import dataIcon from '@assets/alarm/data.png';
@@ -47,7 +48,8 @@ const FILTER_TABS = [
 ];
 
 const Alarm = () => {
-    const { isAlarmOpen, closeAlarm, notifications, removeNoti, markAllAsRead, clearAll } = useAlarm();
+    const { isAlarmOpen, closeAlarm, toggleAlarm, notifications, removeNoti, markAllAsRead, clearAll } = useAlarm();
+    const { user, selectedCompany } = useAuth(); // 전역 인증 상태 가져오기
     const [activeFilter, setActiveFilter] = useState('ALL');
 
     // 탭 슬라이더 관련 상태 및 Ref
@@ -114,6 +116,16 @@ const Alarm = () => {
                 }}
             />
 
+            {/* 우측 엣지 플로팅 알림 열기 버튼 */}
+            <div 
+                className={`alarm-floating-toggle ${isAlarmOpen ? 'hidden' : ''}`}
+                onClick={toggleAlarm}
+            >
+                <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </div>
+
             {/* 알림 컨테이너 */}
             <div 
                 id="alarm-container"
@@ -122,10 +134,15 @@ const Alarm = () => {
                 }}
             >
                 {/* 1. 헤더 영역 */}
-                <div id="alarm-header">
-                    <div className="alarm-title-box">
-                        <h2>Notification Center</h2>
-                        <img src={alarmSettingIcon} alt="settings" className="alarm-setting-icon" />
+                <div id="alarm-header" style={{ alignItems: 'flex-start' }}>
+                    <div className="alarm-title-box" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <h2>Notification Center</h2>
+                            <img src={alarmSettingIcon} alt="settings" className="alarm-setting-icon" style={{ cursor: 'pointer' }} />
+                        </div>
+                        <div className="alarm-auth-info" style={{ fontSize: '0.8rem', color: '#64748b', fontWeight: 500 }}>
+                            {selectedCompany?.company_name || 'A회사'} • {user?.name || '사용자'}님
+                        </div>
                     </div>
                     <span onClick={closeAlarm} className="alarm-close-btn">×</span>
                 </div>

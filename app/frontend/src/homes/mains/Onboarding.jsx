@@ -3,6 +3,7 @@ import "@styles/onboarding.css";
 import INITIAL_METRICS from "@mains/onboarding/onboardingData.js";
 import { showDefaultAlert, showConfirmAlert } from "@components/ServiceAlert/ServiceAlert";
 import { useAlarm } from '@hooks/AlarmContext.jsx';
+import { useAuth } from '@hooks/AuthContext.jsx';
 import Swal from 'sweetalert2';
 
 // =====================================================================================
@@ -69,7 +70,7 @@ const requestRemoveAssigneeApi = async (issueGroup, email) => {
 
 // ── 버튼 노출 규칙 ──
 const getActions = (role, status, isAuthor) => {
-  const isManager = role === "ESG 담당자";
+  const isManager = role === "ESG 담당자" || role === "ESG담당자";
   const isConsultant = role === "컨설턴트";
   const b = [];
   
@@ -115,8 +116,12 @@ const rnrDisplay = (assignees) => {
 // =====================================================================================
 const Onboarding = () => {
   const { addNotification } = useAlarm();
+  const { user, selectedCompany } = useAuth(); // 전역 계정/회사 상태 가져오기
   const [metrics, setMetrics] = useState(() => INITIAL_METRICS.map(m => ({ ...m })));
-  const [currentUser, setCurrentUser] = useState(DUMMY_USERS[0]);
+  
+  // 기존 DUMMY_USERS 대체: AuthContext의 실제 로그인 데이터 사용
+  const currentRoleName = selectedCompany?.role || "ESG담당자";
+  const currentEmail = selectedCompany?.email || "esg@company.com";
   const [searchTerm, setSearchTerm] = useState("");
   const [activeCategory, setActiveCategory] = useState("전체");
   const [selectedIGs, setSelectedIGs] = useState([]);
@@ -193,7 +198,7 @@ const Onboarding = () => {
   }, [metrics, activeCategory]);
 
   // ── 필터링 ──
-  const canViewAll = ["ESG 담당자", "컨설턴트", "관리자"].includes(currentUser.roleName);
+  const canViewAll = ["ESG담당자", "ESG 담당자", "컨설턴트", "관리자"].includes(currentRoleName);
 
   const filteredData = useMemo(() => {
     const s = searchTerm.toLowerCase();
@@ -212,11 +217,11 @@ const Onboarding = () => {
       if (s && !m.issueId.toLowerCase().includes(s) && !m.issueName.toLowerCase().includes(s) && !m.checklistQuestion.toLowerCase().includes(s)) return false;
       
       // 5. 권한 필터 (공통)
-      if (!canViewAll && !m.assignees.some(a => a.email === currentUser.email && a.status === "ACCEPTED")) return false;
+      if (!canViewAll && !m.assignees.some(a => a.email === currentEmail && a.status === "ACCEPTED")) return false;
       
       return true;
     });
-  }, [metrics, searchTerm, activeCategory, selectedIGs, currentUser, canViewAll, activeStatusFilters]);
+  }, [metrics, searchTerm, activeCategory, selectedIGs, currentEmail, canViewAll, activeStatusFilters]);
 
   const pageCount = Math.ceil(filteredData.length / ROWS_PER_PAGE);
 
@@ -399,15 +404,23 @@ const Onboarding = () => {
     }
   };
   const handleBatchApprove = async () => {
-    const isConfirmed = await showConfirmAlert("일괄 승인", `선택한 ${selectedIds.length}건의 항목을 모두 승인하시겠습니까?`, "question");
+    // 승인 가능한(검토 대기 중인) 항목들만 필터링
+    const targetIds = selectedIds.filter(id => {
+      const m = metrics.find(x => x.issueId === id);
+      return m && (m.status === "SUBMITTED" || m.status === "EDITING_SUBMITTED");
+    });
+
+    if (targetIds.length === 0) {
+      showDefaultAlert("승인 불가", "승인 가능한(검토 대기 중인) 항목이 선택되지 않았습니다.", "warning");
+      return;
+    }
+
+    const isConfirmed = await showConfirmAlert("일괄 승인", `선택한 ${targetIds.length}건의 항목을 모두 승인하시겠습니까?`, "question");
     if (!isConfirmed) return;
 
-    for (const id of selectedIds) {
-      const m = metrics.find(x => x.issueId === id);
-      if (m.status === "SUBMITTED" || m.status === "EDITING_SUBMITTED") {
-        await requestApproveMetricApi(id);
-        setMetrics(prev => prev.map(x => x.issueId === id ? { ...x, status: "APPROVED" } : x));
-      }
+    for (const id of targetIds) {
+      await requestApproveMetricApi(id);
+      setMetrics(prev => prev.map(x => x.issueId === id ? { ...x, status: "APPROVED" } : x));
     }
     setSelectedIds([]);
   };
@@ -589,7 +602,7 @@ const Onboarding = () => {
               <div className="ob-batch-btns">
                 <button type="button" className="ob-batch-btn save" onClick={handleBatchSave}>선택 저장</button>
                 <button type="button" className="ob-batch-btn submit" onClick={handleBatchSubmit}>선택 제출</button>
-                {(currentUser.roleName === "ESG 담당자" || currentUser.roleName === "컨설턴트") && (
+                {(currentRoleName === "ESG 담당자" || currentRoleName === "ESG담당자" || currentRoleName === "컨설턴트") && (
                   <button type="button" className="ob-batch-btn approve" onClick={handleBatchApprove}>선택 승인</button>
                 )}
               </div>
@@ -599,13 +612,12 @@ const Onboarding = () => {
           {/* 툴바 (우측) */}
           <div className="ob-toolbar-right">
             <span className="ob-count">총 {filteredData.length.toLocaleString()}건</span>
-            <select
-              className="ob-role-select"
-              value={currentUser.roleId}
-              onChange={(e) => setCurrentUser(DUMMY_USERS.find(u => u.roleId === Number(e.target.value)))}
-            >
-              {DUMMY_USERS.map(u => <option key={u.roleId} value={u.roleId}>{u.roleName}</option>)}
-            </select>
+            {/* 기존 더미 권한 선택 select 제거, 현재 사용자의 회사 및 권한 뱃지로 표시 */}
+            <div className="ob-current-auth-badge" style={{display: 'flex', gap: '8px', alignItems: 'center', fontSize: '0.85rem', color: '#64748b', backgroundColor: '#f8fafc', padding: '6px 12px', borderRadius: '20px', border: '1px solid #e2e8f0'}}>
+              <span style={{fontWeight: 600, color: '#3b82f6'}}>{selectedCompany?.company_name || "A회사"}</span>
+              <span style={{width: '4px', height: '4px', borderRadius: '50%', backgroundColor: '#cbd5e1'}}></span>
+              <span>{currentRoleName}</span>
+            </div>
             <input
               type="text"
               className="ob-search"
@@ -662,8 +674,8 @@ const Onboarding = () => {
             <tbody>
               {pageData.map((item, index) => {
                 const st = STATUS_CFG[item.status] || STATUS_CFG.NOT_STARTED;
-                const isAuthor = item.assignees.some(a => a.email === currentUser.email);
-                const actions = getActions(currentUser.roleName, item.status, isAuthor);
+                const isAuthor = item.assignees.some(a => a.email === currentEmail);
+                const actions = getActions(currentRoleName, item.status, isAuthor);
                 const rnr = rnrDisplay(item.assignees);
                 const isGroupStart = !!rowSpans[index];
                 return (
@@ -736,8 +748,8 @@ const Onboarding = () => {
                         <span className={`ob-status ${st.cls}`}>{st.label}</span>
                         {(() => {
                           const isAssigned = item.assignees.length > 0;
-                          const isAuthor = item.assignees.some(a => a.email === currentUser.email) || !isAssigned;
-                          const canReview = (currentUser.roleName === "ESG 담당자") || (currentUser.roleName === "컨설턴트" && !isAuthor);
+                          const isAuthor = item.assignees.some(a => a.email === currentEmail) || !isAssigned;
+                          const canReview = (currentRoleName === "ESG담당자" || currentRoleName === "ESG 담당자") || (currentRoleName === "컨설턴트" && !isAuthor);
                           
                           return item.status === "SUBMITTED" && canReview && (
                             <button 
@@ -755,8 +767,8 @@ const Onboarding = () => {
                       <div className="ob-actions">
                         {(() => {
                           const isAssigned = item.assignees.length > 0;
-                          const isAuthor = item.assignees.some(a => a.email === currentUser.email) || !isAssigned;
-                          const actions = getActions(currentUser.roleName, item.status, isAuthor);
+                          const isAuthor = item.assignees.some(a => a.email === currentEmail) || !isAssigned;
+                          const actions = getActions(currentRoleName, item.status, isAuthor);
                           return actions.length > 0 ? (
                             actions.map(label => (
                               <button
@@ -770,7 +782,7 @@ const Onboarding = () => {
                             ))
                           ) : (
                             <span className="ob-action-badge-empty">
-                              {getStatusBadge(currentUser.roleName, item.status)}
+                              {getStatusBadge(currentRoleName, item.status)}
                             </span>
                           );
                         })()}
