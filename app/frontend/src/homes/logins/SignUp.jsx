@@ -373,14 +373,16 @@ const Signup = () => {
         // 3️⃣ API 요청
         setSignupLoading(true);
         try {
-            // const payload = {
-            //     ...formData,
-            //     licensefileId: fileId,
-            //     industryCodes: industryCodes.map(code => Number(code)),
-            //     agreed: isAgreed,
-            //     businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
-            //     corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
-            // };
+            const payload = {
+                ...formData,
+                licensefileId: fileId,
+                industryCodes: industryCodes,
+                agreed: isAgreed,
+                businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
+                corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
+            };
+            console.log(payload);
+
             if (USE_DUMMY) {
                 setTimeout(async () => {
                     setSignupLoading(false);
@@ -396,11 +398,12 @@ const Signup = () => {
             const res = await api.put("/user", {
                 ...formData,
                 licensefileId: fileId,
-                industryCodes: industryCodes.map(code => Number(code)),
+                industryCodes: industryCodes,
                 agreed: isAgreed,
                 businessNumber: Number(formData.businessNumber.replace(/-/g, "")),
                 corporateNumber: Number(formData.corporateNumber.replace(/-/g, "")),
             });
+            // console.log(industryCodes[0]);
             if (res.data.status === true) {
                 showDefaultAlert(
                     "회원가입 완료",
