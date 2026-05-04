@@ -16,9 +16,11 @@ router = APIRouter()
         ## 회원가입 및 기업 등록 통합 API
 
         **처리 순서 (단일 트랜잭션)**
+        
         1. `USER` 테이블 — 사용자 계정 생성 (bcrypt 암호화)
         2. `COMPANY` 테이블 — 기업 정보 등록 (industry_code_id FK 검증)
         3. `USER_ROLE` 테이블 — 사용자/기업/권한 매핑
+        4. `INDUSTRY_DETAIL` 테이블 — 기업별 산업 상세 정보 일괄 등록
 
         **반환값** : 생성된 user_id, company_id
       """,

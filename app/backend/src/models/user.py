@@ -74,7 +74,7 @@ def signUpProcess(signUpModel: SignUpModel) -> dict:
   ┌─ Step 1-1. USER INSERT
   ├─ Step 1-2. COMPANY INSERT     → user_id FK 자동 주입
   ├─ Step 1-3. USER_ROLE INSERT   → user_id + company_id FK 자동 주입
-  └─ Step 2.   INDUSTRY_DETAIL    → industryCodes 배열 saveMany() 일괄 INSERT
+  └─ Step 2.   INDUSTRY_DETAIL    → industryList 배열 saveMany() 일괄 INSERT
   """
   try:
     # ── Step 1-1. USER INSERT SQL
