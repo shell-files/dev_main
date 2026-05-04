@@ -40,14 +40,20 @@ html1 = f"""
     <p>아래 링크를 통해 가입 후 로그인하세요.</p>
     <p>link</p>
   """
-# html2 = 컨설턴트 초대 이메일
+# html2 = 신규 컨설턴트 초대 이메일
 html2 = f"""
     <h1>컨설턴트 초대</h1>
     <p>아래 링크를 통해 가입 후 로그인하세요.</p>
     <p>link</p>
   """
-# html3 = 임시 비밀번호 발송 이메일
-html3 = """
+# html3 = 기존 컨설턴트 초대 이메일
+html3 = f"""
+    <h1>컨설턴트 초대</h1>
+    <p>아래 링크를 통해 가입 후 로그인하세요.</p>
+    <p>link</p>
+  """
+# html4 = 임시 비밀번호 발송 이메일
+html4 = """
     <h1>임시 비밀번호 안내</h1>
     <p>요청하신 임시 비밀번호는 <strong>{tempPwd}</strong> 입니다.</p>
     <p>로그인 후 반드시 비밀번호를 변경해 주세요.</p>
@@ -67,11 +73,11 @@ async def handleEmailJob(data):
     elif type == 2:
         subject = "컨설턴트 초대"
         body = html2
-    elif type == 3:
+    elif type == 4:
         subject = "임시 비밀번호 발송"
         # tempPwd가 없는 경우를 대비해 기본값 설정
         temp_pwd = data.get("tempPwd", "비밀번호 오류")
-        body = html3.format(tempPwd=temp_pwd)
+        body = html4.format(tempPwd=temp_pwd)
 
     message = MessageSchema(
         subject=subject,

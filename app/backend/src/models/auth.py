@@ -112,7 +112,7 @@ def findPwdProcess(emailModel):
         save(updatePwdSql, updatePwdParams)
 
         # 3. 임시 비밀번호 포함된 메일(kafka이용) 발송 
-        kafkaData = {"type":3, "email": user["email"], "tempPwd": tempPwd}
+        kafkaData = {"type":4, "email": user["email"], "tempPwd": tempPwd}
         sendToKafka(kafkaData)      
 
         return responseModel(True, "임시 비밀번호가 메일로 발송 됐습니다.")
