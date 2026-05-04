@@ -77,4 +77,3 @@ export const showConfirmAlert = async(title, text, iconType = "warning") => {
   })
   return result.isConfirmed;
 }
-
