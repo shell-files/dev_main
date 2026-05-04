@@ -8,7 +8,7 @@ import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/Ser
  *  true: mock 데이터
  *  false: 실제 API
  */
-const UseMock = true;
+const UseMock = false;
 
 /**
  * [CONSTANTS]
