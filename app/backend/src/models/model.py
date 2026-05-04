@@ -5,7 +5,7 @@ from pydantic import BaseModel, EmailStr, Field
 # float인 경우 field에 (0.0, description="") 선언
 # bool인 경우 field에 (True, description="") 선언
 
-def responseModel(status: bool, message: str, data: dict={}):
+def responseModel(status: bool, message: str="", data: dict={}):
     """ 응답 모델 """
     return {
         "status": status,
