@@ -28,9 +28,12 @@ services:
     environment:
       - GF_SECURITY_ADMIN_USER=root
       - GF_SECURITY_ADMIN_PASSWORD=1234
+    volumes:
+      - grafana_storage:/var/lib/grafana
 
 networks:
   main_with-network: 
     external: true
 volumes:
   prometheus_data:
+  grafana_storage:
