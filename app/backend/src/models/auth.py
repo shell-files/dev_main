@@ -1,6 +1,6 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
-from src.utils.rediscl import setRedis, delRedis
+from src.utils.rediscl import setTokenRedis, delTokenRedis, setPasswordRedis
 from src.utils.kafkasv import sendToKafka
 from src.models.model import responseModel
 import random
@@ -51,7 +51,7 @@ def loginProcess(loginModel):
         save(refreshTokenSql,tokenParams)
 
         # 4. accessToken redis 저장
-        setRedis(tokenUuid,accessToken)
+        setTokenRedis(tokenUuid,accessToken)
 
         return responseModel(True, "로그인에 성공했습니다.", {"uuid": tokenUuid, "companys": result })
     except Exception as e:
@@ -75,7 +75,7 @@ def logoutProcess(logoutModel):
         save(logoutSql, logoutParams)
 
         # 2. redis에서 uuid 삭제
-        delRedis(uuidKey)
+        delTokenRedis(uuidKey)
         
         return responseModel(True, "로그아웃 완료")        
     except Exception as e:
@@ -103,13 +103,14 @@ def findPwdProcess(emailModel):
         # 2. 임시 비밀번호 생성(12자리) / db 저장
         characters = string.ascii_letters + string.digits
         tempPwd = ''.join(random.choice(characters) for i in range(12))
-        updatePwdSql = """
-            UPDATE edu.USER 
-            SET password = ?
-            WHERE id = ?
-        """
-        updatePwdParams = (tempPwd, user["id"])
-        save(updatePwdSql, updatePwdParams)
+        # updatePwdSql = """
+        #     UPDATE edu.USER 
+        #     SET password = ?
+        #     WHERE id = ?
+        # """
+        # updatePwdParams = (tempPwd, user["id"])
+        # save(updatePwdSql, updatePwdParams)
+        setPasswordRedis(tempPwd, user["email"])
 
         # 3. 임시 비밀번호 포함된 메일(kafka이용) 발송 
         kafkaData = {"type":4, "email": user["email"], "tempPwd": tempPwd}
