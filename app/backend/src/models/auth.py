@@ -85,7 +85,7 @@ def findPwdProcess(emailModel):
     """ 
     - 비밀번호 찾기
     1. db에서 이메일 체크 (id, email 조회)
-    2. 임시 비밀번호 생성(12자리) / db 저장
+    2. 임시 비밀번호 생성(12자리) / redis에 key(임시비밀번호):value(email)
     3. 임시 비밀번호 포함된 메일(kafka이용) 발송
     """
     try:
@@ -100,7 +100,7 @@ def findPwdProcess(emailModel):
         if not user:
             return responseModel(False, "등록되지 않은 이메일이거나 탈퇴한 회원입니다.")
         
-        # 2. 임시 비밀번호 생성(12자리) / db 저장
+        # 2. 임시 비밀번호 생성(12자리) / redis에 key(임시비밀번호):value(email)
         characters = string.ascii_letters + string.digits
         tempPwd = ''.join(random.choice(characters) for i in range(12))
         # updatePwdSql = """

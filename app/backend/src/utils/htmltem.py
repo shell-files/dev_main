@@ -1,5 +1,8 @@
-import random
-import string
+
+# html1: 사내 직원 초대
+# html2: 신규 컨설턴트 초대
+# html3: 기존 컨설턴트 초대
+# html4: 임시 비밀번호 발송
 
 def html1(companyName):
     return f"""

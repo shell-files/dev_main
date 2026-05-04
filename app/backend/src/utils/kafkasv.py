@@ -41,7 +41,14 @@ def sendToKafka(data):
 # type 4: 임시 비밀번호 발송
 
 async def handleEmailJob(data):
-    """ 이메일 발송 핸들러 """
+    """
+    이메일 발송 핸들러
+    data 예시: 
+    {"type": 1, "email": "user@example.com", "companyName": "회사명"}
+    {"type": 2, "email": "user@example.com", "companyName": "회사명"}
+    {"type": 3, "email": "user@example.com", "companyName": "회사명"}
+    {"type": 4, "email": "user@example.com", "tempPwd": "임시비밀번호"} 
+    """
 
     # 1. 타입에 따른 제목 및 본문 설정
     subject, body, email = getHtml(data)
