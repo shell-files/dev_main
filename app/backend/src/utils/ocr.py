@@ -38,7 +38,7 @@ def ocr(fileName,ext):
         # 3. 결과 반환
         return {
             "status": "success",
-            "data": texts[0].description.replace('\n', ' ').strip()
+            "data": texts[0].description.replace('\n', ' ').replace('-', '').strip()
         }
 
     except Exception as e:
