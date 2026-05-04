@@ -52,6 +52,8 @@ services:
       - auth_keys:/workspace/secrets
     environment:
       - HOST_IP=http://weareithero.cloud
+      - KAFKA_SERVER=${KAFKA_SERVER}
+      - KAFKA_TOPIC=${KAFKA_TOPIC}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
       - MAIL_FROM=${MAIL_FROM}

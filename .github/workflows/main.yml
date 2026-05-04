@@ -62,6 +62,8 @@ jobs:
 
       - name: Docker App Up
         env:
+          KAFKA_SERVER: ${{ secrets.KAFKA_SERVER }}
+          KAFKA_TOPIC: ${{ secrets.KAFKA_TOPIC }}
           MAIL_USERNAME: ${{ secrets.MAIL_USERNAME }}
           MAIL_PASSWORD: ${{ secrets.MAIL_PASSWORD }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
