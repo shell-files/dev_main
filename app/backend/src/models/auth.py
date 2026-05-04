@@ -1,6 +1,6 @@
 from src.utils.db import findOne, save, findAll
 from src.utils.tokenset import createUserTokens
-from src.utils.rediscl import setTokenRedis, delTokenRedis, setPasswordRedis
+from src.utils.rediscl import setTokenRedis, delTokenRedis, setPasswordRedis, getPasswordRedis, delPasswordRedis
 from src.utils.kafkasv import sendToKafka
 from src.models.model import responseModel
 import random
@@ -8,13 +8,22 @@ import string
 
 def loginProcess(loginModel):
     """ 
-    1. DB에서 사용자 검증 및 사용자 정보 추출
-    2. access token 생성
-    3. refresh token DB 저장
-    4. accessToken redis 저장
+    1. 임시 비밀번호 redis에서 조회 (비밀번호 찾기 후 로그인 시도하는 경우)
+    2. DB에서 사용자 검증 및 사용자 정보 추출
+    3. access token 생성
+    4. refresh token DB 저장
+    5. accessToken redis 저장
     """
     try:
-        # 1. DB에서 사용자 검증 및 사용자 정보 추출 
+        tempLogin = False
+        # 1. 임시 비밀번호 redis에서 조회 (비밀번호 찾기 후 로그인 시도하는 경우)
+        tempPwdResult = getPasswordRedis(loginModel.password)
+        if tempPwdResult["status"]:
+            tempLogin = True
+            # 임시 비밀번호 삭제
+            delPasswordRedis(loginModel.password)  
+    
+        # 2. DB에서 사용자 검증 및 사용자 정보 추출 
         loginSql="""
             SELECT 
                 u.id, 
@@ -28,21 +37,26 @@ def loginProcess(loginModel):
             INNER JOIN `USER_ROLE` AS ur ON u.id = ur.user_id
             INNER JOIN `COMPANY` AS c ON ur.company_id = c.id
             INNER JOIN `ROLE` AS r ON r.id = ur.role_id
-            WHERE u.email = 'test@gmail.com' 
-            AND u.password = '1234' 
-            AND u.delete_yn = 0;
+            WHERE u.email = ?
+            AND u.delete_yn = 0
             """
         
-        loginParams = (loginModel.email, loginModel.password)
-        result = findAll(loginSql, loginParams)
+        loginParams = [loginModel.email]
+
+        # 임시 로그인이 아닐 때만 비밀번호 조건 추가
+        if not tempLogin:
+            loginSql += 'AND u.password = ?'
+            loginParams.append(loginModel.password)
+
+        result = findAll(loginSql, tuple(loginParams))
         if len(result) == 0:
-            return {"status": False}
+            return responseModel(False, "이메일 또는 비밀번호가 올바르지 않습니다.")
         
-        # 2. access token 생성
+        # 3. access token 생성
         id = result[0]["id"]
         accessToken, refreshToken, tokenUuid = createUserTokens(id)     
 
-        # 3. refresh token DB 저장
+        # 4. refresh token DB 저장
         refreshTokenSql="""
                     INSERT INTO TOKEN (`user_id`,`refresh_token`,`uuid`)
                     VALUES (?,?,?)
@@ -50,10 +64,10 @@ def loginProcess(loginModel):
         tokenParams = (id,refreshToken,tokenUuid)
         save(refreshTokenSql,tokenParams)
 
-        # 4. accessToken redis 저장
+        # 5. accessToken redis 저장
         setTokenRedis(tokenUuid,accessToken)
 
-        return responseModel(True, "로그인에 성공했습니다.", {"uuid": tokenUuid, "companys": result })
+        return responseModel(True, "로그인에 성공했습니다.", {"uuid": tokenUuid, "companys": result, "tempLogin": tempLogin })
     except Exception as e:
         print(e)
      

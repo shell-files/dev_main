@@ -74,7 +74,7 @@ def setPasswordRedis(tempPwd: str, email: str):
         return {"status": False}
 
 # --------------------------
-# getRedis: Password Redis(client2)에서 저장된 값을 가져오는 함수
+# getPasswordRedis: Password Redis(client2)에서 저장된 값을 가져오는 함수
 # --------------------------
 def getPasswordRedis(tempPwd: str):
     """tempPwd로 Email 조회"""
@@ -88,7 +88,7 @@ def getPasswordRedis(tempPwd: str):
         return {"status": False}
 
 # --------------------------
-# delRedis: Password Redis(client2)에 저장된 값을 삭제하는 함수
+# delPasswordRedis: Password Redis(client2)에 저장된 값을 삭제하는 함수
 # --------------------------
 def delPasswordRedis(tempPwd: str):
     """특정 tempPwd 키 삭제"""
