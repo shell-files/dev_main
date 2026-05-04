@@ -63,8 +63,7 @@ import gateBg3 from '@assets/backgrounds/GateBg3.png'
 import blobMain from '@assets/backgrounds/login-blob-main.png';
 import softCube from '@assets/backgrounds/login-soft-cube.png';
 import floatingOrb from '@assets/backgrounds/login-floating-orb.png';
-import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
-
+import { useAuth } from '@hooks/AuthContext.jsx';
 
 // 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
 // true: 백엔드 없이 더미 테스트
@@ -72,6 +71,8 @@ import { showDefaultAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
 const USE_DUMMY_API = true;
 
 const Login = () => {
+  const { login } = useAuth();
+
   // =========================
   // 0. 공통 상태
   // =========================
@@ -152,25 +153,34 @@ const Login = () => {
   // 1. requestLoginApi
   // 설명: 로그인 API 요청 함수
   // 현재는 USE_DUMMY_API=true 상태라 백엔드 없이 성공 응답을 더미로 반환
-  // 실제 API 구축 시 USE_DUMMY_API=false로 변경 후 "/auth/login" 엔드포인트 수정
+  // 실제 API 구축 시 USE_DUMMY_API=false로 변경 후 "/auth" 엔드포인트 수정
   const requestLoginApi = async () => {
     if (USE_DUMMY_API) {
       await new Promise((resolve) => setTimeout(resolve, 900));
 
       return {
-        status: "success",
+        status: true,
+        message: "로그인에 성공했습니다.",
         data: {
-          accessToken: "dummy-access-token",
+          uuid: "7efdca5d-585c-4e79-b2c2-04a9082aa7d3", // 식별아이디 (TOKEN.uuid)
           user: {
-            userId: "dummy-user-001",
-            email: loginEmail,
+            name: "이정빈" // 이름 (USER.name)
           },
-        },
-        message: null,
+          companys: [
+            {
+              id: 1, // 고유ID (USER_ROLE.id)
+              email: "test@gmail.com", // 이메일 (USER.email)
+              role_id: 1, // 권한 코드ID (USER_ROLE.role_id)
+              role: "ESG담당자", // 권한 (ROLE.role)
+              company_id: 1, // 회사정보ID (COMPANY.id)
+              company_name: "A회사" // 사업장명 (COMPANY.company_name)
+            }
+          ]
+        }
       };
     }
 
-    const response = await api.post("/auth/login", {
+    const response = await api.post("/auth", {
       email: loginEmail,
       password: loginPassword,
     });
@@ -183,8 +193,8 @@ const Login = () => {
   // 역할:
   // - 이메일/비밀번호 입력값 검증
   // - requestLoginApi 호출
-  // - 성공 시 accessToken 저장
-  // - 성공 시 /main 이동
+  // - 성공 시 전역 Auth 상태 업데이트
+  // - 성공 시 /main 또는 /companyselect 이동
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -198,19 +208,19 @@ const Login = () => {
 
       const result = await requestLoginApi();
 
-      if (result.status !== "success") {
+      if (result.status !== true) {
         throw new Error(result.message || "로그인 실패");
       }
 
-      if (result.data?.accessToken) {
-        localStorage.setItem("accessToken", result.data.accessToken);
-      }
+      // AuthContext를 통해 전역 상태 및 LocalStorage에 유저 정보 저장
+      login(result.data);
 
-      if (result.data?.user?.userId) {
-        localStorage.setItem("userId", result.data.user.userId);
+      // 다중 회사(컨설턴트 등)인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
+      if (result.data.companys && result.data.companys.length > 1) {
+        navigate("/companyselect");
+      } else {
+        navigate("/main");
       }
-
-      navigate("/main");
     } catch (error) {
       setErrors(prev => ({ ...prev, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
       // ----------- 커스텀 알럿 추가 ----------
@@ -308,15 +318,6 @@ const Login = () => {
     }
   };
 
-  // 0. handleAccountInquiry
-  // 설명: 계정 문의 안내 alert 출력 (이메일 찾기 / 고객센터)
-  const handleAccountInquiry = () => {
-    showDefaultAlert(
-      "계정 문의",
-      "이메일 찾기 또는 기타 서비스 문의는 고객센터로 연락해 주세요.",
-      "info"
-    );
-  };
 
   // 3. goToLoginView
   // 설명: success -> login 화면 복귀
@@ -331,13 +332,7 @@ const Login = () => {
     setView("forgot");
     setPasswordResetEmail("");
     setErrors({});
-  
-  // 3. success_이메일 다시 받기 클릭 함수
-  // 설명: success 화면 → forgot 화면으로 이동하고 이메일 입력값 초기화
-const goToPasswordResetViewAgain = () => {
-  setPasswordResetEmail("");
-  setView("forgot");
-};
+  };
 
   // =========================
   // 4. 공통: 이메일 문의 안내 함수
@@ -604,114 +599,6 @@ const goToPasswordResetViewAgain = () => {
               </div>
             </div>
           </section>
-        {/* ========================= */}
-        {/* 2. forgot: 비밀번호 찾기 화면 */}
-        {/* ========================= */}
-        <div
-          className="container"
-          id="forgot-section"
-          style={{ display: view === "forgot" ? "block" : "none" }}
-        >
-          <div className="header-nav">
-            <span className="back-btn" onClick={goToLoginView}>
-              ←
-            </span>
-          </div>
-
-          <div className="logo-placeholder">로고 추가 예정</div>
-
-          <h1>비밀번호 찾기</h1>
-
-          <div className="forgot-icon-wrapper">
-            <img 
-              src={emailIcon} 
-              alt="이메일 비밀번호 찾기" 
-            />
-          </div>
-
-          <form className="input-group" onSubmit={handleSendPasswordEmail}>
-            <input
-              type="email"
-              autoComplete="off"
-              name="passwordResetEmail"
-              className={errors.passwordResetEmail ? "input-error" : ""}
-              placeholder="이메일을 입력해주세요"
-              value={passwordResetEmail}
-              onChange={(e) => {
-                setPasswordResetEmail(e.target.value);
-                setErrors((prev) => ({ ...prev, passwordResetEmail: "" }));
-              }}
-              onBlur={(e) => validateRequiredField("passwordResetEmail", e.target.value)}
-            />
-            {errors.passwordResetEmail && <p className="error">{errors.passwordResetEmail}</p>}
-
-            <div className="info-box">
-              <strong>임시 비밀번호 발송 안내</strong>
-              입력하신 이메일로 임시 비밀번호가 발송됩니다.
-            </div>
-
-            <button
-              className="login-action-button"
-              type="submit"
-              disabled={passwordResetLoading}
-            >
-              {passwordResetLoading ? (
-                <span className="button-spinner" />
-              ) : (
-                "이메일 전송"
-              )}
-            </button>
-
-            <div className="links">
-              <span onClick={handleAccountInquiry}>
-                이메일 정보를 잊으셨나요?
-              </span>
-            </div>
-          </form>
-        </div>
-
-        {/* ========================= */}
-        {/* 3. success: 이메일 발송 완료 화면 */}
-        {/* ========================= */}
-        <div
-          className="container"
-          id="success-section"
-          style={{ display: view === "success" ? "block" : "none" }}
-          >
-          <div className="logo-placeholder">로고 추가 예정</div>
-
-          <h1>이메일 발송 완료</h1>
-
-          <div className="success-check-wrap">
-            <div className="success-check-icon">✓</div>
-          </div>
-
-          <div className="success-message-box">
-            <div className="success-message-main">
-              {maskEmail(passwordResetEmail)}
-              <br />
-              임시 비밀번호를 발송했습니다.
-            </div>
-
-            <div className="success-message-sub">
-              메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
-              <br />
-              로그인 확인 후 비밀번호를 변경해 주세요.
-            </div>
-          </div>
-
-          <button
-            className="login-action-button success-button"
-            onClick={goToLoginView}
-          >
-            로그인으로 돌아가기
-          </button>
-
-          <div className="success-help-links">
-            <span onClick={goToPasswordResetViewAgain}>이메일 다시 받기</span>
-            <span className="divider">|</span>
-            <span onClick={handleSupportInquiry}>고객센터 문의</span>
-          </div>
         </div>
       </div>
     </div>
