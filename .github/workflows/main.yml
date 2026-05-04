@@ -76,7 +76,8 @@ jobs:
           REFRESH_TOKEN_EXPIRE_DAYS: ${{ secrets.REFRESH_TOKEN_EXPIRE_DAYS }}
           REDIS_HOST: ${{ secrets.REDIS_HOST }}
           REDIS_PORT: ${{ secrets.REDIS_PORT }}
-          REDIS_DB: ${{ secrets.REDIS_DB }}
+          REDIS_DB1: ${{ secrets.REDIS_DB1 }}
+          REDIS_DB2: ${{ secrets.REDIS_DB2 }}
           SERVICE_KEY: ${{ secrets.SERVICE_KEY }}
         working-directory: ./app
         run: docker compose up -d
