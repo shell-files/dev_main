@@ -29,7 +29,7 @@ export const AuthProvider = ({ children }) => {
     const initialCompany = data.companys.length === 1 ? data.companys[0] : null;
     setSelectedCompany(initialCompany);
 
-    // 3. LocalStorage 저장 (새로고침 유지용)
+    // 3. LocalStorage 저장 (새로고침유지용)
     localStorage.setItem("uuid", data.uuid); // TOKEN.uuid
     localStorage.setItem("name", data.user.name); // USER.name
     localStorage.setItem("companies", JSON.stringify(data.companys));
