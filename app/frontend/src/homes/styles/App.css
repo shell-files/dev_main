@@ -12,6 +12,5 @@ body {
 }
 html {
     height: 100%;
-    scrollbar-gutter: stable;
-}
+
 a {text-decoration: none; color: #333; display: inline-block;}
