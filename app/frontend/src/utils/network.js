@@ -2,7 +2,7 @@ import axios from "axios"
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
-  // withCredentials: true,
+  withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
@@ -31,3 +31,34 @@ export const tvApi = axios.create({
     "Content-Type": "application/json",
   },
 })
+
+// =========================================================
+// 공통 인터셉터 적용: API 요청 시 자동으로 식별아이디와 회사정보를 헤더에 포함
+// =========================================================
+const applyAuthInterceptor = (instance) => {
+  instance.interceptors.request.use((config) => {
+    // 로그인, 비밀번호 찾기 등 인증 관련 API는 헤더 추가에서 제외
+    if (config.url && config.url.includes('/auth')) {
+      return config;
+    }
+
+    const uuid = localStorage.getItem("uuid");
+    const selectedCompanyRaw = localStorage.getItem("selectedCompany");
+    const selectedCompany = selectedCompanyRaw ? JSON.parse(selectedCompanyRaw) : null;
+
+    if (uuid) {
+      // Authorization 헤더에 식별아이디(uuid) 추가
+      config.headers['Authorization'] = `Bearer ${uuid}`;
+    }
+    if (selectedCompany?.company_id) {
+      // 회사 ID를 백엔드가 요구하는 헤더 키로 추가 (예: X-Company-ID)
+      config.headers['company_id'] = selectedCompany.company_id;
+    }
+    return config;
+  });
+};
+
+applyAuthInterceptor(api);
+applyAuthInterceptor(skmApi);
+applyAuthInterceptor(hgApi);
+applyAuthInterceptor(tvApi);

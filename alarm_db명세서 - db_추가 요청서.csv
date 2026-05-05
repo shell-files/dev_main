@@ -1,0 +1,36 @@
+,,,,,,,,,,
+,INDEX,COLUMN,TYPE,LENGTH,PK,FK,UNIQUE,NOT NULL,DEFAULT,COMMENT
+,1,id,BIGINT,20,Y,,,Y,AUTO_INCREMENT,고유 ID
+,2,user_id,BIGINT,20,,Y,,Y,,사용자 ID
+,3,company_id,BIGINT,20,,Y,,Y,,회사 ID
+,4,type,VARCHAR,30,,,,Y,,알림 유형
+,5,title,VARCHAR,100,,,,,,알림 제목
+,6,content,VARCHAR,255,,,,Y,,알림 내용
+,7,is_read,BOOLEAN,,,,,Y,FALSE,읽음 여부
+,8,path,VARCHAR,255,,,,,,클릭 시 이동 경로
+,9,meta_json,LONGTEXT,,,,,,,추가 메타데이터
+,10,created_at,DATETIME,,,,,Y,CURRENT_TIMESTAMP,생성일시
+,11,read_at,DATETIME,,,,,,,읽음 처리일시
+,12,deleted_at,DATETIME,,,,,,,삭제 처리일시
+,,,,,,,,,,
+,,,,,,,,,,
+,type,title,content,path,meta_json,,,,,
+,USER,신규 팀원 초대,신규 팀원 초대 요청을 보냈습니다.,/manager/invite,"{""inviteId"":15}",,,,,
+,CHECK,데이터 승인 반려,ESG 데이터 승인이 반려되었습니다.,/onboarding,"{""datasetId"":30}",,,,,
+,CHART,보고서 생성 완료,2026년 ESG 보고서 v01 생성이 완료되었습니다.,/dashboard,"{""reportId"":100}",,,,,
+,LEAF,탄소 관리 보고서 완료,탄소관리 보고서 생성이 완료되었습니다.,/dashboard,"{""reportId"":101}",,,,,
+,CUBE,3D 에셋 변환 완료,공급망 3D 에셋 변환이 완료되었습니다.,/dashboard,"{""assetId"":20}",,,,,
+,,,,,,,,,,
+,,,,,,,,,,
+,"-- 1. JSON 유효성 검사 및 데이터 저장
+CREATE TABLE user_profiles (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    data LONGTEXT,
+    CONSTRAINT CHECK (JSON_VALID(data))
+);
+
+-- 2. JSON 데이터 조회
+SELECT data->>'$.name' AS name FROM user_profiles;
+
+-- 3. 기존 컬럼 결합하여 JSON 생성
+SELECT JSON_OBJECT('id', id, 'name', name) AS json_data FROM users;",,,,,,,,,
