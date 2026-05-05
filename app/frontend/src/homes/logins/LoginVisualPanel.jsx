@@ -1,8 +1,8 @@
 import "@styles/loginBackground.css";
 
-import gateBg1 from "@assets/backgrounds/GateBg1.png";
-import gateBg2 from "@assets/backgrounds/GateBg2.png";
-import gateBg3 from "@assets/backgrounds/GateBg3.png";
+import gateBg1 from "@assets/images/backgrounds/GateBg1.png";
+import gateBg2 from "@assets/images/backgrounds/GateBg2.png";
+import gateBg3 from "@assets/images/backgrounds/GateBg3.png";
 
 /**
  * LoginVisualPanel

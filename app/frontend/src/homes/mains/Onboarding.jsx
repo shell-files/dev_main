@@ -1,7 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from "react";
 import "@styles/onboarding.css";
-import INITIAL_METRICS from "@mains/onboarding/onboardingData.js";
-import { showDefaultAlert, showConfirmAlert } from "@components/ServiceAlert/ServiceAlert";
+import INITIAL_METRICS from "@assets/data/onboardingData.js";
+import { showDefaultAlert, showConfirmAlert } from "@components/UI/ServiceAlert";
 import { useAlarm } from '@hooks/AlarmContext.jsx';
 import { useAuth } from '@hooks/AuthContext.jsx';
 import Swal from 'sweetalert2';

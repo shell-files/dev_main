@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { api } from '@utils/network'; 
 import '@styles/Manager.css';
-import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert';
+import { showDefaultAlert, showConfirmAlert } from '@components/UI/ServiceAlert';
 
 /**
  * [CONFIG]

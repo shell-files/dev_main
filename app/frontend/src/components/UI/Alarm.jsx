@@ -27,10 +27,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useAlarm } from '@hooks/AlarmContext.jsx'; 
 import { useAuth } from '@hooks/AuthContext.jsx';
 import "@styles/alarm.css";
-import userIcon from '@assets/alarm/user.png';
-import dataIcon from '@assets/alarm/data.png';
-import serviceIcon from '@assets/alarm/service.png';
-import alarmSettingIcon from '@assets/alarm/alarmsetting.png';
+import userIcon from '@assets/icons/alarm/user.png';
+import dataIcon from '@assets/icons/alarm/data.png';
+import serviceIcon from '@assets/icons/alarm/service.png';
+import alarmSettingIcon from '@assets/icons/alarm/alarmsetting.png';
 
 const ALARM_TYPES = {
     USER:  { icon: userIcon,    color: '#03A94D' }, // Users - Green (Theme)

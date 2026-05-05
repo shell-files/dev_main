@@ -1,16 +1,16 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router'
-import { showServiceIntro } from '@components/ServiceAlert/ServiceAlert.jsx'
+import { showServiceIntro } from '@components/UI/ServiceAlert.jsx'
 import '@styles/Gate.css'
 
 // ―――――――――― [ Images import ] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
-import logo from '@assets/logos/Logo.png'
-import gateBg1 from '@assets/backgrounds/GateBg1.png'
-import gateBg2 from '@assets/backgrounds/GateBg2.png'
-import gateBg3 from '@assets/backgrounds/GateBg3.png'
-import gateMain1 from '@assets/banners/GateMain1.jpg'
-import gateMain2 from '@assets/banners/GateMain2.jpg'
-import gateMain3 from '@assets/banners/GateMain3.jpg'
+import logo from '@assets/images/logos/Logo.png'
+import gateBg1 from '@assets/images/backgrounds/GateBg1.png'
+import gateBg2 from '@assets/images/backgrounds/GateBg2.png'
+import gateBg3 from '@assets/images/backgrounds/GateBg3.png'
+import gateMain1 from '@assets/images/banners/GateMain1.jpg'
+import gateMain2 from '@assets/images/banners/GateMain2.jpg'
+import gateMain3 from '@assets/images/banners/GateMain3.jpg'
 
 // ―――――――――― [ Icon import ] ―――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――――
 import gateReport from '@assets/icons/base/GateReport.png'

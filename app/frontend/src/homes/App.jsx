@@ -11,9 +11,9 @@ import Main from '@mains/Main.jsx'
 import Onboarding from '@mains/Onboarding.jsx'
 import Dashboard from '@mains/Dashboard.jsx'
 import Manager from '@mains/Manager.jsx'
-import Headernav from "@components/HeaderNav.jsx"
-import Sidebarnav from "@components/SidebarNav.jsx"
-import Alarm from "@components/Alarm.jsx"
+import Headernav from "@components/Layout/HeaderNav.jsx"
+import Sidebarnav from "@components/Layout/SidebarNav.jsx"
+import Alarm from "@components/UI/Alarm.jsx"
 import CompanySelect from "@logins/CompanySelect.jsx"
 import Invite from "@mains/Invite.jsx"
 import InviteSignUp from "@logins/InviteSignup.jsx";
