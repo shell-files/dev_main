@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
-import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert.jsx'
-import SignupInputField from '@components/SignupInputField'
+import { showDefaultAlert, showConfirmAlert } from '@components/UI/ServiceAlert.jsx'
+import SignupInputField from '@components/UI/SignupInputField'
 
 const InviteSignUp = () => {
     const navigate = useNavigate()

@@ -52,11 +52,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { api } from "@utils/network";
-import { showDefaultAlert } from "@components/ServiceAlert/ServiceAlert";
-import LoginBackground from "@components/LoginBackground";
+import { showDefaultAlert } from "@components/UI/ServiceAlert";
+import LoginBackground from "@components/Layout/LoginBackground";
 import LoginVisualPanel from "@logins/LoginVisualPanel";
 import "@styles/logins.css";
-import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
+import emailIcon from "@assets/icons/base/email-icon.png"; // 새로 추가된 아이콘
 
 import { useAuth } from '@hooks/AuthContext.jsx';
 

@@ -41,8 +41,8 @@ import { useNavigate } from 'react-router'
 import '@styles/SignUp.css'
 import { api } from '@utils/network'
 import ksicData from '@assets/data/ksicClassification.json';
-import { showDefaultAlert, showConfirmAlert } from '@components/ServiceAlert/ServiceAlert.jsx';
-import SignupInputField from '@components/SignupInputField'
+import { showDefaultAlert, showConfirmAlert } from '@components/UI/ServiceAlert.jsx';
+import SignupInputField from '@components/UI/SignupInputField'
 
 /**
  * [환경 설정]

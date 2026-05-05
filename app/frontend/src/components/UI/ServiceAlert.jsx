@@ -1,5 +1,5 @@
 import Swal from 'sweetalert2'
-import '@components/ServiceAlert/ServiceAlert.css'
+import '@styles/ServiceAlert.css'
 
 // ―――――――――― [ Gate 페이지 전용: 커스텀 아이콘 이미지 사용 ] ―――――――――――――――――――――――――――――――――――――――――――――――
   /**

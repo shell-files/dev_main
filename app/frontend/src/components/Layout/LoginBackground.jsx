@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import "@styles/loginBackground.css";
 
-import gateBg1 from "@assets/backgrounds/GateBg1.png";
-import gateBg2 from "@assets/backgrounds/GateBg2.png";
-import gateBg3 from "@assets/backgrounds/GateBg3.png";
+import gateBg1 from "@assets/images/backgrounds/GateBg1.png";
+import gateBg2 from "@assets/images/backgrounds/GateBg2.png";
+import gateBg3 from "@assets/images/backgrounds/GateBg3.png";
 
-import blobMain from "@assets/backgrounds/login-blob-main.png";
-import floatingOrb from "@assets/backgrounds/login-floating-orb.png";
+import blobMain from "@assets/images/backgrounds/login-blob-main.png";
+import floatingOrb from "@assets/images/backgrounds/login-floating-orb.png";
 
 /**
  * LoginBackground
