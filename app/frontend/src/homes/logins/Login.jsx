@@ -1,53 +1,22 @@
-// =====================================================================================
-// Login.jsx 페이지 흐름설명 (함수 기준)
-
-// 1. login 흐름 → handleLoginSubmit (handleLogin) → requestLoginApi 호출 → 성공 시 navigateToHome (navigate("/main")) 실행
-// 2. forgot 흐름 → goToForgotView → handlePasswordResetSubmit (handleSendPasswordEmail) → requestPasswordResetApi 호출 → 성공 시 showSuccessView (setView("success")) 실행
-// 3. success 흐름 → goToLoginView → setView("login") 실행
-
-// ========================
-// 함수 설명 (현재 코드 기준)
-
-// 0. handleAccountInquiry - 설명: 계정 문의 안내 alert 출력 (이메일 찾기 / 고객센터)
-
-// 1. login
-// 1. initLoginPage (useEffect) - 설명: 페이지 진입 시 body에 id="login" 설정 (CSS scope 적용)
-// 1. requestLoginApi - 설명: 로그인 API 요청 함수
-//    - 현재 더미 API 지원 (USE_DUMMY_API)
-//    - 실제 API 연결 시 "/auth/login" 수정 필요
-// 1. handleLoginSubmit (handleLogin) - 설명: 로그인 버튼 클릭 시 실행
-//    - 입력값 검증 (email, password)
-//    - requestLoginApi 호출
-//    - 성공 시 navigate("/main")
-// 1. navigateToHome - 설명: 로그인 성공 시 홈 화면 이동 (navigate("/main"))
-
-// 2. forgot
-// 2. goToForgotView - 설명: login → forgot 화면 전환
-// 2. requestPasswordResetApi - 설명: 임시 비밀번호 발송 API 요청
-//    - 현재 더미 API 지원
-//    - 실제 API 연결 시 "/auth/password-reset" 수정 필요
-// 2. handlePasswordResetSubmit (handleSendPasswordEmail) - 설명: 이메일 전송 버튼 클릭 시 실행
-//    - 입력값 검증 (email)
-//    - requestPasswordResetApi 호출
-//    - 성공 시 setView("success")
-// 2. showSuccessView - 설명: 이메일 발송 완료 화면 표시 (setView("success"))
-
-// 3. success
-// 3. goToLoginView - 설명: success → login 화면 복귀
-// 3. goToPasswordResetViewAgain - 설명: success → forgot 화면 이동
-//    - 이메일 입력값 초기화
-//    - 재입력 유도 UX
-
-// =========================
-// API 연결 위치 (수정 포인트)
-// =========================
-
-// 1. requestLoginApi
-// → api.post("/auth/login", { email, password })
-
-// 2. requestPasswordResetApi
-// → api.post("/auth/password-reset", { email })
-// =====================================================================================
+/**
+ * Login.jsx 페이지 흐름 및 구조 가이드
+ * 
+ * 1. 상태(State) 구성:
+ *    - view: 화면 전환 관리 ('login' | 'forgot' | 'success')
+ *    - formData: 모든 입력값 통합 관리 (이메일, 비밀번호 등)
+ *    - errors: 유효성 검사 및 API 에러 메시지 관리
+ *    - loading: API 통신 중 버튼 비활성화 및 스피너 제어
+ * 
+ * 2. 주요 로직 흐름:
+ *    - 로그인: handleLogin -> validate 확인 -> requestApi.login 호출 -> 성공 시 AuthContext.login 및 페이지 이동
+ *    - 비번 찾기: handleResetPassword -> validate 확인 -> requestApi.resetPassword 호출 -> 성공 시 'success' 뷰 전환
+ *    - 뷰 전환: setView 및 setErrors 초기화를 통해 화면 간 상태 격리
+ * 
+ * 3. 외부 연동:
+ *    - useAuth: 전역 로그인 상태 관리 (세션 유지)
+ *    - useNavigate: 라우팅 (메인 홈, 회사 선택, 게이트 페이지 등)
+ *    - api (network.js): 실제 백엔드 서버와의 HTTP 통신
+ */
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
@@ -55,566 +24,272 @@ import { api } from "@utils/network";
 import { showDefaultAlert } from "@components/ServiceAlert/ServiceAlert";
 import LoginBackground from "@components/LoginBackground";
 import LoginVisualPanel from "@logins/LoginVisualPanel";
-import "@styles/logins.css";
-import emailIcon from "@assets/email-icon.png"; // 새로 추가된 아이콘
-
 import { useAuth } from '@hooks/AuthContext.jsx';
+import "@styles/logins.css";
+import emailIcon from "@assets/email-icon.png";
 
-// 프론트 테스트용 더미 api 이거 false 로 처리하고 api 연결하면 됩니다. (api 확정 및 테스트 마무리 후 지워도 됨)
-// true: 백엔드 없이 더미 테스트
-// false: 실제 API 호출
+// ── API 설정 ──
+// USE_DUMMY_API: true일 경우 백엔드 없이 더미 데이터를 반환. 실서버 연동 시 false로 변경.
 const USE_DUMMY_API = true;
 
-const Login = () => {
-  const { login } = useAuth();
-
-  // =========================
-  // 0. 공통 상태
-  // =========================
-
-  // view - 현재 화면 상태 관리
-  // 1. login: 로그인 화면
-  // 2. forgot: 비밀번호 찾기 화면
-  // 3. success: 이메일 발송 완료 화면
-  const [view, setView] = useState("login");
-  const [errors, setErrors] = useState({});
-  const [isReady, setIsReady] = useState(false);
-
-  // 1. login_로그인 버튼 로딩 상태
-  const [loginLoading, setLoginLoading] = useState(false);
-
-  // 2. forgot_이메일 전송 버튼 로딩 상태
-  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
-
-  // 페이지 이동 처리 함수
-  const navigate = useNavigate();
-
-  // 초기 렌더링 레이아웃 시프트 방지
-  useEffect(() => {
-    const frame = requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        setIsReady(true);
-      });
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
-  // 필수 기입 메세지 처리 함수
-  const validateRequiredField = (name, value) => {
-  let message = "";
-
-  if (!value.trim()) {
-    if (name === "loginEmail") message = "이메일을 입력해 주세요.";
-    if (name === "loginPassword") message = "비밀번호를 입력해 주세요.";
-    if (name === "passwordResetEmail") message = "이메일을 입력해 주세요.";
-  }
-
-  if ((name === "loginEmail" || name === "passwordResetEmail") && value.trim()) {
-    const emailRegex = /\S+@\S+\.\S+/;
-    if (!emailRegex.test(value)) {
-      message = "올바른 이메일 주소를 입력해 주세요.";
-    }
-  }
-
-  setErrors((prev) => ({
-    ...prev,
-    [name]: message,
-  }));
-
-  return message;
-  };
-
-  // =========================
-  // 1. initLoginPage
-  // =========================
-
-  // 로그인 페이지 진입 시 body에 id="login" 부여
-  // logins.css에서 #login .container 같은 스타일을 적용하기 위한 처리
-  useEffect(() => {
-    document.body.id = "login";
-    return () => {
-      document.body.removeAttribute("id");
-    };
-  }, []);
-
-  // =========================
-  // 1. login: 로그인 화면 상태/함수
-  // =========================
-
-  // 1. login_로그인 이메일, 비밀번호 입력값
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-
-  // 1. requestLoginApi
-  // 설명: 로그인 API 요청 함수
-  // 현재는 USE_DUMMY_API=true 상태라 백엔드 없이 성공 응답을 더미로 반환
-  // 실제 API 구축 시 USE_DUMMY_API=false로 변경 후 "/auth" 엔드포인트 수정
-  const requestLoginApi = async () => {
+// ── requestApi: 인증 관련 통신 함수 모음 ──
+const requestApi = {
+  /**
+   * 1. login: 로그인 API 요청
+   * @param {string} email - 사용자 이메일
+   * @param {string} password - 사용자 비밀번호
+   * @returns {object} - 로그인 성공 시 사용자 정보 및 소속 회사 목록 반환
+   */
+  login: async (email, password) => {
     if (USE_DUMMY_API) {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-
+      await new Promise(r => setTimeout(r, 900));
       return {
         status: true,
-        message: "로그인에 성공했습니다.",
+        message: "로그인 성공",
         data: {
-          uuid: "7efdca5d-585c-4e79-b2c2-04a9082aa7d3", // 식별아이디 (TOKEN.uuid)
-          user: {
-            name: "이정빈" // 이름 (USER.name)
-          },
-          companys: [
-            {
-              id: 1, // 고유ID (USER_ROLE.id)
-              email: "test@gmail.com", // 이메일 (USER.email)
-              role_id: 1, // 권한 코드ID (USER_ROLE.role_id)
-              role: "ESG담당자", // 권한 (ROLE.role)
-              company_id: 1, // 회사정보ID (COMPANY.id)
-              company_name: "A회사" // 사업장명 (COMPANY.company_name)
-            }
-          ]
+          uuid: "7efdca5d-585c-4e79-b2c2-04a9082aa7d3", 
+          user: { name: "이정빈" }, 
+          companys: [{ id: 1, email: "test@gmail.com", role_id: 1, role: "ESG담당자", company_id: 1, company_name: "A회사" }] 
         }
       };
     }
+    const res = await api.post("/auth", { email, password });
+    return res.data;
+  },
 
-    const response = await api.post("/auth", {
-      email: loginEmail,
-      password: loginPassword,
-    });
+  /**
+   * 2. resetPassword: 임시 비밀번호 발송 API 요청
+   * @param {string} email - 임시 비밀번호를 받을 이메일 주소
+   * @returns {object} - 성공 여부 메시지 반환
+   */
+  resetPassword: async (email) => {
+    if (USE_DUMMY_API) {
+      await new Promise(r => setTimeout(r, 900));
+      return { status: "success", message: "임시 비밀번호가 발송되었습니다." };
+    }
+    const res = await api.post("/auth/password-reset", { email });
+    return res.data;
+  }
+};
 
-    return response.data;
+const Login = () => {
+  // [연결] useAuth(): 전역 인증 상태를 업데이트하는 login 함수 가져오기
+  const { login } = useAuth();
+  
+  // [연결] useNavigate(): 페이지 이동을 위한 네비게이트 함수
+  const navigate = useNavigate();
+
+  // ── States ──
+  
+  // [변수] view: 현재 활성화된 화면 섹션 관리
+  const [view, setView] = useState("login"); 
+
+  // [변수] formData: 로그인 및 비밀번호 재설정에 필요한 모든 입력 데이터 통합 관리
+  const [formData, setFormData] = useState({ loginEmail: "", loginPassword: "", resetEmail: "" });
+
+  // [변수] errors: 각 입력 필드별 유효성 검사 에러 메시지 저장
+  const [errors, setErrors] = useState({});
+
+  // [변수] loading: API 호출 중 중복 클릭 방지 및 로딩 스피너 제어
+  const [loading, setLoading] = useState(false);
+
+  // [변수] isReady: 초기 레이아웃 시프트를 방지하기 위한 렌더링 준비 상태
+  const [isReady, setIsReady] = useState(false);
+
+  /**
+   * [이펙트] 초기화 로직
+   * - 페이지 진입 시 body에 'login' ID 부여 (CSS 스코프용)
+   * - cleanup 시 ID 제거 및 프레임 취소
+   */
+  useEffect(() => {
+    const frame = requestAnimationFrame(() => requestAnimationFrame(() => setIsReady(true)));
+    document.body.id = "login";
+    return () => { cancelAnimationFrame(frame); document.body.removeAttribute("id"); };
+  }, []);
+
+  /**
+   * [함수] validate: 입력 필드 유효성 검사 (실시간 및 블러 시 동작)
+   * @param {string} name - 검사할 필드 이름 (formData의 key)
+   * @param {string} value - 검사할 값
+   * @returns {string} - 에러 메시지 (정상이면 빈 문자열)
+   */
+  const validate = (name, value) => {
+    let msg = "";
+    if (!value.trim()) {
+      msg = name.toLowerCase().includes("email") ? "이메일을 입력해 주세요." : "비밀번호를 입력해 주세요.";
+    } else if (name.toLowerCase().includes("email") && !/\S+@\S+\.\S+/.test(value)) {
+      msg = "올바른 이메일 주소를 입력해 주세요.";
+    }
+    setErrors(prev => ({ ...prev, [name]: msg }));
+    return msg;
   };
 
-  // 1. handleLoginSubmit
-  // 설명: 로그인 버튼 클릭 시 실행되는 메인 핸들러
-  // 역할:
-  // - 이메일/비밀번호 입력값 검증
-  // - requestLoginApi 호출
-  // - 성공 시 전역 Auth 상태 업데이트
-  // - 성공 시 /main 또는 /companyselect 이동
+  /**
+   * [핸들러] handleLogin: 로그인 폼 제출 처리
+   * [연결] validate(), requestApi.login(), AuthContext.login()
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
-
-    const emailError = validateRequiredField("loginEmail", loginEmail);
-    const passwordError = validateRequiredField("loginPassword", loginPassword);
-
-    if (emailError || passwordError) return;
+    // 1. 유효성 검사
+    if (validate("loginEmail", formData.loginEmail) || validate("loginPassword", formData.loginPassword)) return;
 
     try {
-      setLoginLoading(true);
-
-      const result = await requestLoginApi();
-
-      const isSuccess = result.status === true || result.status === "success";
-
-      if (!isSuccess) {
-        throw new Error(result.message || "로그인 실패");
-      }
-
-      const authData = result.data;
-
-      // AuthContext를 통해 전역 상태 및 LocalStorage에 유저 정보 저장
-      login(authData);
-
-      const companies = authData.companies || authData.companys || [];
-
-      // 다중 회사(컨설턴트 등)인 경우 회사 선택 페이지로 이동, 아니면 바로 메인으로 이동
-      if (companies.length > 1) {
-        navigate("/companyselect");
-      } else {
-        navigate("/main");
-      }
-    } catch (error) {
-      setErrors((prev) => ({
-        ...prev,
-        loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다.",
-      }));
-
-      showDefaultAlert(
-        "로그인 실패",
-        "이메일 또는 비밀번호가 일치하지 않습니다.\n" +
-          "다시 시도해주세요.",
-        "error"
-      );
-    } finally {
-      setLoginLoading(false);
-    }
+      setLoading(true);
+      // 2. API 요청
+      const res = await requestApi.login(formData.loginEmail, formData.loginPassword);
+      if (res.status === true || res.status === "success") {
+        // 3. 성공 시 전역 상태 업데이트 및 이동
+        login(res.data);
+        const companies = res.data.companies || res.data.companys || [];
+        navigate(companies.length > 1 ? "/companyselect" : "/main");
+      } else throw new Error(res.message);
+    } catch (err) {
+      setErrors(p => ({ ...p, loginSubmit: "이메일 또는 비밀번호가 일치하지 않습니다." }));
+      showDefaultAlert("로그인 실패", "이메일 또는 비밀번호가 일치하지 않습니다.", "error");
+    } finally { setLoading(false); }
   };
 
-  // 1. login_회원가입 화면 이동 함수
-  const goToSignupPage = () => {
-    navigate("/signup");
-  };
-  const goToGatePage = () => {
-    navigate("/");
-  };
+  /**
+   * [핸들러] handleResetPassword: 비밀번호 재설정 요청 처리
+   * [연결] validate(), requestApi.resetPassword()
+   */
+  const handleResetPassword = async (e) => {
+    e.preventDefault();
+    if (validate("resetEmail", formData.resetEmail)) return;
 
-  // =========================
-  // 2. forgot: 비밀번호 찾기 화면 상태/함수
-  // =========================
-
-  // 2. forgot_비밀번호 찾기 이메일 입력값
-  const [passwordResetEmail, setPasswordResetEmail] = useState("");
-
-  // 2. goToForgotView
-  // 설명: 로그인 화면에서 비밀번호 찾기 화면으로 전환
-  const goToForgotView = () => {
-    setView("forgot");
+    try {
+      setLoading(true);
+      const res = await requestApi.resetPassword(formData.resetEmail);
+      if (res.status === "success") setView("success");
+      else throw new Error(res.message);
+    } catch (err) {
+      showDefaultAlert("발송 실패", "이메일 발송에 실패했습니다. 잠시 후 다시 시도해 주세요.", "error");
+    } finally { setLoading(false); }
   };
 
-  // 2. requestPasswordResetApi
-  // 설명: 임시 비밀번호 발송 API 요청 함수
-  const requestPasswordResetApi = async () => {
-    if (USE_DUMMY_API) {
-      await new Promise((resolve) => setTimeout(resolve, 900));
-      return {
-        status: "success",
-        data: { sent: true },
-        message: "임시 비밀번호가 발송되었습니다.",
-      };
-    }
-    const response = await api.post("/auth/password-reset", {
-      email: passwordResetEmail,
-    });
-    return response.data;
-  };
-
-  // 3. success_이메일 마스킹 표시 함수
+  /**
+   * [함수] maskEmail: 이메일 보안을 위한 마스킹 처리 (success 뷰에서 사용)
+   */
   const maskEmail = (email) => {
     const [id, domain] = email.split("@");
     if (!id || !domain) return email;
-    const visibleId = id.length <= 2 ? id[0] : id.slice(0, 2);
-    return `${visibleId}***@${domain}`;
+    return `${id.length <= 2 ? id[0] : id.slice(0, 2)}***@${domain}`;
   };
 
-  // 설명: 이메일 전송 버튼 클릭 시 실행되는 메인 핸들러
-  // 역할:
-  // - 이메일 입력값 검증
-  // - requestPasswordResetApi 호출
-  // - 성공 시 setView("success") 전환
-  const handleSendPasswordEmail = async (e) => {
-    e.preventDefault();
-
-    const emailError = validateRequiredField("passwordResetEmail", passwordResetEmail);
-    if (emailError) return;
-
-    try {
-      setPasswordResetLoading(true);
-
-      const result = await requestPasswordResetApi();
-
-      if (result.status !== "success") {
-        throw new Error(result.message || "발송 실패");
-      }
-
-      setView("success");
-    } catch (error) {
-      setErrors(prev => ({ ...prev, passwordResetSubmit: "이메일 발송에 실패했습니다. 다시 시도해주세요." }));
-      // ----------- 커스텀 알럿 추가 ----------
-      showDefaultAlert(
-        "이메일 발송 실패",
-        "이메일 발송에 실패했습니다.\n"+
-        "잠시 후 다시 시도해 주세요.",
-        "error"
-      )
-      // alert("이메일 전송에 실패했습니다. 잠시 후 다시 시도해 주세요.");
-    } finally {
-      setPasswordResetLoading(false);
+  /**
+   * [함수] showInquiry: 각종 안내 모달 출력 (계정 찾기, 고객센터 등)
+   */
+  const showInquiry = (type) => {
+    if (type === 'account') {
+      showDefaultAlert("계정 정보 문의", "보안 정책상 계정 조회는 <span class='text-point'>사내 관리자</span>를 통해 진행됩니다.", "info");
+    } else {
+      showDefaultAlert("도움이 필요하신가요?", "<span class='text-point'>platformanagers@gmail.com</span>으로 문의해 주세요.", "question");
     }
   };
 
+  /**
+   * [헬퍼 렌더러] renderInput: 공통 입력 필드 렌더링 함수
+   * @param {string} name - 필드 고유 이름
+   * @param {string} type - input 타입 (text, password, email)
+   * @param {string} placeholder - 플레이스홀더 텍스트
+   * @param {string} value - 현재 입력값
+   */
+  const renderInput = (name, type, placeholder, value) => (
+    <div className="input-wrapper">
+      <input
+        type={type}
+        name={name}
+        placeholder={placeholder}
+        className={errors[name] ? "input-error" : ""}
+        value={value}
+        autoComplete={type === 'password' ? 'new-password' : 'off'}
+        onChange={e => {
+          setFormData(p => ({ ...p, [name]: e.target.value }));
+          setErrors(p => ({ ...p, [name]: "" }));
+        }}
+        onBlur={e => validate(name, e.target.value)}
+      />
+      {errors[name] && <p className="error-text">{errors[name]}</p>}
+    </div>
+  );
 
-  // 3. goToLoginView
-  // 설명: success -> login 화면 복귀
-  const goToLoginView = () => {
-    setView("login");
-    setErrors({});
-  };
+  // 초기 준비 중일 때는 아무것도 렌더링하지 않음 (레이아웃 튐 방지)
+  if (!isReady) return null;
 
-  // 3. goToPasswordResetViewAgain
-  // 설명: success -> forgot 화면 이동 (재시도)
-  const goToPasswordResetViewAgain = () => {
-    setView("forgot");
-    setPasswordResetEmail("");
-    setErrors({});
-  };
-
-  // =========================
-  // 4. 공통: 이메일 문의 안내 함수
-  // =========================
-
-  // 0. handleAccountInquiry
-  // 설명: 이메일 찾기/문의 클릭 시 안내
-  const handleAccountInquiry = () => {
-    // ----------- 커스텀 알럿 추가 ----------
-    showDefaultAlert(
-      "이메일 정보를 잊으셨나요?", 
-      "보안 정책상 계정 조회는\n" +
-      "<span class='text-point'>소속 기업별 ESG 시스템 관리자</span>를 통해 진행됩니다.\n" +
-      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의하여 주시기 바랍니다.", 
-      "info"
-    );
-    // alert(
-    //   "계정 관련 문의는 아래 연락처로 부탁드립니다.\n\n" +
-    //     "담당자: 고객지원팀\n" +
-    //     "연락처: 010-0000-0000\n" +
-    //     "운영시간: 평일 09:00 ~ 18:00"
-    // );
-  };
-
-  // =========================
-  // 5. 고객센터 문의 안내 함수
-  // =========================
-  const handleSupportInquiry = () => {
-    showDefaultAlert(
-      "도움이 필요하신가요?", 
-      "<span class='text-point'>platformanagers@gmail.com</span>\n\n"+
-      "플랫폼 운영 및 기술 관련 문의사항은\n" +
-      "위의 고객센터 메일로 접수해 주시기 바랍니다.\n\n" +
-      "계정 분실 및 권한 승인 관련 문의사항은\n" + 
-      "사내 'IT 지원팀' 또는 'ESG 전담 부서'에 문의 바랍니다.",
-      "question"
-    );
-  }
-
-return (
-  <div id="login">
-    <LoginBackground>
-      <div className="login-combined-card">
-        <LoginVisualPanel />
-
-        <section className="login-form-panel">
-          <div className="login-card-viewport">
-            {/* ========================= */}
-            {/* 1. login: 로그인 화면 */}
-            {/* ========================= */}
-            <div
-              className={`login-card ${view === "login" ? "active" : ""}`}
-              id="login-section"
-              style={{ display: view === "login" ? "flex" : "none" }}
-            >
-              <div className="header-nav">
-                <span className="back-btn" onClick={goToGatePage}>
-                  ←
-                </span>
-              </div>
-
-              <div className="login-logo-mark">ESG DATA PLATFORM</div>
-
-              <h1>Login</h1>
-
-              <form className="input-group" onSubmit={handleLogin}>
-                <div className="input-wrapper">
-                  <input
-                    type="email"
-                    autoComplete="off"
-                    name="loginEmail"
-                    className={errors.loginEmail ? "input-error" : ""}
-                    placeholder="이메일을 입력해주세요"
-                    value={loginEmail}
-                    onChange={(e) => {
-                      setLoginEmail(e.target.value);
-                      setErrors((prev) => ({ ...prev, loginEmail: "" }));
-                    }}
-                    onBlur={(e) =>
-                      validateRequiredField("loginEmail", e.target.value)
-                    }
-                  />
-                  {errors.loginEmail && (
-                    <p className="error-text">{errors.loginEmail}</p>
-                  )}
+  return (
+    <div id="login">
+      <LoginBackground>
+        <div className="login-combined-card">
+          <LoginVisualPanel />
+          <section className="login-form-panel">
+            <div className="login-card-viewport">
+              
+              {/* [SECTION] 1. Login View: 일반 로그인 화면 */}
+              {view === "login" && (
+                <div className="login-card active" id="login-section">
+                  <div className="header-nav"><span className="back-btn" onClick={() => navigate("/")}>←</span></div>
+                  <div className="login-logo-mark">ESG DATA PLATFORM</div>
+                  <h1>Login</h1>
+                  <form className="input-group" onSubmit={handleLogin}>
+                    {renderInput("loginEmail", "email", "이메일을 입력해주세요", formData.loginEmail)}
+                    {renderInput("loginPassword", "password", "비밀번호를 입력해주세요", formData.loginPassword)}
+                    <div className="links">
+                      <span onClick={() => navigate("/signup")}>회원 가입</span> | <span onClick={() => showInquiry('account')}>이메일 찾기</span> | <span className="active-link" onClick={() => setView("forgot")}>비밀번호 찾기</span>
+                    </div>
+                    <button className="login-action-button" type="submit" disabled={loading}>
+                      {loading ? <span className="button-spinner" /> : "로그인"}
+                    </button>
+                    {errors.loginSubmit && <p className="error-text submit-error">{errors.loginSubmit}</p>}
+                  </form>
                 </div>
+              )}
 
-                <div className="input-wrapper">
-                  <input
-                    type="password"
-                    autoComplete="new-password"
-                    name="loginPassword"
-                    className={errors.loginPassword ? "input-error" : ""}
-                    placeholder="비밀번호를 입력해주세요"
-                    value={loginPassword}
-                    onChange={(e) => {
-                      setLoginPassword(e.target.value);
-                      setErrors((prev) => ({
-                        ...prev,
-                        loginPassword: "",
-                      }));
-                    }}
-                    onBlur={(e) =>
-                      validateRequiredField("loginPassword", e.target.value)
-                    }
-                  />
-                  {errors.loginPassword && (
-                    <p className="error-text">{errors.loginPassword}</p>
-                  )}
+              {/* [SECTION] 2. Forgot View: 비밀번호 찾기 (이메일 입력) */}
+              {view === "forgot" && (
+                <div className="login-card active" id="forgot-section">
+                  <div className="header-nav"><span className="back-btn" onClick={() => { setView("login"); setErrors({}); }}>←</span></div>
+                  <div className="login-logo-mark">ESG DATA PLATFORM</div>
+                  <div className="forgot-view-header">
+                    <h1>비밀번호 찾기</h1>
+                    <div className="forgot-visual-wrap"><img src={emailIcon} alt="email" className="forgot-visual-image" /></div>
+                  </div>
+                  <form className="input-group" onSubmit={handleResetPassword}>
+                    {renderInput("resetEmail", "email", "이메일을 입력해주세요", formData.resetEmail)}
+                    <div className="info-box"><strong>임시 비밀번호 발송 안내</strong><br />입력하신 이메일로 임시 비밀번호가 발송됩니다.</div>
+                    <button className="login-action-button" type="submit" disabled={loading}>
+                      {loading ? <span className="button-spinner" /> : "이메일 전송"}
+                    </button>
+                    <div className="links"><span onClick={() => showInquiry('account')}>아이디가 기억나지 않나요?</span></div>
+                  </form>
                 </div>
+              )}
 
-                <div className="links">
-                  <span onClick={goToSignupPage}>회원 가입</span> |{" "}
-                  <span onClick={handleAccountInquiry}>이메일 찾기</span> |{" "}
-                  <span className="active-link" onClick={goToForgotView}>
-                    비밀번호 찾기
-                  </span>
+              {/* [SECTION] 3. Success View: 이메일 발송 완료 결과 화면 */}
+              {view === "success" && (
+                <div className="login-card active" id="success-section">
+                  <div className="login-logo-mark">ESG DATA PLATFORM</div>
+                  <h1>이메일 발송 완료</h1>
+                  <div className="success-check-wrap"><div className="success-check-icon">✓</div></div>
+                  <div className="success-message-box">
+                    <div className="success-message-id">{maskEmail(formData.resetEmail)}</div>
+                    <div className="success-message-main">임시 비밀번호를 발송했습니다.</div>
+                    <div className="success-message-sub">메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.<br />로그인 확인 후 비밀번호를 변경해 주세요.</div>
+                  </div>
+                  <button className="login-action-button success-button" onClick={() => setView("login")}>로그인으로 돌아가기</button>
+                  <div className="success-help-links">
+                    <span onClick={() => { setView("forgot"); setFormData(p => ({ ...p, resetEmail: "" })); }}>이메일 다시 받기</span>
+                    <span className="divider">|</span>
+                    <span onClick={() => showInquiry('support')}>고객센터 문의</span>
+                  </div>
                 </div>
+              )}
 
-                <button
-                  className="login-action-button"
-                  type="submit"
-                  disabled={loginLoading}
-                >
-                  {loginLoading ? <span className="button-spinner" /> : "로그인"}
-                </button>
-
-                {errors.loginSubmit && (
-                  <p className="error-text submit-error">
-                    {errors.loginSubmit}
-                  </p>
-                )}
-              </form>
             </div>
-
-            {/* ========================= */}
-            {/* 2. forgot: 비밀번호 찾기 화면 */}
-            {/* ========================= */}
-            <div
-              className={`login-card ${view === "forgot" ? "active" : ""}`}
-              id="forgot-section"
-              style={{ display: view === "forgot" ? "flex" : "none" }}
-            >
-              <div className="header-nav">
-                <span className="back-btn" onClick={goToLoginView}>
-                  ←
-                </span>
-              </div>
-
-              <div className="login-logo-mark">ESG DATA PLATFORM</div>
-
-              <div className="forgot-view-header">
-                <h1>비밀번호 찾기</h1>
-
-                <div className="forgot-visual-wrap">
-                  <img
-                    src={emailIcon}
-                    alt=""
-                    className="forgot-visual-image"
-                  />
-                </div>
-              </div>
-
-              <form className="input-group" onSubmit={handleSendPasswordEmail}>
-                <div className="input-wrapper">
-                  <input
-                    type="email"
-                    autoComplete="off"
-                    name="passwordResetEmail"
-                    className={errors.passwordResetEmail ? "input-error" : ""}
-                    placeholder="이메일을 입력해주세요"
-                    value={passwordResetEmail}
-                    onChange={(e) => {
-                      setPasswordResetEmail(e.target.value);
-                      setErrors((prev) => ({
-                        ...prev,
-                        passwordResetEmail: "",
-                      }));
-                    }}
-                    onBlur={(e) =>
-                      validateRequiredField(
-                        "passwordResetEmail",
-                        e.target.value
-                      )
-                    }
-                  />
-
-                  {errors.passwordResetEmail && (
-                    <p className="error-text">
-                      {errors.passwordResetEmail}
-                    </p>
-                  )}
-                </div>
-
-                <div className="info-box">
-                  <strong>임시 비밀번호 발송 안내</strong>
-                  <br />
-                  입력하신 이메일로 임시 비밀번호가 발송됩니다.
-                </div>
-
-                <button
-                  className="login-action-button"
-                  type="submit"
-                  disabled={passwordResetLoading}
-                >
-                  {passwordResetLoading ? (
-                    <span className="button-spinner" />
-                  ) : (
-                    "이메일 전송"
-                  )}
-                </button>
-
-                {errors.passwordResetSubmit && (
-                  <p className="error-text submit-error">
-                    {errors.passwordResetSubmit}
-                  </p>
-                )}
-
-                <div className="links">
-                  <span onClick={handleAccountInquiry}>
-                    아이디가 기억나지 않나요?
-                  </span>
-                </div>
-              </form>
-            </div>
-
-            {/* ========================= */}
-            {/* 3. success: 이메일 발송 완료 화면 */}
-            {/* ========================= */}
-            <div
-              className={`login-card ${view === "success" ? "active" : ""}`}
-              id="success-section"
-              style={{ display: view === "success" ? "flex" : "none" }}
-            >
-              <div className="login-logo-mark">ESG DATA PLATFORM</div>
-
-              <h1>이메일 발송 완료</h1>
-
-              <div className="success-check-wrap">
-                <div className="success-check-icon">✓</div>
-              </div>
-
-              <div className="success-message-box">
-                <div className="success-message-id">
-                  {maskEmail(passwordResetEmail || "user@naver.com")}
-                </div>
-
-                <div className="success-message-main">
-                  임시 비밀번호를 발송했습니다.
-                </div>
-
-                <div className="success-message-sub">
-                  메일이 보이지 않는다면 스팸 메일함을 확인해 주세요.
-                  <br />
-                  로그인 확인 후 비밀번호를 변경해 주세요.
-                </div>
-              </div>
-
-              <button
-                className="login-action-button success-button"
-                onClick={goToLoginView}
-              >
-                로그인으로 돌아가기
-              </button>
-
-              <div className="success-help-links">
-                <span onClick={goToPasswordResetViewAgain}>
-                  이메일 다시 받기
-                </span>
-                <span className="divider">|</span>
-                <span onClick={handleAccountInquiry}>고객센터 문의</span>
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-    </LoginBackground>
-  </div>
-);
+          </section>
+        </div>
+      </LoginBackground>
+    </div>
+  );
 };
 
 export default Login;
